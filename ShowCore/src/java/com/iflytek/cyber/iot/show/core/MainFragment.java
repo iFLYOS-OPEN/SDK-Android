@@ -1,13 +1,34 @@
+/*
+ * Copyright (C) 2018 iFLYTEK CO.,LTD.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.iflytek.cyber.iot.show.core;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Network;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.preference.PreferenceManager;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -25,9 +46,9 @@ import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
+import com.iflytek.cyber.iot.show.core.setup.WifiActivity;
 import com.iflytek.cyber.iot.show.core.weather.Weather;
 import com.iflytek.cyber.iot.show.core.weather.WeatherApi;
-import com.iflytek.cyber.iot.show.core.widget.SettingsFragment;
 import com.iflytek.cyber.platform.internal.retrofit2.SimpleCallback;
 import com.iflytek.cyber.resolver.templateruntime.GlideApp;
 
@@ -92,8 +113,28 @@ public class MainFragment extends Fragment implements AMapLocationListener {
         }
 
         view.findViewById(R.id.settings).setOnClickListener(v -> {
-            if (getFragmentManager() != null)
+            if (Build.VERSION.SDK_INT >= 23) {
+                if (Settings.System.canWrite(getContext())) {
+                    if (getFragmentManager() != null)
+                        settingsFragment.show(getFragmentManager(), "Settings");
+                } else {
+                    new AlertDialog.Builder(getContext())
+                            .setTitle("提示")
+                            .setMessage("使用设置需要允许 修改系统设置 权限")
+                            .setPositiveButton(android.R.string.yes, (dialog, which) -> {
+                                Intent intent = new Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS);
+                                intent.setData(Uri.parse("package:com.iflytek.cyber.iot.show.core"));
+                                startActivity(intent);
+                            })
+                            .setNegativeButton(android.R.string.cancel, null)
+                            .show();
+                }
+            } else if (getFragmentManager() != null)
                 settingsFragment.show(getFragmentManager(), "Settings");
+        });
+
+        ivNetwork.setOnClickListener(v -> {
+            startActivity(new Intent(context, WifiActivity.class));
         });
     }
 
@@ -114,7 +155,7 @@ public class MainFragment extends Fragment implements AMapLocationListener {
         weatherApi = retrofit.create(WeatherApi.class);
     }
 
-    public AMapLocationClient mlocationClient;
+    public AMapLocationClient mLocationClient;
     public AMapLocationClientOption mLocationOption = null;
 
     @Override
@@ -123,14 +164,14 @@ public class MainFragment extends Fragment implements AMapLocationListener {
 
         setupRetrofit();
 
-        mlocationClient = new AMapLocationClient(getContext());
+        mLocationClient = new AMapLocationClient(getContext());
         mLocationOption = new AMapLocationClientOption();
-        mlocationClient.setLocationListener(this);
+        mLocationClient.setLocationListener(this);
         mLocationOption.setLocationMode(AMapLocationClientOption.AMapLocationMode.Hight_Accuracy);
         mLocationOption.setOnceLocation(true);
-        mlocationClient.setLocationOption(mLocationOption);
+        mLocationClient.setLocationOption(mLocationOption);
 
-        mlocationClient.startLocation();
+        mLocationClient.startLocation();
 
         final WifiInfoManager manager = WifiInfoManager.getManager();
 
@@ -138,11 +179,12 @@ public class MainFragment extends Fragment implements AMapLocationListener {
                 new WifiInfoManager.NetworkStateListener() {
                     @Override
                     public void onAvailable(Network network) {
-
+                        ivNetwork.setClickable(false);
                     }
 
                     @Override
                     public void onLost(Network network) {
+                        ivNetwork.setClickable(true);
                         ivNetwork.setImageResource(R.drawable.ic_baseline_wifi_error_24px);
                     }
                 });
@@ -225,7 +267,7 @@ public class MainFragment extends Fragment implements AMapLocationListener {
     }
 
     private void startUpdateWeatherLoop() {
-        handler.postDelayed(() -> mlocationClient.startLocation(), 3 * 60 * 60 * 1000);
+        handler.postDelayed(() -> mLocationClient.startLocation(), 3 * 60 * 60 * 1000);
     }
 
     private TimerHandler timerHandler = new TimerHandler(this);
@@ -259,6 +301,6 @@ public class MainFragment extends Fragment implements AMapLocationListener {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        mlocationClient.stopLocation();
+        mLocationClient.stopLocation();
     }
 }

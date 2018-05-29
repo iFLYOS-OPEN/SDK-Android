@@ -1,5 +1,22 @@
+/*
+ * Copyright (C) 2018 iFLYTEK CO.,LTD.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.iflytek.cyber.iot.show.core;
 
+import android.animation.ValueAnimator;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -18,6 +35,8 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.animation.FastOutLinearInInterpolator;
+import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -59,7 +78,8 @@ public class LauncherActivity extends BaseActivity implements TemplateRuntimeRes
     private LinearLayout pagerIndicatorContainer;
     private TextView tvCounter;
     //private RecognizeBar recognizeBar;
-    private FrameLayout iatContainer;
+    private LinearLayout iatContainer;
+    private View volumeBar;
     private TextView tvIat;
     private MarqueeView marqueeView;
     private TextView networkMessage;
@@ -72,6 +92,8 @@ public class LauncherActivity extends BaseActivity implements TemplateRuntimeRes
 
     private int templateRuntimeHeight;
     private int bottomBarHeight;
+
+    private ValueAnimator animator;
 
     private boolean showIat = false;
 
@@ -88,6 +110,7 @@ public class LauncherActivity extends BaseActivity implements TemplateRuntimeRes
         tvCounter = findViewById(R.id.close_after_seconds);
         //recognizeBar = findViewById(R.id.recognize_bar);
         iatContainer = findViewById(R.id.iat_container);
+        volumeBar = findViewById(R.id.volume_center_bar);
         tvIat = findViewById(R.id.iat);
         marqueeContent = findViewById(R.id.marquee_content);
         marqueeView = findViewById(R.id.marquee_view);
@@ -108,7 +131,9 @@ public class LauncherActivity extends BaseActivity implements TemplateRuntimeRes
         findViewById(R.id.close).setOnClickListener(v -> dismissTemplate());
         findViewById(R.id.template_runtime_bottom_bar).post(() -> {
             View container = findViewById(R.id.template_runtime_container);
-            templateRuntimeHeight = container.getHeight();
+            DisplayMetrics dm = new DisplayMetrics();
+            getWindowManager().getDefaultDisplay().getMetrics(dm);
+            templateRuntimeHeight = dm.heightPixels;
             container.setTranslationY(templateRuntimeHeight);
             container.setVisibility(View.VISIBLE);
             bottomBarHeight = findViewById(R.id.template_runtime_bottom_bar).getHeight();
@@ -444,13 +469,17 @@ public class LauncherActivity extends BaseActivity implements TemplateRuntimeRes
         iatContainer.setVisibility(View.VISIBLE);
         iatContainer.animate().alpha(1).setDuration(300).start();
         tvIat.setText("我正在听...");
+        findViewById(R.id.marquee_content).setVisibility(View.GONE);
     }
 
     private void dismissIat() {
         if (iatContainer.getAlpha() != 1)
             return;
         iatContainer.animate().alpha(0).setDuration(250)
-                .withEndAction(() -> iatContainer.setVisibility(View.GONE)).start();
+                .withEndAction(() -> {
+                    iatContainer.setVisibility(View.GONE);
+                    findViewById(R.id.marquee_content).setVisibility(View.VISIBLE);
+                }).start();
     }
 
     private ServiceConnection connection = new ServiceConnection() {
@@ -477,7 +506,20 @@ public class LauncherActivity extends BaseActivity implements TemplateRuntimeRes
 
         @Override
         public void onVolumeChanged(int level) {
-            //recognizeBar.updateVolume(level);
+            float percent = 1f * level / 100;
+            int targetWidth = (int) (iatContainer.getWidth() * percent / 2);
+
+            if (animator != null)
+                animator.cancel();
+            animator = ValueAnimator.ofInt(volumeBar.getWidth(), targetWidth);
+            animator.addUpdateListener(animation -> {
+                int width = (int) animation.getAnimatedValue();
+                LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) volumeBar.getLayoutParams();
+                params.width = width;
+                volumeBar.setLayoutParams(params);
+            });
+            animator.setDuration(100);
+            animator.start();
         }
     };
 
