@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="WeatherTheme" parent="Theme.AppCompat">
+        <item name="android:windowBackground">@android:color/black</item>
+        <item name="android:textColorPrimary">@color/textColorDarkPrimary</item>
+        <item name="android:textColorSecondary">@color/textColorDarkSecondary</item>
+        <item name="android:textColorTertiary">@color/textColorDarkTertiary</item>
+    </style>
+
+    <style name="PlayerInfoTheme" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:textColorPrimary">@color/textColorDarkPrimary</item>
+        <item name="android:textColorSecondary">@color/textColorDarkSecondary</item>
+    </style>
+
+    <style name="Body1Theme" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:windowBackground">@android:color/black</item>
+        <item name="android:textColorPrimary">@color/textColorDarkPrimary</item>
+        <item name="android:textColorSecondary">@color/textColorDarkSecondary</item>
+        <item name="android:textColorTertiary">@color/textColorDarkTertiary</item>
+    </style>
+</resources>

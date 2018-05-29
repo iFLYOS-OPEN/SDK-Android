@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">TemplateRuntime Resolver</string>
+    <string name="music_from_source">音乐版权来自 %s</string>
+</resources>

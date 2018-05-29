@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    style="@style/WeatherTheme"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?android:windowBackground"
+    android:orientation="vertical"
+    android:theme="@style/WeatherTheme">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <ImageView
+            android:id="@+id/current_weather_icon"
+            android:layout_width="@dimen/weatherIconLargeSize"
+            android:layout_height="@dimen/weatherIconLargeSize"
+            android:layout_centerVertical="true"
+            android:layout_marginEnd="40dp"
+            android:layout_marginStart="64dp"
+            android:padding="@dimen/weatherIconLargePadding" />
+
+        <TextView
+            android:id="@+id/position"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignTop="@id/current_weather_icon"
+            android:layout_marginEnd="56dp"
+            android:layout_marginTop="40dp"
+            android:gravity="center"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+            android:textColor="?android:textColorPrimary"
+            android:textSize="@dimen/weatherNormalTextSize"
+            tools:text="广州市 越秀区" />
+
+        <TextView
+            android:id="@+id/today"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignEnd="@id/position"
+            android:layout_below="@id/position"
+            android:gravity="center"
+            android:textAppearance="@style/TextAppearance.AppCompat.Small"
+            android:textColor="?android:textColorPrimary"
+            android:textSize="@dimen/weatherNormalTextSize"
+            tools:text="4月16日 星期一" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginEnd="32dp"
+            android:layout_toEndOf="@id/current_weather_icon"
+            android:layout_toStartOf="@id/today"
+            android:gravity="center_vertical"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/current_temperature"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:gravity="start|bottom"
+                android:maxLines="1"
+                android:textColor="?android:textColorPrimary"
+                android:textSize="@dimen/weatherMainTitleMaxTextSize"
+                tools:text="25℃" />
+
+            <TextView
+                android:id="@+id/today_temperature_range"
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:layout_marginStart="8dp"
+                android:layout_weight="2"
+                android:textAppearance="@style/TextAppearance.AppCompat.Small"
+                android:textColor="?android:textColorTertiary"
+                android:textSize="@dimen/weatherSubTitleTextSize"
+                tools:text="22℃ ~ 27℃" />
+
+        </LinearLayout>
+
+
+    </RelativeLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/dividerLight" />
+
+    <LinearLayout
+        android:id="@+id/future_days_weather"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingBottom="@dimen/pageHorizontalPadding"
+        android:paddingTop="@dimen/pageHorizontalPadding"
+        tools:layout_height="204dp">
+
+    </LinearLayout>
+
+
+</LinearLayout>

@@ -1,0 +1,31 @@
+apply plugin: 'com.android.library'
+
+android {
+    compileSdkVersion 27
+
+    defaultConfig {
+        minSdkVersion 22
+        targetSdkVersion 27
+
+        versionCode 1
+        versionName "1.0"
+    }
+
+    sourceSets.main {
+        manifest.srcFile 'AndroidManifest.xml'
+        java.srcDir 'src'
+        res.srcDir 'res'
+        assets.srcDir 'assets'
+        jniLibs.srcDir 'jniLibs'
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+dependencies {
+    api 'com.google.code.gson:gson:2.8.2'
+    api 'com.squareup.okio:okio:1.14.0'
+}

@@ -1,0 +1,12 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.iflytek.cyber.resolver.audioplayer" >
+
+    <application>
+
+        <meta-data
+            android:name="com.iflytek.cyber.resolver.audioplayer.AudioPlayerResolver"
+            android:value="ResolverModule:AudioPlayer" />
+        <service android:name=".service.AudioPlayerService"/>
+    </application>
+
+</manifest>

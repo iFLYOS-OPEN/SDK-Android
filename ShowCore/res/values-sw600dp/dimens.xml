@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <dimen name="qr_size">280dp</dimen>
+    <dimen name="bottom_bar_height">88dp</dimen>
+    <dimen name="bottom_bar_logo_size">56dp</dimen>
+    <dimen name="bottom_bar_logo_padding">4dp</dimen>
+    <dimen name="image_button_size">40dp</dimen>
+    <dimen name="page_horizontal_padding">56dp</dimen>
+    <dimen name="page_iat_end_padding">320dp</dimen>
+    <dimen name="page_iat_text_size">64sp</dimen>
+    <dimen name="page_indicator_margin">12dp</dimen>
+    <dimen name="page_iat_bottom_padding">16dp</dimen>
+    <dimen name="page_indicator_size">8dp</dimen>
+    <dimen name="recognize_bar_min_height">5dp</dimen>
+    <dimen name="recognize_bar_max_height">9dp</dimen>
+    <dimen name="recognize_bar_min_height_expanded">6dp</dimen>
+    <dimen name="recognize_bar_max_height_expanded">26dp</dimen>
+    <dimen name="recognize_bar_width">2.25dp</dimen>
+    <dimen name="recognize_bar_width_expanded">6dp</dimen>
+    <dimen name="recognize_bar_margin">2dp</dimen>
+    <dimen name="recognize_bar_margin_expanded">8dp</dimen>
+    <dimen name="weather_icon_size">80dp</dimen>
+    <dimen name="weather_icon_temperature_text_size">40sp</dimen>
+    <dimen name="weather_icon_description_text_size">24sp</dimen>
+    <dimen name="weather_icon_description_padding_start">8dp</dimen>
+    <dimen name="settings_height">200dp</dimen>
+    <dimen name="settings_padding_horizontal">40dp</dimen>
+    <dimen name="settings_seek_bar_container_width">504dp</dimen>
+    <dimen name="settings_seek_bar_margin">48dp</dimen>
+    <dimen name="settings_toggle_text_size">20sp</dimen>
+    <dimen name="settings_toggle_text_margin">16dp</dimen>
+    <dimen name="settings_toggle_size">120dp</dimen>
+    <dimen name="main_action_button_size">56dp</dimen>
+    <dimen name="main_action_button_margin">28dp</dimen>
+    <dimen name="about_navigation_title_text_size">32dp</dimen>
+    <dimen name="about_navigation_icon_size">32dp</dimen>
+    <dimen name="about_navigation_icon_margin">16dp</dimen>
+    <dimen name="about_item_width">560dp</dimen>
+    <dimen name="about_item_divider_width">512dp</dimen>
+    <dimen name="about_item_height">120dp</dimen>
+    <dimen name="about_item_height_small">88dp</dimen>
+    <dimen name="about_item_padding_horizontal">24dp</dimen>
+    <dimen name="about_title_text_size">24sp</dimen>
+    <dimen name="about_secondary_text_size">16sp</dimen>
+    <dimen name="about_secondary_text_margin">6dp</dimen>
+
+</resources>

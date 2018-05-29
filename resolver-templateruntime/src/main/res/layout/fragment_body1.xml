@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?android:windowBackground"
+    android:orientation="vertical"
+    android:paddingEnd="@dimen/body_horizontal_padding"
+    android:paddingStart="@dimen/body_horizontal_padding"
+    android:theme="@style/Body1Theme">
+
+    <TextView
+        android:id="@+id/main_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/body_vertical_padding"
+        android:textAppearance="@style/TextAppearance.AppCompat.Title"
+        android:textColor="?android:textColorPrimary"
+        android:textSize="@dimen/body_main_title_size"
+        tools:text="周杰伦是谁" />
+
+    <TextView
+        android:id="@+id/sub_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
+        android:textColor="?android:textColorTertiary"
+        android:textSize="@dimen/body_sub_title_size"
+        tools:text="百科" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="@dimen/body_vertical_padding">
+
+        <TextView
+            android:id="@+id/text_field"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:lineSpacingMultiplier="1.5"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+            android:textColor="?android:textColorPrimary"
+            android:textSize="@dimen/body_text_field_size"
+            tools:text="周杰伦（英语：Jay Chou；1979年1月18日－）台湾的流行歌曲男歌手、音乐家、唱片制片人、演员、导演、电竞团队队长兼老板、服饰品牌老板。在2000年，周杰伦发行了他的首张专辑《Jay》，从属于唱片公司阿尔发音乐。从此以后，他的音乐获得了遍及亚洲的荣誉，尤其在台湾、中国大陆、马来西亚、香港、新加坡、印度尼西亚、韩国、日本和西方国家——例如美国和澳大利亚——的亚洲群体中。他卖出了超过3000万张专辑并获得了许多针对他的音乐工作的奖项。周杰伦在工作与他的专辑时也为其他艺术家写歌。在2003年，他是《时代》杂志（亚洲版）的封面故事，被称为亚洲流行音乐的新天王，作为对他对流行文化的影响的认可。他其后开展了六个世界巡演，在世界各地的城市中对超过1000万人表演。" />
+
+    </ScrollView>
+</LinearLayout>

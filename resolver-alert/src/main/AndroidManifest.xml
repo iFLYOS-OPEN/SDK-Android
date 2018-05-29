@@ -1,0 +1,12 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.iflytek.cyber.resolver.alert">
+
+    <application>
+
+        <meta-data
+            android:name="com.iflytek.cyber.resolver.AlertResolver"
+            android:value="ResolverModule:Alerts" />
+
+    </application>
+
+</manifest>

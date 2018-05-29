@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="windowBackground">#0f1722</color>
+    <color name="divider">#1effffff</color>
+    <color name="dividerLight">#1e000000</color>
+    <color name="textColorLightPrimary">#0f1722</color>
+    <color name="textColorLightSecondary">#7f8187</color>
+    <color name="textColorDarkPrimary">#ffffff</color>
+    <color name="textColorDarkSecondary">#b3b3b3</color>
+    <color name="textColorDarkTertiary">#7f7f7f</color>
+</resources>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <color name="setup_primary">#1784e9</color>
+    <color name="setup_background">#0f1722</color>
+    <color name="weather_desc_color">#b3ffffff</color>
+    <color name="settings_background">#0f1722</color>
+
+</resources>

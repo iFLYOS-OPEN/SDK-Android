@@ -1,0 +1,82 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 27
+    buildToolsVersion '27.0.3'
+
+    defaultConfig {
+        applicationId "com.iflytek.cyber.iot.show.core"
+
+        minSdkVersion 22
+        targetSdkVersion 27
+
+        versionCode 1
+        versionName "1.0"
+
+        buildConfigField "String", "API_SERVER", (rootProject.hasProperty('OVERRIDE_VENDOR_SERVER')
+                ? "\"${OVERRIDE_VENDOR_SERVER}\""
+                : '"https://home.iflyos.cn"')
+
+        buildConfigField "String", "CLIENT_ID", '"70ac6c5c-bece-4cf2-97e4-1e6e652c7f03"'
+        buildConfigField "String", "MODEL_ID", '"20120a03-178b-404e-95e5-ab3ade60fbf0"'
+
+        ndk {
+            abiFilters 'armeabi-v7a'
+        }
+    }
+
+    sourceSets.main {
+        manifest.srcFile 'AndroidManifest.xml'
+        java.srcDir 'src/java'
+        res.srcDir 'res'
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+repositories {
+    flatDir { dirs 'libs' }
+}
+
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+
+    implementation 'com.android.support:design:27.1.1'
+    implementation 'com.android.support:recyclerview-v7:27.1.1'
+
+    implementation project(':sdk')
+    implementation project(':opus')
+    implementation project(':platform')
+
+    implementation 'com.google.code.gson:gson:2.8.2'
+    implementation 'com.squareup.okio:okio:1.14.0'
+    implementation 'com.squareup.okhttp3:okhttp:3.10.0'
+    implementation 'com.squareup.retrofit2:retrofit:2.4.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.4.0'
+
+    implementation 'jp.wasabeef:blurry:2.1.1'
+    implementation 'com.google.zxing:core:3.3.2'
+    implementation('com.journeyapps:zxing-android-embedded:3.5.0') {
+        exclude group: 'com.android.support'
+    }
+
+    implementation 'com.github.bumptech.glide:glide:4.7.1'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.6.1'
+    implementation 'com.amap.api:location:3.5.0'
+
+    implementation project(':resolver-alert')
+    implementation project(':resolver-audioplayer')
+    implementation project(':resolver-notification')
+    implementation project(':resolver-playbackcontroller')
+    implementation project(':resolver-speaker')
+    implementation project(':resolver-speechrecognizer')
+    implementation project(':resolver-speechsynthesizer')
+    implementation project(':resolver-system')
+    implementation project(':resolver-templateruntime')
+    implementation project(':resolver-xftemplateruntime')
+
+    implementation(name: 'wake-word-detector-ivw', ext: 'aar')
+}

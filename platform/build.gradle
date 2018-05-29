@@ -1,0 +1,45 @@
+apply plugin: 'com.android.library'
+
+android {
+    compileSdkVersion 27
+
+    defaultConfig {
+        minSdkVersion 22
+        targetSdkVersion 27
+
+        versionCode 1
+        versionName "1.0"
+
+        buildConfigField "String", "API_SERVER", (rootProject.hasProperty('OVERRIDE_AUTH_SERVER')
+                ? "\"${OVERRIDE_AUTH_SERVER}\""
+                : '"https://auth.iflyos.cn"')
+
+        buildConfigField "String", "IVS_SERVER", (rootProject.hasProperty('OVERRIDE_VOICE_SERVER')
+                ? "\"${OVERRIDE_VOICE_SERVER}\""
+                : '"https://gw.iflyos.cn"')
+    }
+
+    sourceSets.main {
+        manifest.srcFile 'AndroidManifest.xml'
+        java.srcDir 'src'
+        res.srcDir 'res'
+        assets.srcDir 'assets'
+        jniLibs.srcDir 'jniLibs'
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+dependencies {
+    api 'com.google.code.gson:gson:2.8.2'
+    api 'com.squareup.okio:okio:1.14.0'
+
+    api project(':sdk')
+
+    implementation 'com.squareup.okhttp3:okhttp:3.10.0'
+    implementation 'com.squareup.retrofit2:retrofit:2.4.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.4.0'
+}

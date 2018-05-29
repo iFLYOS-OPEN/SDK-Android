@@ -1,0 +1,13 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.iflytek.cyber.resolver.speaker">
+
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+
+    <application>
+
+        <meta-data
+            android:name="com.iflytek.cyber.resolver.speaker.SpeakerResolver"
+            android:value="ResolverModule:Speaker" />
+
+    </application>
+</manifest>

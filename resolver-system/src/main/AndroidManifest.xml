@@ -1,0 +1,11 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.iflytek.cyber.resolver.system" >
+
+    <application>
+
+        <meta-data
+            android:name="com.iflytek.cyber.resolver.system.SystemResolver"
+            android:value="ResolverModule:System" />
+
+    </application>
+</manifest>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <declare-styleable name="MarqueeView_MarqueeStyle">
+        <attr name="marqueeTextSize" format="dimension"/>
+        <attr name="marqueeTextColor" format="color"/>
+        <attr name="marqueeInterval" format="integer|reference"/>
+        <attr name="marqueeTextGravity" >
+            <enum name="start" value="0"/>
+            <enum name="center" value="1"/>
+            <enum name="end" value="2"/>
+        </attr>
+
+    </declare-styleable>
+
+</resources>

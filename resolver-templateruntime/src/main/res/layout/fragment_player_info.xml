@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#01000000"
+    android:gravity="bottom"
+    android:orientation="vertical"
+    android:theme="@style/PlayerInfoTheme">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:minHeight="48dp"
+        android:paddingEnd="@dimen/player_horizontal_margin"
+        android:paddingStart="@dimen/player_horizontal_margin"
+        android:visibility="gone">
+
+        <ImageView
+            android:id="@+id/music_provider_logo"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_gravity="center_vertical" />
+
+        <TextView
+            android:id="@+id/music_provider_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginStart="48dp"
+            android:textColor="@android:color/white"
+            tools:text="QQ音乐" />
+
+    </FrameLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <FrameLayout
+            android:id="@+id/album_container"
+            android:layout_width="@dimen/player_album_background_size"
+            android:layout_height="@dimen/player_album_background_size"
+            android:layout_centerVertical="true"
+            android:layout_marginEnd="@dimen/player_horizontal_margin"
+            android:layout_marginStart="@dimen/player_horizontal_margin">
+
+            <ImageView
+                android:layout_width="@dimen/player_album_background_size"
+                android:layout_height="@dimen/player_album_background_size"
+                android:background="@drawable/cover" />
+
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@+id/album"
+                android:layout_width="@dimen/player_album_size"
+                android:layout_height="@dimen/player_album_size"
+                android:layout_gravity="center" />
+        </FrameLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_alignBottom="@id/album_container"
+            android:layout_alignTop="@id/album_container"
+            android:layout_marginEnd="@dimen/player_horizontal_margin"
+            android:layout_toEndOf="@id/album_container"
+            android:gravity="center_horizontal|bottom"
+            android:orientation="vertical"
+            android:paddingBottom="@dimen/player_info_bottom_padding">
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:paddingTop="@dimen/player_info_top_padding">
+
+                <TextView
+                    android:id="@+id/slogan"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:clickable="true"
+                    android:ellipsize="marquee"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"
+                    android:marqueeRepeatLimit="marquee_forever"
+                    android:singleLine="true"
+                    android:text="唤醒小飞，轻松听歌"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Title"
+                    android:textSize="@dimen/player_slogan_text_size"
+                    tools:visibility="gone" />
+
+                <TextView
+                    android:id="@+id/title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:clickable="true"
+                    android:ellipsize="marquee"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"
+                    android:marqueeRepeatLimit="marquee_forever"
+                    android:singleLine="true"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Title"
+                    android:textColor="@android:color/white"
+                    android:textSize="@dimen/player_title_text_size"
+                    android:visibility="gone"
+                    tools:text="漂移 - 《头文字D》电影原声带"
+                    tools:visibility="visible" />
+
+                <TextView
+                    android:id="@+id/artist"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/player_artist_margin"
+                    android:ellipsize="marquee"
+                    android:singleLine="true"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Small"
+                    android:textSize="@dimen/player_artist_text_size"
+                    android:visibility="gone"
+                    tools:text="周杰伦"
+                    tools:visibility="visible" />
+            </FrameLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/player_control_margin"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:id="@+id/skip_previous"
+                    android:layout_width="@dimen/player_next_button_size"
+                    android:layout_height="@dimen/player_next_button_size"
+                    android:background="?selectableItemBackgroundBorderless"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:src="@drawable/ic_skip_previous_white_24dp" />
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_weight="1" />
+
+                <ImageView
+                    android:id="@+id/play_pause"
+                    android:layout_width="@dimen/player_play_button_size"
+                    android:layout_height="@dimen/player_play_button_size"
+                    android:background="?selectableItemBackgroundBorderless"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:src="@drawable/ic_play_circle_outline_white_24dp" />
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_weight="1" />
+
+                <ImageView
+                    android:id="@+id/skip_next"
+                    android:layout_width="@dimen/player_next_button_size"
+                    android:layout_height="@dimen/player_next_button_size"
+                    android:background="?selectableItemBackgroundBorderless"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:src="@drawable/ic_skip_next_white_24dp" />
+            </LinearLayout>
+
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:id="@+id/current_position"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0:00" />
+
+                    <TextView
+                        android:id="@+id/duration"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end"
+                        android:text="0:00" />
+                </FrameLayout>
+
+
+                <SeekBar
+                    android:id="@+id/seek_bar"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:progressTint="#9dffffff"
+                    android:thumb="@drawable/seek_bar_indicator"
+                    tools:progress="50" />
+            </LinearLayout>
+        </LinearLayout>
+
+    </RelativeLayout>
+
+</LinearLayout>

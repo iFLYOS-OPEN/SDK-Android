@@ -1,0 +1,16 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.iflytek.cyber.resolver.speechrecognizer">
+
+    <application>
+
+        <meta-data
+            android:name="com.iflytek.cyber.resolver.speechrecognizer.SpeechRecognizerResolver"
+            android:value="ResolverModule:SpeechRecognizer" />
+
+        <meta-data
+            android:name="com.iflytek.cyber.resolver.speechrecognizer.XFSpeechRecognizerResolver"
+            android:value="ResolverModule:XFSpeechRecognizer" />
+
+    </application>
+
+</manifest>

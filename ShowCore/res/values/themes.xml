@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="AppTheme" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:windowEnterAnimation">@null</item>
+        <item name="android:windowExitAnimation">@null</item>
+        <item name="android:windowBackground">@android:color/black</item>
+    </style>
+
+    <style name="SetupTheme" parent="AppTheme">
+        <item name="android:colorPrimary">@color/setup_primary</item>
+        <item name="android:windowBackground">@color/setup_background</item>
+    </style>
+
+</resources>
