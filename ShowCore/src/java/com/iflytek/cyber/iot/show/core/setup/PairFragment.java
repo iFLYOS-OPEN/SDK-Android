@@ -30,14 +30,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.zxing.BarcodeFormat;
-import com.google.zxing.EncodeHintType;
 import com.google.zxing.WriterException;
 import com.iflytek.cyber.iot.show.core.R;
 import com.iflytek.cyber.iot.show.core.SetupWizardActivity;
 import com.iflytek.cyber.platform.AuthManager;
 import com.journeyapps.barcodescanner.BarcodeEncoder;
-
-import java.util.HashMap;
 
 public class PairFragment extends Fragment implements AuthManager.AuthorizeCallback {
 
@@ -169,12 +166,9 @@ public class PairFragment extends Fragment implements AuthManager.AuthorizeCallb
         final String url = verificationUri + "?user_code=" + userCode + "#" + deviceId + "," + bindingCode;
         final int size = getResources().getDimensionPixelSize(R.dimen.qr_size);
 
-        final HashMap<EncodeHintType, String> hints = new HashMap<>();
-        hints.put(EncodeHintType.MARGIN, "0");
-
         try {
             final Bitmap bitmap = new BarcodeEncoder().encodeBitmap(
-                    url, BarcodeFormat.QR_CODE, size, size, hints);
+                    url, BarcodeFormat.QR_CODE, size, size);
 
             code.setImageBitmap(bitmap);
 
