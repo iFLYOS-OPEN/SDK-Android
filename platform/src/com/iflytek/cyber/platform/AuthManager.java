@@ -79,7 +79,7 @@ public class AuthManager {
             public void onHttpFailure(int code, JsonObject body, Response<DeviceCode> response) {
                 deviceCodeCall = null;
                 uiHandler.post(() -> callback.onFailure(
-                        new Error("Get device token failed with code " + code)));
+                        new Error("Get device token failed with code " + code + " - " + body)));
             }
 
             @Override

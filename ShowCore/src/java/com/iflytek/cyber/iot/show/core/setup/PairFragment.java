@@ -22,6 +22,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -39,6 +40,8 @@ import com.journeyapps.barcodescanner.BarcodeEncoder;
 import java.util.HashMap;
 
 public class PairFragment extends Fragment implements AuthManager.AuthorizeCallback {
+
+    private static final String TAG = "PairFragment";
 
     private SetupWizardActivity activity;
 
@@ -153,6 +156,7 @@ public class PairFragment extends Fragment implements AuthManager.AuthorizeCallb
 
     @Override
     public void onFailure(Throwable t) {
+        Log.e(TAG, "Auth failed", t);
         bm.cancel();
         showError("网络异常，请重试。");
     }
