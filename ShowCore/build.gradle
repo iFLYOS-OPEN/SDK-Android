@@ -33,7 +33,7 @@ android {
                 ? "\"${OVERRIDE_VENDOR_SERVER}\""
                 : '"https://home.iflyos.cn"')
 
-        buildConfigField "String", "CLIENT_ID", '"70ac6c5c-bece-4cf2-97e4-1e6e652c7f03"'
+        buildConfigField "String", "CLIENT_ID", '"ceb62135-38a7-42c3-b721-842f3ed596a8"'
         buildConfigField "String", "MODEL_ID", '"20120a03-178b-404e-95e5-ab3ade60fbf0"'
 
         ndk {
