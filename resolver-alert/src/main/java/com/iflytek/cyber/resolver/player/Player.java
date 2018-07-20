@@ -1,6 +1,8 @@
 package com.iflytek.cyber.resolver.player;
 
 
+import android.content.Context;
+import android.content.res.AssetFileDescriptor;
 import android.media.MediaPlayer;
 
 import java.io.IOException;
@@ -15,7 +17,10 @@ public class Player implements MediaPlayer.OnCompletionListener {
     private int playIndex = -1;
     private long playTime;
 
-    public Player() {
+    private Context context;
+
+    public Player(Context context) {
+        this.context = context;
         mediaPlayer = new MediaPlayer();
         mediaPlayer.setOnCompletionListener(this);
         this.playOrders = new ArrayList<>();
@@ -41,15 +46,29 @@ public class Player implements MediaPlayer.OnCompletionListener {
         play(playOrder);
     }
 
+    public void replay() {
+        playIndex = 0;
+        final PlayOrder playOrder = playOrders.get(0);
+        play(playOrder);
+    }
+
     public void play(PlayOrder playOrder) {
         try {
+            onPlayListener.onPlayStarted();
             mediaPlayer.reset();
             mediaPlayer.setDataSource(playOrder.url);
             mediaPlayer.prepare();
             mediaPlayer.start();
-            onPlayListener.onPlayStarted();
         } catch (IOException e) {
-            e.printStackTrace();
+            try {
+                AssetFileDescriptor afd = context.getAssets().openFd("alert.wav");
+                mediaPlayer.reset();
+                mediaPlayer.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
+                mediaPlayer.prepare();
+                mediaPlayer.start();
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            }
         }
     }
 
@@ -71,6 +90,12 @@ public class Player implements MediaPlayer.OnCompletionListener {
 
     public void pause() {
         if (mediaPlayer.isPlaying()) {
+            mediaPlayer.pause();
+        }
+    }
+
+    public void stop() {
+        if (mediaPlayer.isPlaying()) {
             onPlayListener.onPlayStopped();
             mediaPlayer.stop();
         }
@@ -79,6 +104,16 @@ public class Player implements MediaPlayer.OnCompletionListener {
     public void resume() {
         mediaPlayer.start();
         onPlayListener.onPlayStarted();
+    }
+
+    public void release() {
+        if (mediaPlayer != null) {
+            mediaPlayer.release();
+        }
+    }
+
+    public void setVolume(float volume) {
+        mediaPlayer.setVolume(volume, volume);
     }
 
     @Override

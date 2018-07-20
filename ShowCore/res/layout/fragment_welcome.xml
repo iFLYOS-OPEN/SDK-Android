@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ Copyright (C) 2018 iFLYTEK CO.,LTD.
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
@@ -45,14 +44,16 @@
             android:textColor="#000000"
             android:textSize="50sp" />
 
-        <android.support.design.widget.FloatingActionButton
+        <ImageView
             android:id="@+id/next"
             android:layout_width="80dp"
             android:layout_height="80dp"
             android:layout_marginTop="72dp"
+            android:background="@drawable/circle_accent"
+            android:elevation="6dp"
+            android:padding="20dp"
             android:src="@drawable/ic_next_white_24dp"
-            app:backgroundTint="@color/setup_primary"
-            app:fabSize="normal" />
+            android:stateListAnimator="@drawable/state_list_fab" />
 
     </LinearLayout>
 

@@ -17,39 +17,53 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 27
-    buildToolsVersion '27.0.3'
+    compileSdkVersion 28
+    buildToolsVersion '28.0.0'
 
     defaultConfig {
         applicationId "com.iflytek.cyber.iot.show.core"
 
         minSdkVersion 22
-        targetSdkVersion 27
+        targetSdkVersion 28
 
         versionCode 1
         versionName "1.0"
-
-        buildConfigField "String", "API_SERVER", (rootProject.hasProperty('OVERRIDE_VENDOR_SERVER')
-                ? "\"${OVERRIDE_VENDOR_SERVER}\""
-                : '"https://home.iflyos.cn"')
-
-        buildConfigField "String", "CLIENT_ID", '"ceb62135-38a7-42c3-b721-842f3ed596a8"'
-        buildConfigField "String", "MODEL_ID", '"20120a03-178b-404e-95e5-ab3ade60fbf0"'
 
         ndk {
             abiFilters 'armeabi-v7a'
         }
     }
 
-    sourceSets.main {
-        manifest.srcFile 'AndroidManifest.xml'
-        java.srcDir 'src/java'
-        res.srcDir 'res'
+    sourceSets {
+        main {
+            manifest.srcFile 'AndroidManifest.xml'
+            java.srcDir 'src/java'
+            res.srcDir 'res'
+        }
+        common {
+            java.srcDir 'products/common/src/java'
+        }
     }
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    flavorDimensions 'env', 'product'
+
+    productFlavors {
+        /** 产品变体 **/
+        common { // 通用版
+            dimension 'product'
+        }
+
+        /** API 变体 **/
+        master { // 生产
+            dimension 'env'
+            buildConfigField "String", "CLIENT_ID", '"a369716c-eb30-4b98-b424-c63ed1e58c5c"'
+            manifestPlaceholders = [APP_NAME: '@string/app_name']
+        }
     }
 }
 
@@ -60,14 +74,14 @@ repositories {
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
 
-    implementation 'com.android.support:design:27.1.1'
-    implementation 'com.android.support:recyclerview-v7:27.1.1'
+    implementation 'com.android.support:design:28.0.0-alpha3'
+    implementation 'com.android.support:recyclerview-v7:28.0.0-alpha3'
 
     implementation project(':sdk')
     implementation project(':opus')
     implementation project(':platform')
 
-    implementation 'com.google.code.gson:gson:2.8.2'
+    implementation 'com.google.code.gson:gson:2.8.5'
     implementation 'com.squareup.okio:okio:1.14.0'
     implementation 'com.squareup.okhttp3:okhttp:3.10.0'
     implementation 'com.squareup.retrofit2:retrofit:2.4.0'
@@ -84,6 +98,7 @@ dependencies {
     implementation 'com.amap.api:location:3.5.0'
 
     implementation project(':resolver-alert')
+    implementation project(':resolver-audioactivitytracker')
     implementation project(':resolver-audioplayer')
     implementation project(':resolver-notification')
     implementation project(':resolver-playbackcontroller')
@@ -92,7 +107,8 @@ dependencies {
     implementation project(':resolver-speechsynthesizer')
     implementation project(':resolver-system')
     implementation project(':resolver-templateruntime')
+    implementation project(':resolver-visualactivitytracker')
     implementation project(':resolver-xftemplateruntime')
 
-    implementation(name: 'wake-word-detector-ivw', ext: 'aar')
+    commonImplementation(name: 'wake-word-detector-ivw', ext: 'aar')
 }

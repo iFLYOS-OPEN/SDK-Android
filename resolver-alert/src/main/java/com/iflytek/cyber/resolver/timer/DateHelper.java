@@ -23,7 +23,7 @@ public class DateHelper {
 
     public static long getTime(String time) {
         TimeZone tz = TimeZone.getTimeZone("UTC");
-        DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
         df.setTimeZone(tz);
         try {
             return df.parse(time).getTime();

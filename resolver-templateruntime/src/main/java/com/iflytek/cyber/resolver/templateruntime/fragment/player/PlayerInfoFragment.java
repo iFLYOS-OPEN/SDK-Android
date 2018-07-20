@@ -58,7 +58,6 @@ public class PlayerInfoFragment extends Fragment implements AudioPlayer.PlayerIn
     private TextView tvCurrentPosition;
     private TextView tvDuration;
     private ImageView ivProviderLogo;
-    private TextView tvProviderName;
 
     private SeekBar seekBar;
     private boolean seekBarDragging = false;
@@ -81,7 +80,6 @@ public class PlayerInfoFragment extends Fragment implements AudioPlayer.PlayerIn
         tvCurrentPosition = view.findViewById(R.id.current_position);
         tvDuration = view.findViewById(R.id.duration);
         ivProviderLogo = view.findViewById(R.id.music_provider_logo);
-        tvProviderName = view.findViewById(R.id.music_provider_name);
         ivAlbum = view.findViewById(R.id.album);
         return view;
     }
@@ -224,45 +222,38 @@ public class PlayerInfoFragment extends Fragment implements AudioPlayer.PlayerIn
                         }
                     });
                 }
-                if (payload.content.provider != null &&
-                        payload.content.provider.logo != null &&
-                        payload.content.provider.logo.sources.size() > 0) {
-                    tvProviderName.setVisibility(View.GONE);
-                    ivProviderLogo.setVisibility(View.VISIBLE);
-                    Glide.with(getContext())
-                            .load(payload.content.provider.logo.sources.get(0).url)
-                            .listener(new RequestListener<Drawable>() {
-                                @Override
-                                public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
-                                    ivProviderLogo.setVisibility(View.GONE);
-                                    tvProviderName.setVisibility(View.VISIBLE);
-                                    return false;
-                                }
+                if (payload.content.provider != null) {
+                    if (payload.content.provider.logo != null &&
+                            payload.content.provider.logo.sources.size() > 0) {
+                        ivProviderLogo.setVisibility(View.VISIBLE);
+                        Glide.with(getContext())
+                                .load(payload.content.provider.logo.sources.get(0).url)
+                                .listener(new RequestListener<Drawable>() {
+                                    @Override
+                                    public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+                                        ivProviderLogo.setVisibility(View.GONE);
+                                        return false;
+                                    }
 
-                                @Override
-                                public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
-                                    return false;
-                                }
-                            })
-                            .into(ivProviderLogo);
-                    tvProviderName.setText(getString(R.string.music_from_source, payload.content.provider.name));
-                } else if (payload.content.provider != null && !TextUtils.isEmpty(payload.content.provider.name)) {
-                    ivProviderLogo.setVisibility(View.GONE);
-                    tvProviderName.setVisibility(View.VISIBLE);
-                    tvProviderName.setText(getString(R.string.music_from_source, payload.content.provider.name));
-                } else {
-                    ivProviderLogo.setVisibility(View.GONE);
-                    tvProviderName.setVisibility(View.GONE);
+                                    @Override
+                                    public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                                        return false;
+                                    }
+                                })
+                                .into(ivProviderLogo);
+                    } else {
+                        ivProviderLogo.setVisibility(View.GONE);
+                    }
                 }
             }
         }
     }
 
     public void requestFocus() {
-        if (tvSlogan.getVisibility() == View.VISIBLE) {
+        if (tvSlogan != null && tvSlogan.getVisibility() == View.VISIBLE) {
             tvSlogan.requestFocus();
         }
-        if (tvTitle.getVisibility() == View.VISIBLE) {
+        if (tvTitle != null && tvTitle.getVisibility() == View.VISIBLE) {
             tvTitle.requestFocus();
         }
     }
@@ -319,8 +310,7 @@ public class PlayerInfoFragment extends Fragment implements AudioPlayer.PlayerIn
             ivPlayPause.setImageResource(R.drawable.ic_play_circle_outline_white_24dp);
         }
         if (playbackState.getState() == PlaybackState.STATE_STOPPED) {
-            seekBar.setEnabled(false);
-            seekBar.setProgress(0);
+            ivPlayPause.setImageResource(R.drawable.ic_play_circle_outline_white_24dp);
         }
     }
 
@@ -329,6 +319,7 @@ public class PlayerInfoFragment extends Fragment implements AudioPlayer.PlayerIn
         AudioPlayer audioPlayer = getAudioPlayer();
         if (audioPlayer == null)
             return;
+        // id is not static-final
         switch (v.getTag().toString()) {
             case TAG_PREVIOUS:
                 playbackControllerResolver.postCommand(PlaybackControllerResolver.PREVIOUS_COMMAND_ISSUED);
@@ -339,10 +330,9 @@ public class PlayerInfoFragment extends Fragment implements AudioPlayer.PlayerIn
             case TAG_PLAY_PAUSE:
                 if (audioPlayer.isPlaying()) {
                     playbackControllerResolver.postCommand(PlaybackControllerResolver.PAUSE_COMMAND_ISSUED);
-                    audioPlayer.pause();
+                    audioPlayer.stop();
                 } else {
                     playbackControllerResolver.postCommand(PlaybackControllerResolver.PLAY_COMMAND_ISSUED);
-                    audioPlayer.start();
                 }
                 break;
         }

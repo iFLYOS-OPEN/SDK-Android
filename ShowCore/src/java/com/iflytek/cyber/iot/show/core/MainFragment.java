@@ -179,12 +179,10 @@ public class MainFragment extends Fragment implements AMapLocationListener {
                 new WifiInfoManager.NetworkStateListener() {
                     @Override
                     public void onAvailable(Network network) {
-                        ivNetwork.setClickable(false);
                     }
 
                     @Override
                     public void onLost(Network network) {
-                        ivNetwork.setClickable(true);
                         ivNetwork.setImageResource(R.drawable.ic_baseline_wifi_error_24px);
                     }
                 });

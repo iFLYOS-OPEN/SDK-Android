@@ -1,0 +1,12 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.iflytek.cyber.resolver.visualactivitytracker">
+
+    <application>
+
+        <meta-data
+            android:name="com.iflytek.cyber.resolver.visualactivitytracker.VisualActivityTracker"
+            android:value="ResolverModule:VisualActivityTracker" />
+
+    </application>
+
+</manifest>

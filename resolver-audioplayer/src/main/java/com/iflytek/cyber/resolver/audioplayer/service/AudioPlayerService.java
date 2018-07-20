@@ -16,6 +16,7 @@ public class AudioPlayerService extends Service {
 
     public static final String EXTRA_AUDIO_ITEM = "audioItem";
     public static final String EXTRA_PLAY_BEHAVIOR = "playBehaviour";
+    public static final String EXTRA_TOKEN = "token";
     public static final String EXTRA_CLEAR_BEHAVIOR = "clearBehaviour";
 
     private static final String ACTION_PREFIX = "com.iflytek.cyber.resolver.audioplayer.action.";
@@ -24,6 +25,7 @@ public class AudioPlayerService extends Service {
     public static final String ACTION_CLEAR_QUEUE = ACTION_PREFIX + "ACTION_CLEAR_QUEUE";
     public static final String ACTION_PREPARED = ACTION_PREFIX + "ACTION_PREPARED";
     public static final String ACTION_SERVICE_STARTED = ACTION_PREFIX + "ACTION_SERVICE_STARTED";
+    public static final String ACTION_SETUP_TOKEN = ACTION_PREFIX + "ACTION_SETUP_TOKEN";
 
     private AudioPlayer audioPlayer;
 
@@ -64,10 +66,14 @@ public class AudioPlayerService extends Service {
                     Log.w(getClass().getSimpleName(), "ACTION_PLAY: " + playBehavior);
                     break;
                 case ACTION_STOP:
-                    audioPlayer.pause();
+                    audioPlayer.stop();
                     break;
                 case ACTION_CLEAR_QUEUE:
                     audioPlayer.clearQueue(intent.getStringExtra(EXTRA_CLEAR_BEHAVIOR));
+                    break;
+                case ACTION_SETUP_TOKEN:
+                    String token = intent.getStringExtra(EXTRA_TOKEN);
+                    audioPlayer.setupToken(token);
                     break;
             }
         sendBroadcast(new Intent(ACTION_SERVICE_STARTED));

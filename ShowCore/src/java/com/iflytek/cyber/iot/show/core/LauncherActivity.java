@@ -25,6 +25,7 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.graphics.Point;
 import android.net.Network;
 import android.os.Bundle;
 import android.os.Handler;
@@ -35,10 +36,9 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.animation.FastOutLinearInInterpolator;
-import android.util.DisplayMetrics;
-import android.util.Log;
+import android.view.Display;
 import android.view.View;
-import android.widget.FrameLayout;
+import android.widget.ImageSwitcher;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -47,6 +47,7 @@ import com.google.gson.JsonObject;
 import com.iflytek.cyber.iot.show.core.widget.MarqueeView;
 import com.iflytek.cyber.platform.AuthManager;
 import com.iflytek.cyber.platform.DefaultTokenStorage;
+import com.iflytek.cyber.platform.DeviceId;
 import com.iflytek.cyber.platform.Recorder;
 import com.iflytek.cyber.platform.TokenManager;
 import com.iflytek.cyber.platform.resolver.ResolverManager;
@@ -97,6 +98,8 @@ public class LauncherActivity extends BaseActivity implements TemplateRuntimeRes
 
     private boolean showIat = false;
 
+    private static final int CHANGE_WALLPAPER_TIME = 30 * 60 * 1000;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -118,28 +121,56 @@ public class LauncherActivity extends BaseActivity implements TemplateRuntimeRes
 
         startMarquee();
 
-        ImageView ivIndex = findViewById(R.id.iv_index);
-        ivIndex.post(() -> {
-            View parent = (View) ivIndex.getParent();
-            FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) ivIndex.getLayoutParams();
-            layoutParams.leftMargin = (int) (parent.getWidth() * 0.35);
-            ivIndex.setLayoutParams(layoutParams);
+        ImageSwitcher ivIndex = findViewById(R.id.iv_index);
+        final Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                int[] resources = {R.drawable.bg_index1,
+                        R.drawable.bg_index2,
+                        R.drawable.bg_index3,
+                        R.drawable.bg_index4,
+                        R.drawable.bg_index5,
+                        R.drawable.bg_index6,
+                        R.drawable.bg_index7,
+                };
+                int i = (int) (Math.random() * (resources.length - 1));
+                int tag = -1;
+                if (ivIndex.getTag() != null)
+                    tag = (int) ivIndex.getTag();
+                int tryCount = 0;
+                while (i == tag && tryCount < 100) { // trying 100 times is enough
+                    i = (int) (Math.random() * (resources.length - 1));
+                    tryCount = tryCount + 1;
+                }
+                ivIndex.setImageResource(resources[i]);
+                ivIndex.setTag(i);
+                ivIndex.postDelayed(this, CHANGE_WALLPAPER_TIME);
+            }
+        };
+        ivIndex.setInAnimation(this, android.R.anim.fade_in);
+        ivIndex.setOutAnimation(this, android.R.anim.fade_out);
+        ivIndex.setFactory(() -> {
+            ImageView iv = new ImageView(this);
+            iv.setScaleType(ImageView.ScaleType.CENTER_CROP);
+            return iv;
         });
+        ivIndex.post(runnable);
 
         counterHandler = new CounterHandler(this);
 
         findViewById(R.id.close).setOnClickListener(v -> dismissTemplate());
         findViewById(R.id.template_runtime_bottom_bar).post(() -> {
             View container = findViewById(R.id.template_runtime_container);
-            DisplayMetrics dm = new DisplayMetrics();
-            getWindowManager().getDefaultDisplay().getMetrics(dm);
-            templateRuntimeHeight = dm.heightPixels;
+            Display display = getWindowManager().getDefaultDisplay();
+            Point size = new Point();
+            display.getRealSize(size);
+            templateRuntimeHeight = size.y;
             container.setTranslationY(templateRuntimeHeight);
             container.setVisibility(View.VISIBLE);
             bottomBarHeight = findViewById(R.id.template_runtime_bottom_bar).getHeight();
         });
 
-        authManager = new AuthManager(BuildConfig.CLIENT_ID);
+        authManager = new AuthManager(BuildConfig.CLIENT_ID, DeviceId.get(this));
         tokenManager = new TokenManager(new DefaultTokenStorage(this), authManager);
 
         init();
@@ -168,6 +199,8 @@ public class LauncherActivity extends BaseActivity implements TemplateRuntimeRes
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
                 if (position == 0)
                     blurView.setAlpha(positionOffset * positionOffset * positionOffset);
+                else if (position == 1)
+                    blurView.setAlpha(1f);
                 if (mViewPager.getCurrentItem() == 1)
                     if (position == 1) {
                         mPageAdapter.playerInfoFragment.requestFocus();
@@ -292,6 +325,7 @@ public class LauncherActivity extends BaseActivity implements TemplateRuntimeRes
             AudioPlayerResolver audioResolver = resolverManager.peek("AudioPlayer", AudioPlayerResolver.class);
             if (audioResolver != null) {
                 mPageAdapter.playerInfoFragment.setup(audioResolver);
+                audioResolver.setupToken(tokenManager.getAccessToken());
             }
             PlaybackControllerResolver playbackResolver = resolverManager.peek("PlaybackController", PlaybackControllerResolver.class);
             if (playbackResolver != null) {
@@ -408,6 +442,7 @@ public class LauncherActivity extends BaseActivity implements TemplateRuntimeRes
                         AudioPlayerResolver audioResolver = resolverManager.peek("AudioPlayer", AudioPlayerResolver.class);
                         if (audioResolver != null) {
                             mPageAdapter.playerInfoFragment.setup(audioResolver);
+                            audioResolver.setupToken(tokenManager.getAccessToken());
                         }
                         PlaybackControllerResolver playbackResolver = resolverManager.peek("PlaybackController", PlaybackControllerResolver.class);
                         if (playbackResolver != null) {
@@ -576,6 +611,9 @@ public class LauncherActivity extends BaseActivity implements TemplateRuntimeRes
 
         void stop() {
             stopped = true;
+            LauncherActivity activity = reference.get();
+            if (activity != null)
+                activity.tvCounter.setText("");
         }
     }
 }

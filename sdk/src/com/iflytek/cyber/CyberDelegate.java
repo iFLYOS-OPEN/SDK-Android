@@ -23,6 +23,11 @@ import okio.Source;
 
 public abstract class CyberDelegate {
 
+    public static final String CHANNEL_DIALOG = "dialog";
+    public static final String CHANNEL_ALERTS = "alerts";
+    public static final String CHANNEL_CONTENT = "content";
+    public static final String CHANNEL_VISUAL = "visual";
+
     /**
      * 更新当前 namespace 下的 context
      *
@@ -37,6 +42,12 @@ public abstract class CyberDelegate {
      * @param name 需要移除的 context 的名称
      */
     public abstract void removeContext(String name);
+
+    public abstract void activateChannel(String channel);
+
+    public abstract void deactivateChannel(String channel);
+
+    public abstract JsonObject getChannelState(String channel);
 
     /**
      * 向 IVS 提交一个当前 namespace 下的事件（不带 context）

@@ -17,10 +17,8 @@
 package com.iflytek.cyber.inspector.setup;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -31,26 +29,15 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.zxing.BarcodeFormat;
-import com.google.zxing.EncodeHintType;
 import com.google.zxing.WriterException;
 import com.iflytek.cyber.inspector.LauncherActivity;
 import com.iflytek.cyber.inspector.R;
 import com.iflytek.cyber.platform.AuthManager;
 import com.journeyapps.barcodescanner.BarcodeEncoder;
 
-import java.util.HashMap;
-
 public class PairFragment extends Fragment implements AuthManager.AuthorizeCallback {
 
     private LauncherActivity activity;
-
-    private SharedPreferences pref;
-
-    private BindingManager bm;
-
-    private String deviceId;
-    private String bindingCode;
-    private String operateToken;
 
     private String verificationUri;
     private String userCode;
@@ -68,8 +55,6 @@ public class PairFragment extends Fragment implements AuthManager.AuthorizeCallb
     public void onAttach(Context context) {
         super.onAttach(context);
         activity = (LauncherActivity) context;
-        pref = PreferenceManager.getDefaultSharedPreferences(context);
-        bm = new BindingManager(context, this);
     }
 
     @Nullable
@@ -106,7 +91,6 @@ public class PairFragment extends Fragment implements AuthManager.AuthorizeCallb
     @Override
     public void onPause() {
         super.onPause();
-        bm.cancel();
         activity.cancelAuthorize();
     }
 
@@ -117,7 +101,6 @@ public class PairFragment extends Fragment implements AuthManager.AuthorizeCallb
         loading.setVisibility(View.VISIBLE);
 
         activity.requestAuthorize(this);
-        bm.request(pref.getString("model_id", null));
     }
 
     private void showError(String message) {
@@ -126,18 +109,6 @@ public class PairFragment extends Fragment implements AuthManager.AuthorizeCallb
         pairing.setVisibility(View.GONE);
         failed.setVisibility(View.VISIBLE);
         retry.setVisibility(View.VISIBLE);
-    }
-
-    void handleBindingSucceed(String deviceId, String code, String operateToken) {
-        this.deviceId = deviceId;
-        this.bindingCode = code;
-        this.operateToken = operateToken;
-        generateCode();
-    }
-
-    void handleBindingFailed() {
-        activity.cancelAuthorize();
-        showError("网络异常，请重试。");
     }
 
     @Override
@@ -149,36 +120,31 @@ public class PairFragment extends Fragment implements AuthManager.AuthorizeCallb
 
     @Override
     public void onGetToken(String accessToken, String refreshToken, long expiresAt) {
-        activity.finishSetup(accessToken, refreshToken, expiresAt, operateToken);
+        activity.finishSetup(accessToken, refreshToken, expiresAt);
         activity.redirectTo(new FinishFragment());
     }
 
     @Override
     public void onReject() {
-        bm.cancel();
         showError("您拒绝了授权。");
     }
 
     @Override
     public void onFailure(Throwable t) {
-        bm.cancel();
         showError("网络异常，请重试。");
     }
 
     private void generateCode() {
-        if (verificationUri == null || userCode == null || deviceId == null || bindingCode == null) {
+        if (verificationUri == null || userCode == null) {
             return;
         }
 
-        final String url = verificationUri + "?user_code=" + userCode + "#" + deviceId + "," + bindingCode;
+        final String url = verificationUri + "?user_code=" + userCode;
         final int size = getResources().getDimensionPixelSize(R.dimen.qr_size);
-
-        final HashMap<EncodeHintType, String> hints = new HashMap<>();
-        hints.put(EncodeHintType.MARGIN, "0");
 
         try {
             final Bitmap bitmap = new BarcodeEncoder().encodeBitmap(
-                    url, BarcodeFormat.QR_CODE, size, size, hints);
+                    url, BarcodeFormat.QR_CODE, size, size);
 
             code.setImageBitmap(bitmap);
 

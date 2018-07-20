@@ -26,6 +26,7 @@ import android.support.v4.app.FragmentManager;
 import com.iflytek.cyber.iot.show.core.setup.WelcomeFragment;
 import com.iflytek.cyber.platform.AuthManager;
 import com.iflytek.cyber.platform.DefaultTokenStorage;
+import com.iflytek.cyber.platform.DeviceId;
 import com.iflytek.cyber.platform.TokenManager;
 
 public class SetupWizardActivity extends BaseActivity {
@@ -38,7 +39,7 @@ public class SetupWizardActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_setup_wizard);
 
-        authManager = new AuthManager(BuildConfig.CLIENT_ID);
+        authManager = new AuthManager(BuildConfig.CLIENT_ID, DeviceId.get(this));
         tokenManager = new TokenManager(new DefaultTokenStorage(this), authManager);
 
         initMainFragment();
@@ -56,9 +57,6 @@ public class SetupWizardActivity extends BaseActivity {
         } else {
             redirectTo(new WelcomeFragment());
         }
-
-        // 让后台服务根据 token 情况决定是否活动
-        startService(new Intent(this, CoreService.class));
     }
 
     public void redirectTo(Fragment fragment) {
@@ -94,14 +92,8 @@ public class SetupWizardActivity extends BaseActivity {
         authManager.cancel();
     }
 
-    public void finishSetup(String accessToken, String refreshToken, long expiresAt,
-                            String operateToken) {
+    public void finishSetup(String accessToken, String refreshToken, long expiresAt) {
         tokenManager.updateToken(accessToken, refreshToken, expiresAt);
-    }
-
-    void debug_clearToken() {
-        tokenManager.clearToken();
-        initMainFragment();
     }
 
 }

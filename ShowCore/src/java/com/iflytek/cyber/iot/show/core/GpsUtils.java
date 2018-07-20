@@ -23,6 +23,8 @@ import android.location.LocationManager;
 import android.provider.Settings;
 import android.support.v7.app.AlertDialog;
 
+import static android.location.LocationManager.GPS_PROVIDER;
+
 public class GpsUtils {
 
     private static void openGpsSettings(Context context) {
@@ -31,7 +33,13 @@ public class GpsUtils {
 
     public static boolean checkGpsEnable(Context context) {
         final LocationManager manager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
-        return manager != null && manager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        if (manager == null) {
+            return true; // 跳过检查
+        }
+
+        // 如果不支持 GPS 那也不强求了
+        return !manager.getAllProviders().contains(GPS_PROVIDER) ||
+                manager.isProviderEnabled(GPS_PROVIDER);
     }
 
     public static void requestGps(final Context context) {

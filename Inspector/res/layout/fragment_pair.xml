@@ -63,6 +63,7 @@
             android:id="@+id/code"
             android:layout_width="@dimen/qr_size"
             android:layout_height="@dimen/qr_size"
+            android:scaleType="centerInside"
             tools:background="@android:color/white"
             tools:ignore="ContentDescription" />
 
@@ -70,7 +71,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="请使用「讯飞之家」App 扫描上面的二维码完成设置。" />
+            android:text="请使用「小飞在线」App 扫描上面的二维码完成设置。" />
 
     </LinearLayout>
 

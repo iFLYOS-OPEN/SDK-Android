@@ -10,7 +10,10 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.iflytek.cyber.CyberDelegate;
 import com.iflytek.cyber.resolver.player.PlayOrder;
+import com.iflytek.cyber.resolver.timer.DateHelper;
 import com.iflytek.cyber.resolver.timer.Scheduler;
+import com.litesuits.orm.LiteOrm;
+import com.litesuits.orm.db.DataBaseConfig;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,29 +21,81 @@ import java.util.Map;
 
 public class AlertResolver extends ResolverModule {
 
-    private Scheduler scheduler;
+    private final Scheduler scheduler;
+    private final LiteOrm liteOrm;
+
     private String token;
+
+    private OnAlertListener listener;
 
     public AlertResolver(Context context, CyberDelegate delegate) {
         super(context, delegate);
-        scheduler = new Scheduler(context, this);
+        DataBaseConfig config = new DataBaseConfig(context, "alert.db");
+        config.dbVersion = 1;
+        liteOrm = LiteOrm.newSingleInstance(config);
+
+        scheduler = new Scheduler(context, this, liteOrm);
+    }
+
+    @Override
+    public void onCreate() {
+        updateAlert();
+    }
+
+    private void updateAlert() {
+        final List<AllAlert> allAlerts = liteOrm.query(AllAlert.class);
+        for (AllAlert alert : allAlerts) {
+            if (alert != null) {
+                long scheduledTime = DateHelper.getTime(alert.scheduledTime);
+                if ((scheduledTime - System.currentTimeMillis()) > 0) {
+                    //recover alert
+                    recoverAlert(alert);
+                }
+            }
+        }
+    }
+
+    private void recoverAlert(AllAlert alert) {
+        if (TextUtils.equals(alert.type, "TIMER")) {
+            scheduler.startTimer(alert.token, alert.type, alert.scheduledTime, alert.playOrders,
+                    alert.hasLoopCount, alert.loopCount, alert.loopPauseInMilliSeconds);
+        } else if (TextUtils.equals(alert.type, "ALARM")) {
+            scheduler.startAlarm(alert.token, alert.type, alert.scheduledTime, alert.playOrders,
+                    alert.hasLoopCount, alert.loopCount, alert.loopPauseInMilliSeconds);
+        } else if (TextUtils.equals(alert.type, "REMINDER")) {
+            scheduler.startReminder(alert.token, alert.type, alert.scheduledTime, alert.playOrders,
+                    alert.hasLoopCount, alert.loopCount, alert.loopPauseInMilliSeconds);
+        }
     }
 
     @Override
     public void updateContext() {
-        if (!TextUtils.isEmpty(token)) {
-            JsonObject payload = new JsonObject();
-            final JsonArray arrays = getAlerts(scheduler.getAlertMap());
-            payload.add("allAlerts", arrays);
-            payload.add("activeAlerts", arrays);
-            delegate.updateContext("AlertsState", payload);
-        }
+        JsonObject payload = new JsonObject();
+        final JsonArray arrays = getActiveAlerts(scheduler.getActiveAlertMap());
+        List<AllAlert> allAlerts = liteOrm.query(AllAlert.class);
+        payload.add("allAlerts", getAllAlerts(allAlerts));
+        payload.add("activeAlerts", arrays);
+        delegate.updateContext("AlertsState", payload);
     }
 
-    private JsonArray getAlerts(Map<String, Alert> alertMap) {
+    private JsonArray getAllAlerts(List<AllAlert> allAlerts) {
+        final JsonArray array = new JsonArray();
+        for (AllAlert alert : allAlerts) {
+            if (alert != null) {
+                JsonObject object = new JsonObject();
+                object.addProperty("type", alert.type);
+                object.addProperty("token", alert.token);
+                object.addProperty("scheduledTime", alert.scheduledTime);
+                array.add(object);
+            }
+        }
+        return array;
+    }
+
+    private JsonArray getActiveAlerts(Map<String, ActiveAlert> alertMap) {
         final JsonArray array = new JsonArray();
         for (String key : alertMap.keySet()) {
-            final Alert alert = alertMap.get(key);
+            final ActiveAlert alert = alertMap.get(key);
             if (alert != null) {
                 JsonObject object = new JsonObject();
                 object.addProperty("type", alert.type);
@@ -68,11 +123,16 @@ public class AlertResolver extends ResolverModule {
                 return;
             }
 
+            long alertTime = DateHelper.getTime(scheduledTime);
+            if (alertTime - System.currentTimeMillis() < 0) {
+                return;
+            }
+
             boolean hasLoopCount = payload.has("loopCount");
             long loopCount = hasLoopCount? payload.get("loopCount").getAsLong() : 0;
             long loopPauseInMilliSeconds = payload.has("loopPauseInMilliSeconds") ?
                     payload.get("loopPauseInMilliSeconds").getAsLong() : 0;
-            final List<PlayOrder> playOrders = parseArray(orderArray);
+            final ArrayList<PlayOrder> playOrders = parseArray(orderArray);
             if (TextUtils.equals(type, "TIMER")) {
                 scheduler.startTimer(token, type, scheduledTime, playOrders, hasLoopCount, loopCount, loopPauseInMilliSeconds);
             } else if (TextUtils.equals(type, "ALARM")) {
@@ -87,14 +147,18 @@ public class AlertResolver extends ResolverModule {
         callback.next();
     }
 
-    private List<PlayOrder> parseArray(JsonArray array) {
-        List<PlayOrder> playOrders = new ArrayList<>();
+    private ArrayList<PlayOrder> parseArray(JsonArray array) {
+        ArrayList<PlayOrder> playOrders = new ArrayList<>();
         Gson gson = new Gson();
         for (JsonElement element : array) {
             PlayOrder playOrder = gson.fromJson(element, PlayOrder.class);
             playOrders.add(playOrder);
         }
         return playOrders;
+    }
+
+    public void setListener(OnAlertListener listener) {
+        this.listener = listener;
     }
 
     public void notifySetAlertSucceeded() {
@@ -138,4 +202,23 @@ public class AlertResolver extends ResolverModule {
         payload.addProperty("token", token);
         delegate.postEvent("AlertEnteredForeground", payload);
     }
+
+    public void onAlertActive() {
+        delegate.activateChannel(CyberDelegate.CHANNEL_ALERTS);
+        if (listener != null) {
+            listener.onAlert(true);
+        }
+    }
+
+    public void onAlertDeactive() {
+        delegate.deactivateChannel(CyberDelegate.CHANNEL_ALERTS);
+        if (listener != null) {
+            listener.onAlert(false);
+        }
+    }
+
+    public interface OnAlertListener {
+        void onAlert(boolean active);
+    }
+
 }

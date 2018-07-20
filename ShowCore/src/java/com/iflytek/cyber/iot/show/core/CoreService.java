@@ -74,6 +74,7 @@ public class CoreService extends StickyService implements
     private AuthManager authManager;
     private TokenManager tokenManager;
 
+    private VendorFactory vendorFactory;
     private Recorder recorder;
 
     private CyberCore cyber;
@@ -88,12 +89,6 @@ public class CoreService extends StickyService implements
 
     private Recorder.AudioListener audioListener;
 
-    public class CoreServiceBinder extends Binder {
-        public CoreService getService() {
-            return CoreService.this;
-        }
-    }
-
     @Override
     public IBinder onBind(Intent intent) {
         return new CoreServiceBinder();
@@ -107,18 +102,21 @@ public class CoreService extends StickyService implements
         am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         pref = PreferenceManager.getDefaultSharedPreferences(this);
 
-        authManager = new AuthManager(BuildConfig.CLIENT_ID);
+        authManager = new AuthManager(BuildConfig.CLIENT_ID, DeviceId.get(this));
         tokenManager = new TokenManager(new DefaultTokenStorage(this), authManager);
 
-        recorder = new AndroidRecorder(this, this);
+        vendorFactory = new VendorFactoryImpl(this);
+        vendorFactory.onCreate();
+
+        recorder = vendorFactory.createRecorder(this);
 
         cyber = new CyberCore(this);
+
+        initClient();
 
         ResolverManager.init(this, cyber);
         resolverManager = ResolverManager.get();
         resolverManager.create();
-
-        initClient();
 
         final JsonObject deviceState = new JsonObject();
         deviceState.addProperty("deviceId", DeviceId.get(this));
@@ -140,6 +138,7 @@ public class CoreService extends StickyService implements
         recorder.destroy();
         contextUpdater.removeCallbacksAndMessages(null);
         resolverManager.destroy();
+        vendorFactory.onDestroy();
     }
 
     /**
@@ -164,11 +163,6 @@ public class CoreService extends StickyService implements
                 disconnect();
             }
         }
-    }
-
-
-    public Recorder.AudioListener getAudioListener() {
-        return audioListener;
     }
 
     public void setAudioListener(Recorder.AudioListener audioListener) {
@@ -287,7 +281,7 @@ public class CoreService extends StickyService implements
         retryHandler.removeCallbacksAndMessages(null);
         retryHandler.postDelayed(this::connect, TimeUnit.SECONDS.toMillis(retryInterval));
         Log.d(TAG, "scheduled to reconnect after " + retryInterval + " s");
-        retryInterval += 2;
+        retryInterval = Math.min(20, retryInterval + 2);
     }
 
     @Override
@@ -359,6 +353,8 @@ public class CoreService extends StickyService implements
         intent.putExtra("state", false);
         sendBroadcast(intent);
 
+        am.abandonAudioFocus(this);
+
         recorder.start();
     }
 
@@ -397,6 +393,12 @@ public class CoreService extends StickyService implements
         OFFLINE,
         CONNECTING,
         CONNECTED,
+    }
+
+    public class CoreServiceBinder extends Binder {
+        public CoreService getService() {
+            return CoreService.this;
+        }
     }
 
 }

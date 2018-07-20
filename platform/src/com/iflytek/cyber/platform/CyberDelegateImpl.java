@@ -43,6 +43,21 @@ public class CyberDelegateImpl extends CyberDelegate {
     }
 
     @Override
+    public void activateChannel(String channel) {
+        core.activateChannel(channel, namespace);
+    }
+
+    @Override
+    public void deactivateChannel(String channel) {
+        core.deactivateChannel(channel, namespace);
+    }
+
+    @Override
+    public JsonObject getChannelState(String channel) {
+        return core.getChannelState(channel);
+    }
+
+    @Override
     public void postEvent(String name, JsonObject payload, boolean withContext) {
         core.postEvent(namespace, name, payload, withContext);
     }

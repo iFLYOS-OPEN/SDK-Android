@@ -39,6 +39,7 @@ public class CyberCore {
 
     private final AttachmentManager attachmentManager = new AttachmentManager();
     private final ContextManager contextManager = new ContextManager();
+    private final FocusManager focusManager = new FocusManager();
 
     private SpeechController speechController = null;
 
@@ -68,6 +69,18 @@ public class CyberCore {
 
     public void removeContext(String namespace, String name) {
         contextManager.remove(namespace, name);
+    }
+
+    public void activateChannel(String channel, String interfaceName) {
+        focusManager.activate(channel, interfaceName);
+    }
+
+    public void deactivateChannel(String channel, String interfaceName) {
+        focusManager.deactivate(channel, interfaceName);
+    }
+
+    public JsonObject getChannelState(String channel) {
+        return focusManager.get(channel);
     }
 
     @Deprecated

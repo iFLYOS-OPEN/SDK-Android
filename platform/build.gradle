@@ -17,22 +17,14 @@
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 27
+    compileSdkVersion 28
 
     defaultConfig {
         minSdkVersion 22
-        targetSdkVersion 27
+        targetSdkVersion 28
 
         versionCode 1
         versionName "1.0"
-
-        buildConfigField "String", "API_SERVER", (rootProject.hasProperty('OVERRIDE_AUTH_SERVER')
-                ? "\"${OVERRIDE_AUTH_SERVER}\""
-                : '"https://auth.iflyos.cn"')
-
-        buildConfigField "String", "IVS_SERVER", (rootProject.hasProperty('OVERRIDE_VOICE_SERVER')
-                ? "\"${OVERRIDE_VOICE_SERVER}\""
-                : '"https://gw.iflyos.cn"')
     }
 
     sourceSets.main {
@@ -47,10 +39,20 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+
+    flavorDimensions 'env'
+
+    productFlavors {
+        master {
+            dimension 'env'
+            buildConfigField "String", "API_SERVER", '"https://auth.iflyos.cn"'
+            buildConfigField "String", "IVS_SERVER", '"https://gw.iflyos.cn"'
+        }
+    }
 }
 
 dependencies {
-    api 'com.google.code.gson:gson:2.8.2'
+    api 'com.google.code.gson:gson:2.8.5'
     api 'com.squareup.okio:okio:1.14.0'
 
     api project(':sdk')

@@ -39,8 +39,7 @@
         tools:ignore="ProtectedPermissions" />
 
     <application
-        android:name=".CoreApplication"
-        android:label="@string/app_name"
+        android:label="${APP_NAME}"
         android:theme="@style/AppTheme">
 
         <meta-data
@@ -63,8 +62,10 @@
 
         <activity
             android:name=".LauncherActivity"
+            android:enabled="false"
             android:excludeFromRecents="true"
-            android:launchMode="singleInstance">
+            android:launchMode="singleInstance"
+            android:screenOrientation="landscape">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

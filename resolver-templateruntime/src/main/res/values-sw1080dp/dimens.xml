@@ -19,6 +19,8 @@
     <dimen name="player_next_button_size">85dp</dimen>
     <dimen name="player_play_button_size">104dp</dimen>
     <dimen name="player_horizontal_margin">56dp</dimen>
+    <dimen name="player_provider_size">88dp</dimen>
+    <dimen name="player_provider_margin_top">-44dp</dimen>
     <dimen name="player_slogan_margin">112dp</dimen>
     <dimen name="player_slogan_text_size">64sp</dimen>
     <dimen name="player_seek_bar_margin">48dp</dimen>

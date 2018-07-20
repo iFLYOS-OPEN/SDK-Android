@@ -42,12 +42,6 @@ public class PairFragment extends Fragment implements AuthManager.AuthorizeCallb
 
     private SetupWizardActivity activity;
 
-    private BindingManager bm;
-
-    private String deviceId;
-    private String bindingCode;
-    private String operateToken;
-
     private String verificationUri;
     private String userCode;
 
@@ -63,7 +57,6 @@ public class PairFragment extends Fragment implements AuthManager.AuthorizeCallb
     public void onAttach(Context context) {
         super.onAttach(context);
         activity = (SetupWizardActivity) context;
-        bm = new BindingManager(context, this);
     }
 
     @Nullable
@@ -100,7 +93,6 @@ public class PairFragment extends Fragment implements AuthManager.AuthorizeCallb
     @Override
     public void onPause() {
         super.onPause();
-        bm.cancel();
         activity.cancelAuthorize();
     }
 
@@ -110,7 +102,6 @@ public class PairFragment extends Fragment implements AuthManager.AuthorizeCallb
         loading.setVisibility(View.VISIBLE);
 
         activity.requestAuthorize(this);
-        bm.request();
     }
 
     private void showError(String message) {
@@ -118,18 +109,6 @@ public class PairFragment extends Fragment implements AuthManager.AuthorizeCallb
         loading.setVisibility(View.GONE);
         pairing.setVisibility(View.GONE);
         failed.setVisibility(View.VISIBLE);
-    }
-
-    void handleBindingSucceed(String deviceId, String code, String operateToken) {
-        this.deviceId = deviceId;
-        this.bindingCode = code;
-        this.operateToken = operateToken;
-        generateCode();
-    }
-
-    void handleBindingFailed() {
-        activity.cancelAuthorize();
-        showError("网络异常，请重试。");
     }
 
     @Override
@@ -141,29 +120,27 @@ public class PairFragment extends Fragment implements AuthManager.AuthorizeCallb
 
     @Override
     public void onGetToken(String accessToken, String refreshToken, long expiresAt) {
-        activity.finishSetup(accessToken, refreshToken, expiresAt, operateToken);
+        activity.finishSetup(accessToken, refreshToken, expiresAt);
         activity.redirectTo(new FinishFragment());
     }
 
     @Override
     public void onReject() {
-        bm.cancel();
         showError("您拒绝了授权。");
     }
 
     @Override
     public void onFailure(Throwable t) {
         Log.e(TAG, "Auth failed", t);
-        bm.cancel();
         showError("网络异常，请重试。");
     }
 
     private void generateCode() {
-        if (verificationUri == null || userCode == null || deviceId == null || bindingCode == null) {
+        if (verificationUri == null || userCode == null) {
             return;
         }
 
-        final String url = verificationUri + "?user_code=" + userCode + "#" + deviceId + "," + bindingCode;
+        final String url = verificationUri + "?user_code=" + userCode;
         final int size = getResources().getDimensionPixelSize(R.dimen.qr_size);
 
         try {

@@ -18,6 +18,8 @@
     <dimen name="weatherMainTitleMaxTextSize">108sp</dimen>
     <dimen name="weatherMainTitleMinTextSize">40sp</dimen>
     <dimen name="player_album_background_size">408dp</dimen>
+    <dimen name="player_provider_size">48dp</dimen>
+    <dimen name="player_provider_margin_top">-24dp</dimen>
     <dimen name="player_album_size">276dp</dimen>
     <dimen name="player_next_button_size">64dp</dimen>
     <dimen name="player_play_button_size">80dp</dimen>

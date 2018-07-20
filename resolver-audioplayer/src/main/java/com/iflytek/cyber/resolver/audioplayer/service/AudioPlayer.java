@@ -14,15 +14,17 @@ import android.view.KeyEvent;
 
 import com.google.gson.JsonObject;
 import com.iflytek.cyber.CyberDelegate;
+import com.iflytek.cyber.resolver.audioplayer.BuildConfig;
 import com.iflytek.cyber.resolver.audioplayer.DelegateStore;
 import com.iflytek.cyber.resolver.audioplayer.service.model.AudioItem;
 import com.iflytek.cyber.resolver.audioplayer.service.model.ProgressReport;
 
 import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.URL;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 public class AudioPlayer {
@@ -91,10 +93,11 @@ public class AudioPlayer {
     private boolean isPaused = false;
     private int playerActivity = ACTIVITY_IDLE;
     private boolean cached = true;
+    private String token;
 
     private PlayerInfoCallback playerInfoCallback;
 
-    AudioPlayer(Context context) {
+    AudioPlayer(final Context context) {
         mPlayer = new MediaPlayer();
         mPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
             @Override
@@ -120,33 +123,6 @@ public class AudioPlayer {
         mMediaSession.setCallback(mCallback);
         mMediaSession.setActive(true);
 
-        mPlayer.setOnErrorListener(new MediaPlayer.OnErrorListener() {
-            @Override
-            public boolean onError(MediaPlayer mp, int what, int extra) {
-                if (extra == MediaPlayer.MEDIA_ERROR_UNSUPPORTED) {
-                    new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            AudioItem audioItem = getAudioItemById(audioItemId);
-                            if (audioItem == null) return;
-                            try {
-                                URL url = new URL(audioItem.stream.url);
-                                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                                conn.setInstanceFollowRedirects(false);
-                                String redirectUrl = conn.getHeaderField("Location");
-                                audioItem.stream.url = redirectUrl;
-                                mPlayer.setDataSource(redirectUrl);
-                                prepare();
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    }).start();
-                    return true;
-                }
-                return false;
-            }
-        });
         mPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mp) {
@@ -171,14 +147,14 @@ public class AudioPlayer {
         mPlayer.setOnErrorListener(new MediaPlayer.OnErrorListener() {
             @Override
             public boolean onError(MediaPlayer mp, int what, int extra) {
+                AudioItem audioItem = getAudioItemById(audioItemId);
+                if (audioItem == null)
+                    return false;
                 JsonObject payload = new JsonObject();
                 JsonObject currentPlaybackState = new JsonObject();
-                AudioItem audioItem = getAudioItemById(audioItemId);
-                if (audioItem != null) {
-                    currentPlaybackState.addProperty(PAYLOAD_TOKEN, audioItem.stream.token);
-                    payload.addProperty(PAYLOAD_TOKEN, audioItem.stream.token);
-                }
-                currentPlaybackState.addProperty(PAYLOAD_OFFSET_IN_MILLISECONDS, mPlayer.getCurrentPosition());
+                currentPlaybackState.addProperty(PAYLOAD_TOKEN, audioItem.stream.token);
+                payload.addProperty(PAYLOAD_TOKEN, audioItem.stream.token);
+                currentPlaybackState.addProperty(PAYLOAD_OFFSET_IN_MILLISECONDS, getCurrentPosition());
                 switch (playerActivity) {
                     case ACTIVITY_BUFFER_UNDERRUN:
                         currentPlaybackState.addProperty(PAYLOAD_PLAYER_ACTIVITY, "BUFFER_UNDERRUN");
@@ -201,8 +177,34 @@ public class AudioPlayer {
                 }
                 payload.add(PAYLOAD_CURRENT_PLAYBACK_STATE, currentPlaybackState);
                 JsonObject error = new JsonObject();
-                error.addProperty(PAYLOAD_TYPE, what == MediaPlayer.MEDIA_ERROR_UNKNOWN ?
-                        "UNKNOWN" : "SERVER_DIED");
+                error.addProperty(PAYLOAD_TYPE, MEDIA_ERROR_INTERNAL_DEVICE_ERROR);
+                String errorMessage = null;
+                switch (what) {
+                    case MediaPlayer.MEDIA_ERROR_IO:
+                        errorMessage = "File or network related operation errors.";
+                        break;
+                    case MediaPlayer.MEDIA_ERROR_MALFORMED:
+                        errorMessage = "Bitstream is not conforming to the related coding standard or file spec.";
+                        break;
+                    case MediaPlayer.MEDIA_ERROR_NOT_VALID_FOR_PROGRESSIVE_PLAYBACK:
+                        errorMessage = "The video is streamed and its container is not valid for progressive playback i.e the video's index (e.g moov atom) is not at the start of the file.";
+                        break;
+                    case MediaPlayer.MEDIA_ERROR_SERVER_DIED:
+                        errorMessage = " Media server died. In this case, the application must release the MediaPlayer object and instantiate a new one.";
+                        break;
+                    case MediaPlayer.MEDIA_ERROR_TIMED_OUT:
+                        errorMessage = "Some operation takes too long to complete, usually more than 3-5 seconds.";
+                        break;
+                    case MediaPlayer.MEDIA_ERROR_UNKNOWN:
+                        errorMessage = "Unspecified media player error.";
+                        break;
+                    case MediaPlayer.MEDIA_ERROR_UNSUPPORTED:
+                        errorMessage = "Bitstream is conforming to the related coding standard or file spec, but the media framework does not support the feature.";
+                        break;
+                }
+                if (!TextUtils.isEmpty(errorMessage)) {
+                    error.addProperty(PAYLOAD_MESSAGE, errorMessage);
+                }
                 switch (extra) {
                     case MediaPlayer.MEDIA_ERROR_IO:
                         error.addProperty(PAYLOAD_MESSAGE, "IO");
@@ -242,7 +244,7 @@ public class AudioPlayer {
                     }
 
                 }
-                currentPosition = position;
+                currentPosition = Math.max(0, position);
             }
 
             @Override
@@ -265,12 +267,16 @@ public class AudioPlayer {
         progressHandler.startUpdatingCallback();
     }
 
+    public void setupToken(String token) {
+        this.token = token;
+    }
+
     public int getPlayerActivity() {
         return playerActivity;
     }
 
     public long getCurrentPosition() {
-        return mPlayer.getCurrentPosition();
+        return Math.max(0, mPlayer.getCurrentPosition());
     }
 
     private void postProgress(String name, int offsetInMilliseconds) {
@@ -293,7 +299,7 @@ public class AudioPlayer {
         if (audioItem != null) {
             payload.addProperty(PAYLOAD_TOKEN, audioItem.stream.token);
         }
-        payload.addProperty(PAYLOAD_OFFSET_IN_MILLISECONDS, mPlayer.getCurrentPosition());
+        payload.addProperty(PAYLOAD_OFFSET_IN_MILLISECONDS, getCurrentPosition());
         postEvent(NAME_PLAYBACK_STUTTER_STARTED, payload);
     }
 
@@ -307,7 +313,7 @@ public class AudioPlayer {
         if (audioItem != null) {
             payload.addProperty(PAYLOAD_TOKEN, audioItem.stream.token);
         }
-        payload.addProperty(PAYLOAD_OFFSET_IN_MILLISECONDS, mPlayer.getCurrentPosition());
+        payload.addProperty(PAYLOAD_OFFSET_IN_MILLISECONDS, getCurrentPosition());
         if (stutterStart != 0) {
             payload.addProperty(PAYLOAD_STUTTER_DURATION_IN_MILLISECONDS,
                     System.currentTimeMillis() - stutterStart);
@@ -323,7 +329,7 @@ public class AudioPlayer {
         if (audioItem != null) {
             payload.addProperty(PAYLOAD_TOKEN, audioItem.stream.token);
         }
-        payload.addProperty(PAYLOAD_OFFSET_IN_MILLISECONDS, mPlayer.getCurrentPosition());
+        payload.addProperty(PAYLOAD_OFFSET_IN_MILLISECONDS, getCurrentPosition());
         postEvent(name, payload);
     }
 
@@ -343,10 +349,11 @@ public class AudioPlayer {
      */
     private void postEvent(String name, JsonObject payload) {
         CyberDelegate delegate = DelegateStore.get().getDelegate();
-        if (delegate != null)
+        if (delegate != null) {
             delegate.postEvent(name, payload, true);
-        else
+        } else {
             Log.e(getClass().getSimpleName(), "CyberDelegate is null!");
+        }
     }
 
     private static long generateAvailableActions() {
@@ -379,22 +386,21 @@ public class AudioPlayer {
 
     private void updatePlaybackState(final int newState) {
         final PlaybackState.Builder builder = new PlaybackState.Builder();
+        builder.setActions(generateAvailableActions())
+                .setBufferedPosition(getCurrentPosition());
 
         final AudioItem item = getAudioItemById(audioItemId);
         if (item != null) {
-            builder.setActions(generateAvailableActions())
-                    .setActiveQueueItemId(getLongId(item.audioItemId))
-                    .setBufferedPosition(mPlayer.getCurrentPosition())
-                    .setState(newState, mPlayer.getCurrentPosition(), 1f);
-            currentPlaybackState = builder.build();
-
-            mPlaybackState = newState;
-
-            mMediaSession.setPlaybackState(currentPlaybackState);
-
-            if (playerInfoCallback != null)
-                playerInfoCallback.onPlaybackStateUpdated(currentPlaybackState);
+            builder.setActiveQueueItemId(getLongId(item.audioItemId));
         }
+
+        mPlaybackState = newState;
+        builder.setState(newState, getCurrentPosition(), 1f);
+        currentPlaybackState = builder.build();
+
+        mMediaSession.setPlaybackState(currentPlaybackState);
+        if (playerInfoCallback != null)
+            playerInfoCallback.onPlaybackStateUpdated(currentPlaybackState);
     }
 
     private void abandonAudioFocus() {
@@ -491,7 +497,6 @@ public class AudioPlayer {
         if (result == AudioManager.AUDIOFOCUS_REQUEST_FAILED) {
             Log.w(AudioPlayer.class.getSimpleName(), "Request audio focus failed");
         }
-        updatePlaybackState(PlaybackState.STATE_PLAYING);
         try {
             if (!isPaused) {
                 mPlayer.start();
@@ -516,13 +521,15 @@ public class AudioPlayer {
                 mPlayer.start();
                 postDefaultPayloadEvent(NAME_PLAYBACK_RESUMED);
             }
+            if (getAudioItemById(audioItemId) != null)
+                updatePlaybackState(PlaybackState.STATE_PLAYING);
             playerActivity = ACTIVITY_PLAYING;
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    protected void stop() {
+    public void stop() {
         if (mPlaybackState != PlaybackState.STATE_STOPPED) {
             isPaused = false;
             mPlayer.stop();
@@ -545,7 +552,11 @@ public class AudioPlayer {
             index--;
             if (index < audioItems.size()) {
                 switchTo(index);
+            } else {
+                stop();
             }
+        } else {
+            stop();
         }
     }
 
@@ -555,7 +566,11 @@ public class AudioPlayer {
             index++;
             if (index < audioItems.size()) {
                 switchTo(index);
+            } else {
+                stop();
             }
+        } else {
+            stop();
         }
     }
 
@@ -593,7 +608,13 @@ public class AudioPlayer {
         if (audioItem != null) {
             try {
                 mPlayer.reset();
-                mPlayer.setDataSource(audioItem.stream.url);
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Authorization", "Bearer " + token);
+                // Use java reflection call the hide API:
+                Method method = mPlayer.getClass().getMethod("setDataSource", String.class, Map.class);
+                method.invoke(mPlayer, audioItem.stream.url, headers);
+                if (BuildConfig.DEBUG)
+                    Log.d("AudioPlayer", audioItem.stream.url);
 
                 audioItemId = audioItem.audioItemId;
                 progressHandler.updateAudioItemId(audioItemId);
@@ -612,7 +633,7 @@ public class AudioPlayer {
                 JsonObject currentPlaybackState = new JsonObject();
                 payload.add(PAYLOAD_CURRENT_PLAYBACK_STATE, currentPlaybackState);
                 currentPlaybackState.addProperty(PAYLOAD_TOKEN, audioItem.stream.token);
-                currentPlaybackState.addProperty(PAYLOAD_OFFSET_IN_MILLISECONDS, mPlayer.getCurrentPosition());
+                currentPlaybackState.addProperty(PAYLOAD_OFFSET_IN_MILLISECONDS, getCurrentPosition());
                 currentPlaybackState.addProperty(PAYLOAD_PLAYER_ACTIVITY, ACTIVITY_STOPPED);
                 payload.addProperty(PAYLOAD_TOKEN, audioItem.stream.token);
                 JsonObject error = new JsonObject();
@@ -637,9 +658,7 @@ public class AudioPlayer {
             else
                 Log.w(getClass().getSimpleName(), "Callback is null.");
         } else {
-            if (mPlayer.isPlaying()) {
-                mPlayer.stop();
-            }
+            stop();
         }
     }
 
@@ -668,7 +687,7 @@ public class AudioPlayer {
         if (audioItem != null) {
             payload.addProperty(PAYLOAD_TOKEN, audioItem.stream.token);
         }
-        payload.addProperty(PAYLOAD_OFFSET_IN_MILLISECONDS, mPlayer.getCurrentPosition());
+        payload.addProperty(PAYLOAD_OFFSET_IN_MILLISECONDS, getCurrentPosition());
         postEvent(NAME_PLAYBACK_STARTED, payload);
 
         cached = false;

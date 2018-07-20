@@ -173,7 +173,9 @@ class MultipartParser {
             return true;
         }
 
-        throw new IOException("neither json or stream content");
+        // 忽略类型不支持的 part (包括空 part)
+        // 下一个 next() 会自动跳过内容寻找下一个开头 (--boundary) 或结尾 (--boundary--)
+        return true;
     }
 
     public interface Predicate<T> {

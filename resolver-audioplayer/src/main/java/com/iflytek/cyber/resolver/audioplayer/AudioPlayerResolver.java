@@ -63,6 +63,13 @@ public class AudioPlayerResolver extends ResolverModule {
         }
     }
 
+    public void setupToken(String token) {
+        Intent setupToken = new Intent(context, AudioPlayerService.class);
+        setupToken.setAction(AudioPlayerService.ACTION_SETUP_TOKEN);
+        setupToken.putExtra(AudioPlayerService.EXTRA_TOKEN, token);
+        context.startService(setupToken);
+    }
+
     private String getPlaybackState(int activity) {
         String playbackState = "IDLE";
         if (activity == AudioPlayer.ACTIVITY_PLAYING) {

@@ -29,6 +29,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 
+import com.iflytek.cyber.inspector.BuildConfig;
 import com.iflytek.cyber.inspector.LauncherActivity;
 import com.iflytek.cyber.inspector.R;
 
@@ -57,15 +58,11 @@ public class WelcomeFragment extends Fragment {
     @SuppressLint("ApplySharedPref")
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         final EditText clientId = view.findViewById(R.id.client_id);
-        clientId.setText(pref.getString("client_id", "d97dfbaf-bb2f-4936-821d-30e27244260d"));
-
-        final EditText modelId = view.findViewById(R.id.model_id);
-        modelId.setText(pref.getString("model_id", "20120a03-178b-404e-95e5-ab3ade60fbf0"));
+        clientId.setText(pref.getString("client_id", BuildConfig.CLIENT_ID));
 
         view.findViewById(R.id.next).setOnClickListener(v -> {
             pref.edit()
                     .putString("client_id", clientId.getText().toString())
-                    .putString("model_id", modelId.getText().toString())
                     .commit();
 
             activity.updateClientId();

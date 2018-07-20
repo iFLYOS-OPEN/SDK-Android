@@ -40,11 +40,14 @@ public class SpeechSynthesizerResolver extends ResolverModule implements
     private boolean playing = false;
     private ThreadedHandler playingHandler;
 
+    private String cid;
     private String token;
     private Callback callback;
 
     private BufferedSource source;
     private Sink target;
+
+    private OnSpeakingListener speakingListener;
 
     public SpeechSynthesizerResolver(Context context, CyberDelegate delegate) {
         super(context, delegate);
@@ -65,7 +68,7 @@ public class SpeechSynthesizerResolver extends ResolverModule implements
             payload.addProperty("token", token);
             payload.addProperty("offsetInMilliseconds", offsetInMilliseconds);
             payload.addProperty("playerActivity", playing ? "PLAYING" : "FINISHED");
-            delegate.updateContext( "SpeechState", payload);
+            delegate.updateContext("SpeechState", payload);
         }
     }
 
@@ -78,15 +81,22 @@ public class SpeechSynthesizerResolver extends ResolverModule implements
             return;
         }
 
+        cleanup();
+
+        this.cid = payload.get("url").getAsString().split(":")[1];
         this.token = payload.has("token") ? payload.get("token").getAsString() : null;
         this.callback = callback;
 
-        final String audioId = payload.get("url").getAsString().split(":")[1];
-        delegate.queryAttachment(audioId, this);
+        delegate.queryAttachment(cid, this);
     }
 
     @Override
     public void onAttachment(String cid, BufferedSource source) {
+        if (!cid.equals(this.cid)) {
+            CloseableUtil.safeClose(source);
+            return;
+        }
+
         this.source = source;
         this.target = new AudioTrackSink(track);
 
@@ -107,12 +117,16 @@ public class SpeechSynthesizerResolver extends ResolverModule implements
                 Log.e(TAG, "play failed", e);
             } finally {
                 CloseableUtil.safeClose(decoder);
-                uiHandler.post(this::finish);
+                uiHandler.post(() -> finish(cid));
             }
         });
     }
 
-    private void finish() {
+    private void finish(String cid) {
+        if (!cid.equals(this.cid)) {
+            return;
+        }
+
         notifySpeechFinished();
         cleanup();
         callback.next();
@@ -120,6 +134,10 @@ public class SpeechSynthesizerResolver extends ResolverModule implements
 
     @Override
     public void onNotFound(String cid) {
+        if (!cid.equals(this.cid)) {
+            return;
+        }
+
         cleanup();
         callback.next();
     }
@@ -152,15 +170,27 @@ public class SpeechSynthesizerResolver extends ResolverModule implements
     }
 
     private void notifySpeechStarted() {
+        delegate.activateChannel(CyberDelegate.CHANNEL_DIALOG);
+
         final JsonObject payload = new JsonObject();
         payload.addProperty("token", token);
         delegate.postEvent("SpeechStarted", payload);
+
+        if (speakingListener != null) {
+            speakingListener.onSpeaking(true);
+        }
     }
 
     private void notifySpeechFinished() {
+        delegate.activateChannel(CyberDelegate.CHANNEL_DIALOG);
+
         final JsonObject payload = new JsonObject();
         payload.addProperty("token", token);
         delegate.postEvent("SpeechFinished", payload);
+
+        if (speakingListener != null) {
+            speakingListener.onSpeaking(false);
+        }
     }
 
     private void requestFocus() {
@@ -178,6 +208,14 @@ public class SpeechSynthesizerResolver extends ResolverModule implements
     @Override
     public void onAudioFocusChange(int focus) {
         Log.d(TAG, "Focus changed: " + focus);
+    }
+
+    public void setSpeakingListener(OnSpeakingListener speakingListener) {
+        this.speakingListener = speakingListener;
+    }
+
+    public interface OnSpeakingListener {
+        void onSpeaking(boolean speaking);
     }
 
 }

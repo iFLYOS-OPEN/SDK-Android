@@ -27,6 +27,7 @@ import android.support.v7.app.AppCompatActivity;
 import com.iflytek.cyber.inspector.setup.WelcomeFragment;
 import com.iflytek.cyber.platform.AuthManager;
 import com.iflytek.cyber.platform.DefaultTokenStorage;
+import com.iflytek.cyber.platform.DeviceId;
 import com.iflytek.cyber.platform.TokenManager;
 
 import static android.Manifest.permission.RECORD_AUDIO;
@@ -94,7 +95,7 @@ public class LauncherActivity extends AppCompatActivity {
             tokenManager.destroy();
         }
 
-        authManager = new AuthManager(pref.getString("client_id", null));
+        authManager = new AuthManager(pref.getString("client_id", null), DeviceId.get(this));
         tokenManager = new TokenManager(new DefaultTokenStorage(this), authManager);
     }
 
@@ -136,8 +137,7 @@ public class LauncherActivity extends AppCompatActivity {
         authManager.cancel();
     }
 
-    public void finishSetup(String accessToken, String refreshToken, long expiresAt,
-                            String operateToken) {
+    public void finishSetup(String accessToken, String refreshToken, long expiresAt) {
         tokenManager.updateToken(accessToken, refreshToken, expiresAt);
     }
 

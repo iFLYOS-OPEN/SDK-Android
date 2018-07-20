@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="oval">
+            <solid android:color="@color/setup_primary" />
+        </shape>
+    </item>
+    <item>
+        <ripple android:color="?colorControlHighlight">
+            <item android:id="@android:id/mask">
+                <shape android:shape="oval">
+                    <solid android:color="?colorControlActivated" />
+                </shape>
+            </item>
+        </ripple>
+    </item>
+</layer-list>

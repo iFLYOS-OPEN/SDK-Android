@@ -1,14 +1,7 @@
 package com.iflytek.cyber.resolver;
 
-public class Alert {
+import java.io.Serializable;
 
-    public String type;
-    public String token;
-    public String scheduledTime;
+public class Alert implements Serializable {
 
-    public Alert(String type, String token, String scheduledTime) {
-        this.type = type;
-        this.token = token;
-        this.scheduledTime = scheduledTime;
-    }
 }

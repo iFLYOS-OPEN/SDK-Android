@@ -1,0 +1,12 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.iflytek.cyber.resolver.audioactivitytracker">
+
+    <application>
+
+        <meta-data
+            android:name="com.iflytek.cyber.resolver.audioactivitytracker.AudioActivityTracker"
+            android:value="ResolverModule:AudioActivityTracker" />
+
+    </application>
+
+</manifest>

@@ -18,7 +18,9 @@ package com.iflytek.cyber.platform;
 
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.iflytek.cyber.platform.internal.retrofit2.SimpleCallback;
 
@@ -32,12 +34,15 @@ import retrofit2.http.POST;
 
 public class AuthManager {
 
-    private static final String SCOPE_PUBLIC = "public";
+    private static final String TAG = "AuthManager";
+
+    private static final String SCOPE_IVS_ALL = "user_ivs_all";
     private static final String GRANT_DEVICE_CODE = "urn:ietf:params:oauth:grant-type:device_code";
     private static final String GRANT_REFRESH_TOKEN = "refresh_token";
 
     private final AuthApi api;
     private final String clientId;
+    private final String deviceId;
 
     private final Handler uiHandler = new Handler(Looper.getMainLooper());
     private final Handler pollingHandler = new Handler(Looper.getMainLooper());
@@ -47,9 +52,10 @@ public class AuthManager {
 
     private Call<Token> refreshCall = null;
 
-    public AuthManager(String clientId) {
+    public AuthManager(String clientId, String deviceId) {
         this.api = new ApiFactory().createApi(AuthApi.class);
         this.clientId = clientId;
+        this.deviceId = deviceId;
     }
 
     public void authorize(AuthorizeCallback callback) {
@@ -65,10 +71,18 @@ public class AuthManager {
 
         pollingHandler.removeCallbacksAndMessages(null);
 
-        deviceCodeCall = api.getDeviceCode(clientId, SCOPE_PUBLIC);
+        ScopeData scope = new ScopeData();
+        scope.userIvsAll = new ScopeData.UserIvsAll();
+        scope.userIvsAll.deviceId = deviceId;
+
+        String scopeData = new Gson().toJson(scope);
+
+        deviceCodeCall = api.getDeviceCode(clientId, SCOPE_IVS_ALL, scopeData);
         deviceCodeCall.enqueue(new SimpleCallback<DeviceCode>() {
             @Override
             public void onSuccess(DeviceCode body, Response<DeviceCode> response) {
+                Log.d(TAG, "Request auth " + body.deviceCode + " " + body.userCode);
+
                 deviceCodeCall = null;
                 uiHandler.post(() -> callback.onPromptDeviceCode(body.verificationUri, body.userCode));
                 pollingHandler.postDelayed(() -> pollToken(body.deviceCode, body.interval, callback),
@@ -84,8 +98,10 @@ public class AuthManager {
 
             @Override
             public void onNetworkFailure(Throwable t) {
-                deviceCodeCall = null;
-                uiHandler.post(() -> callback.onFailure(t));
+                if (deviceCodeCall != null) {
+                    deviceCodeCall = null;
+                    uiHandler.post(() -> callback.onFailure(t));
+                }
             }
         });
     }
@@ -95,6 +111,8 @@ public class AuthManager {
         pollingCall.enqueue(new SimpleCallback<Token>() {
             @Override
             public void onSuccess(Token body, Response<Token> response) {
+                Log.d(TAG, "Polling token " + deviceCode + " succeed");
+
                 pollingCall = null;
                 uiHandler.post(() -> callback.onGetToken(body.accessToken, body.refreshToken,
                         body.createdAt + body.expiresIn));
@@ -102,6 +120,8 @@ public class AuthManager {
 
             @Override
             public void onHttpFailure(int code, JsonObject body, Response<Token> response) {
+                Log.d(TAG, "Polling token " + deviceCode + "... " + code + " " + body);
+
                 pollingCall = null;
 
                 if (code != 400) {
@@ -128,8 +148,12 @@ public class AuthManager {
 
             @Override
             public void onNetworkFailure(Throwable t) {
-                pollingCall = null;
-                uiHandler.post(() -> callback.onFailure(t));
+                Log.e(TAG, "Polling token " + deviceCode + " failed", t);
+
+                if (pollingCall != null) {
+                    pollingCall = null;
+                    uiHandler.post(() -> callback.onFailure(t));
+                }
             }
         });
     }
@@ -162,13 +186,17 @@ public class AuthManager {
 
             @Override
             public void onNetworkFailure(Throwable t) {
-                refreshCall = null;
-                uiHandler.post(() -> callback.onFailure(t));
+                if (refreshCall != null) {
+                    refreshCall = null;
+                    uiHandler.post(() -> callback.onFailure(t));
+                }
             }
         });
     }
 
     public void cancel() {
+        Log.d(TAG, "Cancel");
+
         if (deviceCodeCall != null) {
             deviceCodeCall.cancel();
             deviceCodeCall = null;
@@ -212,20 +240,21 @@ public class AuthManager {
 
     private interface AuthApi {
         @FormUrlEncoded
-        @POST("/oauth/device_code")
+        @POST("/oauth/ivs/device_code")
         Call<DeviceCode> getDeviceCode(
                 @Field("client_id") String clientId,
-                @Field("scope") String scope);
+                @Field("scope") String scope,
+                @Field("scope_data") String scopeData);
 
         @FormUrlEncoded
-        @POST("/oauth/token")
+        @POST("/oauth/ivs/token")
         Call<Token> pollToken(
                 @Field("client_id") String clientId,
                 @Field("grant_type") String grantType,
                 @Field("device_code") String deviceCode);
 
         @FormUrlEncoded
-        @POST("/oauth/token")
+        @POST("/oauth/ivs/token")
         Call<Token> refreshToken(
                 @Field("client_id") String clientId,
                 @Field("grant_type") String grantType,

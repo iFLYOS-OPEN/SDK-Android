@@ -129,6 +129,11 @@ class ResolverManagerImpl extends ResolverManager {
         if (dialogRequestId.equals(activeDialogRequestId)) {
             Log.d(TAG, "Finish dialog " + dialogRequestId);
             ongoing = false;
+            if (queue.isEmpty()) {
+                Log.d(TAG, "Completed dialog");
+                queueHandler.removeCallbacksAndMessages(null);
+                core.dialogResolved();
+            }
         }
     }
 

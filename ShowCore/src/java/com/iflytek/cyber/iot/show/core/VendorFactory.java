@@ -14,17 +14,26 @@
  * limitations under the License.
  */
 
-package com.iflytek.cyber.inspector.setup;
+package com.iflytek.cyber.iot.show.core;
 
-import retrofit2.Call;
-import retrofit2.http.Field;
-import retrofit2.http.FormUrlEncoded;
-import retrofit2.http.POST;
+import android.content.Context;
 
-public interface BindingApi {
+import com.iflytek.cyber.platform.Recorder;
 
-    @FormUrlEncoded
-    @POST("/device/binding_code")
-    Call<Binding> requestBind(@Field("model_id") String modelId, @Field("device_id") String deviceId);
+public abstract class VendorFactory {
+
+    protected final Context context;
+
+    VendorFactory(Context context) {
+        this.context = context;
+    }
+
+    abstract Recorder createRecorder(Recorder.AudioListener listener);
+
+    void onCreate() {
+    }
+
+    void onDestroy() {
+    }
 
 }

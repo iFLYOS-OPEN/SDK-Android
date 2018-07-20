@@ -32,6 +32,7 @@ import com.iflytek.cyber.platform.TokenManager;
 import com.iflytek.cyber.platform.client.CyberClient;
 import com.iflytek.cyber.platform.client.CyberOkHttpClient;
 import com.iflytek.cyber.platform.resolver.ResolverManager;
+import com.iflytek.cyber.resolver.audioplayer.AudioPlayerResolver;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -98,20 +99,22 @@ public class MainFragment extends Fragment implements
         am = (AudioManager) getContext().getSystemService(Context.AUDIO_SERVICE);
         pref = PreferenceManager.getDefaultSharedPreferences(getContext());
 
-        authManager = new AuthManager(pref.getString("client_id", null));
+        authManager = new AuthManager(pref.getString("client_id", null), DeviceId.get(activity));
         tokenManager = new TokenManager(new DefaultTokenStorage(getContext()), authManager);
 
         recorder = new SimpleRecorder(this);
 
         cyber = new CyberCore(this);
 
+        initClient();
+
         ResolverManager.init(getContext(), cyber);
         resolverManager = ResolverManager.get();
         resolverManager.create();
+        AudioPlayerResolver resolver = resolverManager.peek("AudioPlayer", AudioPlayerResolver.class);
+        resolver.setupToken(tokenManager.getAccessToken());
 
         gson = new GsonBuilder().setPrettyPrinting().create();
-
-        initClient();
 
         final JsonObject deviceState = new JsonObject();
         deviceState.addProperty("deviceId", DeviceId.get(activity));

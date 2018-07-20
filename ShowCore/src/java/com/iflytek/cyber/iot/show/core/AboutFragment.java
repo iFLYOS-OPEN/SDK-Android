@@ -20,7 +20,6 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.ComponentName;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -37,6 +36,7 @@ import android.widget.TextView;
 
 import com.iflytek.cyber.platform.AuthManager;
 import com.iflytek.cyber.platform.DefaultTokenStorage;
+import com.iflytek.cyber.platform.DeviceId;
 import com.iflytek.cyber.platform.TokenManager;
 
 public class AboutFragment extends DialogFragment {
@@ -71,7 +71,7 @@ public class AboutFragment extends DialogFragment {
         if (activity == null)
             return;
 
-        AuthManager authManager = new AuthManager(BuildConfig.CLIENT_ID);
+        AuthManager authManager = new AuthManager(BuildConfig.CLIENT_ID, DeviceId.get(activity));
         TokenManager tokenManager = new TokenManager(new DefaultTokenStorage(activity), authManager);
         tokenManager.clearToken();
 

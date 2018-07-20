@@ -19,6 +19,8 @@
     <dimen name="player_album_background_size">512dp</dimen>
     <dimen name="player_album_size">341dp</dimen>
     <dimen name="player_next_button_size">85dp</dimen>
+    <dimen name="player_provider_size">56dp</dimen>
+    <dimen name="player_provider_margin_top">-28dp</dimen>
     <dimen name="player_play_button_size">104dp</dimen>
     <dimen name="player_horizontal_margin">56dp</dimen>
     <dimen name="player_slogan_margin">112dp</dimen>
