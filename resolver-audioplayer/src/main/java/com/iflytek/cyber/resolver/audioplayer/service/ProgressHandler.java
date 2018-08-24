@@ -1,10 +1,11 @@
 package com.iflytek.cyber.resolver.audioplayer.service;
 
-import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.NonNull;
+
+import com.google.android.exoplayer2.ExoPlayer;
 
 public class ProgressHandler extends Handler {
     private static final int MSG_UPDATE = 0x1001;
@@ -17,12 +18,12 @@ public class ProgressHandler extends Handler {
     private static final long DELAY = 100;
     private static final long DELAY_CALLBACK = 1000;
 
-    private MediaPlayer player;
+    private ExoPlayer player;
     private String currentAudioItemId = null; // to mark the current audio item
 
     private HandlerCallback onPositionUpdateListener;
 
-    ProgressHandler(@NonNull MediaPlayer mediaPlayer,
+    ProgressHandler(@NonNull ExoPlayer mediaPlayer,
                     @NonNull HandlerCallback onPositionUpdateListener) {
         this.onPositionUpdateListener = onPositionUpdateListener;
         player = mediaPlayer;
@@ -108,12 +109,12 @@ public class ProgressHandler extends Handler {
          *
          * @param position current position of MediaPlayer in milliseconds, if player is stopped position would be 0.
          */
-        void onPositionUpdated(int position);
+        void onPositionUpdated(long position);
 
-        void onPositionUpdatedCallback(int position);
+        void onPositionUpdatedCallback(long position);
 
-        void onProgressReportDelay(int offsetInMilliseconds);
+        void onProgressReportDelay(long offsetInMilliseconds);
 
-        void onProgressReportInterval(int offsetInMilliseconds);
+        void onProgressReportInterval(long offsetInMilliseconds);
     }
 }

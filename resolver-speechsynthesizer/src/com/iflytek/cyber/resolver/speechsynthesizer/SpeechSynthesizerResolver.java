@@ -165,6 +165,8 @@ public class SpeechSynthesizerResolver extends ResolverModule implements
             playingHandler.quit();
         }
 
+        track.stop();
+
         CloseableUtil.safeClose(source);
         CloseableUtil.safeClose(target);
     }

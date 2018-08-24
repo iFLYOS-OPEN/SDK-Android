@@ -22,6 +22,7 @@ import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.iflytek.cyber.platform.BuildConfig;
 import com.iflytek.cyber.platform.internal.okhttp3.SimpleCallback;
 
 import java.io.EOFException;
@@ -79,7 +80,7 @@ public class CyberOkHttpClient extends CyberClient {
         final Request request = new Request.Builder()
                 .get()
                 .addHeader("Accept", "multipart/related; type=application/vnd.iflytek.cyber+opus")
-                .url(endpoint + "/directives")
+                .url(endpoint + "/" + BuildConfig.IVS_VERSION + "/directives")
                 .build();
 
         directiveCall = client.newBuilder()
@@ -234,7 +235,7 @@ public class CyberOkHttpClient extends CyberClient {
         final Request request = new Request.Builder()
                 .post(builder.build())
                 .addHeader("Accept", "multipart/related; type=application/vnd.iflytek.cyber+opus")
-                .url(endpoint + "/events")
+                .url(endpoint + "/" + BuildConfig.IVS_VERSION + "/events")
                 .build();
 
         final Call call = client.newBuilder()
@@ -249,6 +250,11 @@ public class CyberOkHttpClient extends CyberClient {
             public void onSuccess(ResponseBody body, Response response) {
                 if (audio != null) {
                     recognizeCall = null;
+                }
+
+                if (response.code() == 204) {
+                    uiHandler.post(callback::onEnd);
+                    return;
                 }
 
                 new MultipartParser(gson, response, new MultipartParser.OnPartListener() {

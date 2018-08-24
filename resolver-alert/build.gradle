@@ -22,4 +22,5 @@ dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation project(':sdk')
     implementation files('libs/lite-orm-1.9.2.jar')
+    implementation 'com.google.android.exoplayer:exoplayer:2.8.2'
 }

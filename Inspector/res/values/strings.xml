@@ -18,8 +18,5 @@
 <resources>
 
     <string name="app_name">Inspector (prod)</string>
-    <string name="app_name_dev">Inspector (dev)</string>
-    <string name="app_name_test">Inspector (test)</string>
-    <string name="app_name_staging">Inspector (staging)</string>
 
 </resources>

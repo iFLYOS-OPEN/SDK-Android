@@ -18,7 +18,7 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 28
-    buildToolsVersion '28.0.0'
+    buildToolsVersion '28.0.2'
 
     defaultConfig {
         applicationId "com.iflytek.cyber.inspector"
@@ -44,7 +44,7 @@ android {
     flavorDimensions 'env'
 
     productFlavors {
-        master {
+        prod {
             dimension 'env'
             buildConfigField "String", "CLIENT_ID", '"a369716c-eb30-4b98-b424-c63ed1e58c5c"'
             manifestPlaceholders = [APP_NAME: '@string/app_name']
@@ -53,8 +53,8 @@ android {
 }
 
 dependencies {
-    implementation 'com.android.support:design:28.0.0-alpha3'
-    implementation 'com.android.support:recyclerview-v7:28.0.0-alpha3'
+    implementation 'com.android.support:design:28.0.0-rc01'
+    implementation 'com.android.support:recyclerview-v7:28.0.0-rc01'
 
     implementation project(':sdk')
     implementation project(':opus')

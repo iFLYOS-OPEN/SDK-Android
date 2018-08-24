@@ -43,10 +43,11 @@ android {
     flavorDimensions 'env'
 
     productFlavors {
-        master {
+        prod {
             dimension 'env'
             buildConfigField "String", "API_SERVER", '"https://auth.iflyos.cn"'
-            buildConfigField "String", "IVS_SERVER", '"https://gw.iflyos.cn"'
+            buildConfigField "String", "IVS_SERVER", '"https://ivs.iflyos.cn"'
+            buildConfigField "String", "IVS_VERSION", '"v20180810"'
         }
     }
 }

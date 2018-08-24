@@ -49,7 +49,8 @@
         <activity
             android:name=".SetupWizardActivity"
             android:excludeFromRecents="true"
-            android:launchMode="singleInstance">
+            android:launchMode="singleInstance"
+            android:screenOrientation="landscape">
 
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -80,6 +81,7 @@
             android:excludeFromRecents="true" />
 
         <service android:name=".CoreService" />
+        <service android:name=".TimeService" />
 
         <service android:name="com.amap.api.location.APSService"></service>
 

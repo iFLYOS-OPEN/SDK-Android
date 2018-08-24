@@ -44,6 +44,7 @@ import android.widget.TextView;
 
 import com.iflytek.cyber.iot.show.core.R;
 import com.iflytek.cyber.iot.show.core.SetupWizardActivity;
+import com.iflytek.cyber.iot.show.core.TimeService;
 import com.iflytek.cyber.platform.internal.android.content.SelfBroadcastReceiver;
 
 import java.util.ArrayList;
@@ -344,6 +345,8 @@ public class WifiFragment extends Fragment {
         connecting = null;
         failed = false;
         wm.startScan();
+        if (activity != null)
+            activity.startService(new Intent(activity, TimeService.class));
     }
 
     private class WifiAdapter extends RecyclerView.Adapter<WifiAdapter.ViewHolder> {

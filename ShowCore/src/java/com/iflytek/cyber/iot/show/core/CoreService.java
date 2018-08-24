@@ -21,6 +21,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.media.AudioManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -39,6 +41,7 @@ import com.iflytek.cyber.platform.TokenManager;
 import com.iflytek.cyber.platform.client.CyberClient;
 import com.iflytek.cyber.platform.client.CyberOkHttpClient;
 import com.iflytek.cyber.platform.internal.android.app.StickyService;
+import com.iflytek.cyber.platform.internal.android.content.SelfBroadcastReceiver;
 import com.iflytek.cyber.platform.resolver.ResolverManager;
 
 import java.util.concurrent.TimeUnit;
@@ -71,6 +74,8 @@ public class CoreService extends StickyService implements
     private AudioManager am;
     private SharedPreferences pref;
 
+    private ConnectionReceiver connectionReceiver = new ConnectionReceiver();
+
     private AuthManager authManager;
     private TokenManager tokenManager;
 
@@ -99,8 +104,12 @@ public class CoreService extends StickyService implements
         super.onCreate();
         Log.v(TAG, "onCreate");
 
+        triggerTimeSync();
+
         am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         pref = PreferenceManager.getDefaultSharedPreferences(this);
+
+        connectionReceiver.register(this);
 
         authManager = new AuthManager(BuildConfig.CLIENT_ID, DeviceId.get(this));
         tokenManager = new TokenManager(new DefaultTokenStorage(this), authManager);
@@ -139,6 +148,8 @@ public class CoreService extends StickyService implements
         contextUpdater.removeCallbacksAndMessages(null);
         resolverManager.destroy();
         vendorFactory.onDestroy();
+
+        connectionReceiver.unregister(this);
     }
 
     /**
@@ -278,6 +289,8 @@ public class CoreService extends StickyService implements
     private void scheduleToReconnect() {
         connectionState = ConnectionState.CONNECTING;
 
+        triggerTimeSync();
+
         retryHandler.removeCallbacksAndMessages(null);
         retryHandler.postDelayed(this::connect, TimeUnit.SECONDS.toMillis(retryInterval));
         Log.d(TAG, "scheduled to reconnect after " + retryInterval + " s");
@@ -389,10 +402,38 @@ public class CoreService extends StickyService implements
     public void onAudioFocusChange(int focusChange) {
     }
 
+    private void triggerTimeSync() {
+        startService(new Intent(this, TimeService.class));
+    }
+
+    private void handleWifiConnected() {
+        triggerTimeSync();
+    }
+
     private enum ConnectionState {
         OFFLINE,
         CONNECTING,
         CONNECTED,
+    }
+
+    private class ConnectionReceiver extends SelfBroadcastReceiver {
+
+        ConnectionReceiver() {
+            super(ConnectivityManager.CONNECTIVITY_ACTION);
+        }
+
+        @Override
+        protected void onReceiveAction(String action, Intent intent) {
+            final NetworkInfo network = intent.getParcelableExtra(
+                    ConnectivityManager.EXTRA_NETWORK_INFO);
+            final NetworkInfo.DetailedState detailed = network.getDetailedState();
+
+            if (detailed == NetworkInfo.DetailedState.CONNECTED) {
+                Log.d(TAG, "Wi-Fi connected");
+                handleWifiConnected();
+            }
+        }
+
     }
 
     public class CoreServiceBinder extends Binder {

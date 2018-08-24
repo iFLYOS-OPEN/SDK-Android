@@ -17,6 +17,7 @@
 package com.iflytek.cyber.iot.show.core.setup;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -33,6 +34,7 @@ import com.google.zxing.BarcodeFormat;
 import com.google.zxing.WriterException;
 import com.iflytek.cyber.iot.show.core.R;
 import com.iflytek.cyber.iot.show.core.SetupWizardActivity;
+import com.iflytek.cyber.iot.show.core.TimeService;
 import com.iflytek.cyber.platform.AuthManager;
 import com.journeyapps.barcodescanner.BarcodeEncoder;
 
@@ -87,6 +89,7 @@ public class PairFragment extends Fragment implements AuthManager.AuthorizeCallb
     @Override
     public void onResume() {
         super.onResume();
+        activity.startService(new Intent(activity, TimeService.class));
         pair();
     }
 

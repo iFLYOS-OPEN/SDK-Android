@@ -28,7 +28,7 @@ class ApiFactory {
 
     private final Retrofit retrofit;
 
-    ApiFactory() {
+    ApiFactory(String endpoint) {
         final Gson gson = new GsonBuilder()
                 .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
                 .create();
@@ -38,7 +38,7 @@ class ApiFactory {
 
         retrofit = new Retrofit.Builder()
                 .client(client)
-                .baseUrl(BuildConfig.API_SERVER)
+                .baseUrl(endpoint)
                 .addConverterFactory(GsonConverterFactory.create(gson))
                 .build();
     }

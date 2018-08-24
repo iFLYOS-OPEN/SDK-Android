@@ -1,10 +1,8 @@
 package com.iflytek.cyber.resolver.templateruntime.fragment.player;
 
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.VectorDrawable;
 import android.media.session.PlaybackState;
 import android.os.Bundle;
 import android.os.Handler;
@@ -13,7 +11,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.widget.CircularProgressDrawable;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -260,8 +257,10 @@ public class PlayerInfoFragment extends Fragment implements AudioPlayer.PlayerIn
 
 
     public void abandonFocus() {
-        tvSlogan.clearFocus();
-        tvTitle.clearFocus();
+        if (tvSlogan != null)
+            tvSlogan.clearFocus();
+        if (tvTitle != null)
+            tvTitle.clearFocus();
     }
 
     private AudioPlayer getAudioPlayer() {
@@ -288,14 +287,14 @@ public class PlayerInfoFragment extends Fragment implements AudioPlayer.PlayerIn
     }
 
     @Override
-    public void onProgressUpdated(int position) {
+    public void onProgressUpdated(long position) {
         AudioPlayer audioPlayer = getAudioPlayer();
         if (seekBarDragging)
             return;
         if (audioPlayer != null) {
             if (seekBar.getMax() != audioPlayer.getDuration())
-                seekBar.setMax(audioPlayer.getDuration());
-            seekBar.setProgress(position);
+                seekBar.setMax((int) audioPlayer.getDuration());
+            seekBar.setProgress((int) position);
         } else {
             seekBar.setProgress(0);
         }
@@ -338,7 +337,7 @@ public class PlayerInfoFragment extends Fragment implements AudioPlayer.PlayerIn
         }
     }
 
-    private String format(int duration) {
+    private String format(long duration) {
         return String.format(Locale.getDefault(), "%2d:%02d", duration / 1000 / 60, duration / 1000 % 60);
     }
 

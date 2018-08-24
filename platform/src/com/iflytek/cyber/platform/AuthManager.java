@@ -40,12 +40,13 @@ public class AuthManager {
     private static final String GRANT_DEVICE_CODE = "urn:ietf:params:oauth:grant-type:device_code";
     private static final String GRANT_REFRESH_TOKEN = "refresh_token";
 
-    private final AuthApi api;
-    private final String clientId;
     private final String deviceId;
 
     private final Handler uiHandler = new Handler(Looper.getMainLooper());
     private final Handler pollingHandler = new Handler(Looper.getMainLooper());
+
+    private AuthApi api;
+    private String clientId;
 
     private Call<DeviceCode> deviceCodeCall = null;
     private Call<Token> pollingCall = null;
@@ -53,9 +54,17 @@ public class AuthManager {
     private Call<Token> refreshCall = null;
 
     public AuthManager(String clientId, String deviceId) {
-        this.api = new ApiFactory().createApi(AuthApi.class);
+        setEndpoint(BuildConfig.API_SERVER);
         this.clientId = clientId;
         this.deviceId = deviceId;
+    }
+
+    public void setEndpoint(String endpoint) {
+        this.api = new ApiFactory(endpoint).createApi(AuthApi.class);
+    }
+
+    public void setClientId(String clientId) {
+        this.clientId = clientId;
     }
 
     public void authorize(AuthorizeCallback callback) {

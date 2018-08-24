@@ -2,28 +2,41 @@ package com.iflytek.cyber.resolver.player;
 
 
 import android.content.Context;
-import android.content.res.AssetFileDescriptor;
-import android.media.MediaPlayer;
+import android.net.Uri;
 
-import java.io.IOException;
+import com.google.android.exoplayer2.ExoPlayerFactory;
+import com.google.android.exoplayer2.SimpleExoPlayer;
+import com.google.android.exoplayer2.source.ExtractorMediaSource;
+import com.google.android.exoplayer2.source.MediaSource;
+import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
+import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
+import com.google.android.exoplayer2.trackselection.TrackSelection;
+import com.google.android.exoplayer2.upstream.BandwidthMeter;
+import com.google.android.exoplayer2.upstream.DataSource;
+import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
+import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
+import com.google.android.exoplayer2.util.Util;
+
 import java.util.ArrayList;
 import java.util.List;
 
-public class Player implements MediaPlayer.OnCompletionListener {
+public class Player extends com.google.android.exoplayer2.Player.DefaultEventListener {
 
     private OnPlayListener onPlayListener;
-    private final MediaPlayer mediaPlayer;
     private final List<PlayOrder> playOrders;
     private int playIndex = -1;
     private long playTime;
+    private SimpleExoPlayer player;
 
     private Context context;
 
     public Player(Context context) {
         this.context = context;
-        mediaPlayer = new MediaPlayer();
-        mediaPlayer.setOnCompletionListener(this);
         this.playOrders = new ArrayList<>();
+        BandwidthMeter meter = new DefaultBandwidthMeter();
+        TrackSelection.Factory videoTrackSelectionFactory = new AdaptiveTrackSelection.Factory(meter);
+        DefaultTrackSelector trackSelector = new DefaultTrackSelector(videoTrackSelectionFactory);
+        player = ExoPlayerFactory.newSimpleInstance(context, trackSelector);
     }
 
     public void setOnPlayListener(OnPlayListener onPlayListener) {
@@ -42,38 +55,49 @@ public class Player implements MediaPlayer.OnCompletionListener {
     public void play() {
         playIndex = 0;
         playTime = System.currentTimeMillis();
-        final PlayOrder playOrder = playOrders.get(0);
-        play(playOrder);
+        if (playOrders != null && playOrders.size() > 0) {
+            final PlayOrder playOrder = playOrders.get(0);
+            play(playOrder);
+        }
     }
 
     public void replay() {
         playIndex = 0;
-        final PlayOrder playOrder = playOrders.get(0);
-        play(playOrder);
+        if (playOrders != null && playOrders.size() > 0) {
+            final PlayOrder playOrder = playOrders.get(0);
+            play(playOrder);
+        }
     }
 
     public void play(PlayOrder playOrder) {
-        try {
-            onPlayListener.onPlayStarted();
-            mediaPlayer.reset();
-            mediaPlayer.setDataSource(playOrder.url);
-            mediaPlayer.prepare();
-            mediaPlayer.start();
-        } catch (IOException e) {
-            try {
-                AssetFileDescriptor afd = context.getAssets().openFd("alert.wav");
-                mediaPlayer.reset();
-                mediaPlayer.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
-                mediaPlayer.prepare();
-                mediaPlayer.start();
-            } catch (IOException e1) {
-                e1.printStackTrace();
+        if (player == null) {
+            return;
+        }
+
+        onPlayListener.onPlayStarted();
+        DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(context,
+                Util.getUserAgent(context, "Alert"), null);
+        MediaSource videoSource = new ExtractorMediaSource.Factory(dataSourceFactory)
+                .createMediaSource(Uri.parse(playOrder.url));
+        player.addListener(this);
+        player.prepare(videoSource);
+        player.setPlayWhenReady(true);
+    }
+
+    @Override
+    public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
+        super.onPlayerStateChanged(playWhenReady, playbackState);
+        if (playbackState == com.google.android.exoplayer2.Player.STATE_ENDED) {
+            if (playIndex < playOrders.size() - 1) {
+                playNext();
+            } else {
+                onPlayListener.playListFinished();
             }
         }
     }
 
     public boolean isPlaying() {
-        return mediaPlayer.isPlaying();
+        return player != null && player.getPlayWhenReady();
     }
 
     public void playNext() {
@@ -89,39 +113,35 @@ public class Player implements MediaPlayer.OnCompletionListener {
     }
 
     public void pause() {
-        if (mediaPlayer.isPlaying()) {
-            mediaPlayer.pause();
-        }
-    }
-
-    public void stop() {
-        if (mediaPlayer.isPlaying()) {
-            onPlayListener.onPlayStopped();
-            mediaPlayer.stop();
+        if (player != null) {
+            player.setPlayWhenReady(false);
         }
     }
 
     public void resume() {
-        mediaPlayer.start();
-        onPlayListener.onPlayStarted();
+        if (player != null) {
+            player.setPlayWhenReady(true);
+            onPlayListener.onPlayStarted();
+        }
+    }
+
+    public void stop() {
+        if (player != null && isPlaying()) {
+            onPlayListener.onPlayStopped();
+            player.stop();
+        }
     }
 
     public void release() {
-        if (mediaPlayer != null) {
-            mediaPlayer.release();
+        if (player != null) {
+            player.release();
+            player = null;
         }
     }
 
     public void setVolume(float volume) {
-        mediaPlayer.setVolume(volume, volume);
-    }
-
-    @Override
-    public void onCompletion(MediaPlayer mp) {
-        if (playIndex < playOrders.size() - 1) {
-            playNext();
-        } else {
-            onPlayListener.playListFinished();
+        if (player != null) {
+            player.setVolume(volume);
         }
     }
 
@@ -131,7 +151,9 @@ public class Player implements MediaPlayer.OnCompletionListener {
 
     public interface OnPlayListener {
         void onPlayStarted();
+
         void onPlayStopped();
+
         void playListFinished();
     }
 }

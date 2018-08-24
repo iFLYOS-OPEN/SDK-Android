@@ -22,6 +22,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,6 +37,8 @@ import com.iflytek.cyber.platform.AuthManager;
 import com.journeyapps.barcodescanner.BarcodeEncoder;
 
 public class PairFragment extends Fragment implements AuthManager.AuthorizeCallback {
+
+    private static final String TAG = "PairFragment";
 
     private LauncherActivity activity;
 
@@ -141,6 +144,8 @@ public class PairFragment extends Fragment implements AuthManager.AuthorizeCallb
 
         final String url = verificationUri + "?user_code=" + userCode;
         final int size = getResources().getDimensionPixelSize(R.dimen.qr_size);
+
+        Log.d(TAG, "verification uri: " + url);
 
         try {
             final Bitmap bitmap = new BarcodeEncoder().encodeBitmap(
