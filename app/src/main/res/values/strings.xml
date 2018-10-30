@@ -1,0 +1,40 @@
+<resources>
+    <string name="app_name">ShowCore</string>
+
+    <!-- Preference -->
+    <string name="preference_file_key">com.iflytek.cyber.iot.show.core.AppSharedPreferences</string>
+    <string name="preference_client_id">Client ID Key</string>
+    <string name="preference_client_secret">Client Secret Key</string>
+    <string name="preference_product_id">Product ID Key</string>
+    <string name="preference_product_dsn">Product DSN Key</string>
+    <string name="preference_refresh_token">Refresh Token Key</string>
+    <string name="preference_login_method">Login Method Key</string>
+
+    <!-- Dialog -->
+    <string name="dialog_title_permission">申请权限</string>
+    <string name="dialog_permission_failed">申请 %s 权限失败</string>
+    <string name="permission_record_audio">录音</string>
+    <string name="retry">重新</string>
+    <string name="close">关闭</string>
+
+    <!-- MainFragment -->
+    <string name="settings">设置</string>
+    <string name="music">音乐</string>
+    <string name="tips_simple">嘿，小飞</string>
+    <string name="tips_sentence_simple">嘿，小飞，明天出门要带伞吗？</string>
+    <string name="about">关于</string>
+
+    <!-- PlayerInfoFragment -->
+    <string name="default_music_title">唤醒小飞，轻松听歌</string>
+    <string name="next_step">下一步</string>
+    <string name="connect_wifi">连接 Wi-Fi</string>
+    <string name="bind_iflyos_account">绑定讯飞OS账号</string>
+    <string name="pairing_tips">请在手机上打开 小飞在线 APP，扫码添加设备</string>
+    <string name="binding_failed">绑定失败</string>
+    <string name="about_iflyos">关于iFLYOS</string>
+    <string name="system_version">系统版本</string>
+    <string name="change_binding">更换绑定</string>
+    <string name="xiaofei_online">小飞在线</string>
+    <string name="network_error">网络出错，请检查网络</string>
+    <string name="wifi_password">Wi-Fi 密码</string>
+</resources>

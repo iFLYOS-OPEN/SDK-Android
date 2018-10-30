@@ -1,0 +1,7 @@
+{
+  "config": {
+    "clientSecret": "<YOUR DEVICE'S CLIENT SECRET>",
+    "productId" : "<YOUR DEVICE'S PRODUCT ID>",
+    "productDsn" : "show_core"
+  }
+}
