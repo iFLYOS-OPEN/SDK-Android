@@ -16,6 +16,7 @@
 
 package com.iflytek.cyber.iot.show.core.fragment
 
+import android.annotation.SuppressLint
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
@@ -35,7 +36,9 @@ import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.RequestOptions
+import com.bumptech.glide.request.target.SimpleTarget
 import com.bumptech.glide.request.target.Target
+import com.bumptech.glide.request.transition.Transition
 import com.google.gson.Gson
 import com.iflytek.cyber.iot.show.core.R
 import com.iflytek.cyber.iot.show.core.impl.Logger.LogEntry
@@ -76,6 +79,24 @@ class PlayerInfoFragment : BaseFragment(), View.OnClickListener, PlaybackControl
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_player_info, container, false)
+        return view
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        if (null != launcher && launcher?.mEngineService != null) {
+            playbackController = launcher?.mEngineService?.getPlaybackController()
+            playbackController?.setPlaybackCallback(this)
+        }
+
+        if (launcher != null) {
+            launcher?.addObserver(this)
+        }
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         ivBack = view.findViewById(R.id.iv_back)
         tvTitle = view.findViewById(R.id.title)
         tvTipsTitle = view.findViewById(R.id.tv_tips_title)
@@ -89,47 +110,29 @@ class PlayerInfoFragment : BaseFragment(), View.OnClickListener, PlaybackControl
         ivProviderLogo = view.findViewById(R.id.music_provider_logo)
         ivAlbum = view.findViewById(R.id.album)
         ivBlurBackground = view.findViewById(R.id.iv_blur_background)
-        return view
-    }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+        ivBack?.setOnClickListener { v -> Navigation.findNavController(v).navigateUp() }
 
-        if (null != launcher && launcher!!.mEngineService != null) {
-            playbackController = launcher!!.mEngineService!!.getPlaybackController()
-            playbackController!!.setPlaybackCallback(this)
-        }
+        ivPrevious?.setOnClickListener(this)
+        ivPrevious?.tag = TAG_PREVIOUS
+        ivNext?.setOnClickListener(this)
+        ivNext?.tag = TAG_NEXT
+        ivPlayPause?.setOnClickListener(this)
+        ivPlayPause?.tag = TAG_PLAY_PAUSE
 
-        if (launcher != null) {
-            launcher!!.addObserver(this)
-        }
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        ivBack!!.setOnClickListener { v -> Navigation.findNavController(v).navigateUp() }
-
-        ivPrevious!!.setOnClickListener(this)
-        ivPrevious!!.tag = TAG_PREVIOUS
-        ivNext!!.setOnClickListener(this)
-        ivNext!!.tag = TAG_NEXT
-        ivPlayPause!!.setOnClickListener(this)
-        ivPlayPause!!.tag = TAG_PLAY_PAUSE
-
-        seekBar!!.max = 100f
-        seekBar!!.isEnabled = false
-        seekBar!!.onSeekChangeListener = this
+        seekBar?.max = 100f
+        seekBar?.isEnabled = false
+        seekBar?.onSeekChangeListener = this
 
         setupView()
     }
 
     private fun setupView() {
-        if (!isAdded && context != null) {
+        if (!isAdded && launcher != null) {
             return
         }
 
-        Blurry.with(context)
+        Blurry.with(launcher)
                 .sampling(4)
                 .radius(75)
                 .color(Color.parseColor("#66212121"))
@@ -138,65 +141,68 @@ class PlayerInfoFragment : BaseFragment(), View.OnClickListener, PlaybackControl
 
         val content = ContentStorage.get().currentContent
         if (content == null) {
-            //tvTitle.setText(getString(R.string.default_music_title));
-            tvTitle!!.visibility = View.GONE
-            tvTipsTitle!!.visibility = View.VISIBLE
-            tvTipsTitle!!.text = getString(R.string.default_music_title)
-            tvArtist!!.text = null
-            tvArtist!!.visibility = View.GONE
-            tvCurrentPosition!!.text = format(0)
-            tvDuration!!.text = format(0)
+            tvTitle?.visibility = View.GONE
+            tvTipsTitle?.visibility = View.VISIBLE
+            tvTipsTitle?.text = getString(R.string.default_music_title)
+            tvArtist?.text = null
+            tvArtist?.visibility = View.GONE
+            tvCurrentPosition?.text = format(0)
+            tvDuration?.text = format(0)
             setDefaultCover()
-            ivPlayPause!!.setImageResource(R.drawable.ic_play_circle_outline_white_24dp)
+            ivPlayPause?.setImageResource(R.drawable.ic_play_circle_outline_white_24dp)
         } else {
-            tvTipsTitle!!.visibility = View.GONE
-            tvTitle!!.visibility = View.VISIBLE
-            tvTitle!!.text = content.title
-            tvArtist!!.text = content.titleSubtext1
-            tvArtist!!.visibility = View.VISIBLE
-            tvTitle!!.visibility = View.VISIBLE
-            if (content.art != null && content.art!!.sources != null
-                    && content.art!!.sources.size > 0) {
+            tvTipsTitle?.visibility = View.GONE
+            tvTitle?.visibility = View.VISIBLE
+            tvTitle?.text = content.title
+            tvArtist?.text = content.titleSubtext1
+            tvArtist?.visibility = View.VISIBLE
+            tvTitle?.visibility = View.VISIBLE
+            if (content.art != null && content.art?.sources != null
+                    && content.art?.sources?.size ?: 0 > 0) {
                 if (albumHeight > 0) {
                     realSetCover(content, true, albumHeight / 16)
                 } else {
-                    ivAlbum!!.viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
-                        override fun onGlobalLayout() {
-                            realSetCover(content, true, ivAlbum!!.height / 16)
-                            ivAlbum!!.viewTreeObserver.removeOnGlobalLayoutListener(this)
-                        }
-                    })
+                    ivAlbum?.let {
+                        it.viewTreeObserver?.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
+                            override fun onGlobalLayout() {
+                                realSetCover(content, true, it.height / 16)
+                                it.viewTreeObserver?.removeOnGlobalLayoutListener(this)
+                            }
+                        })
+                    }
                 }
             } else {
                 setDefaultCover()
             }
             if (content.provider != null) {
-                if (content.provider!!.logo != null && content.provider!!.logo!!.sources.size > 0) {
-                    ivProviderLogo!!.visibility = View.VISIBLE
-                    Glide.with(context!!)
-                            .load(content.provider!!.logo!!.sources[0].url)
-                            .listener(object : RequestListener<Drawable> {
-                                override fun onLoadFailed(e: GlideException?, model: Any,
-                                                          target: Target<Drawable>, isFirstResource: Boolean): Boolean {
-                                    ivProviderLogo!!.visibility = View.GONE
-                                    return false
-                                }
+                if (content.provider?.logo != null && content.provider?.logo?.sources?.size ?: 0 > 0) {
+                    ivProviderLogo?.visibility = View.VISIBLE
+                    ivProviderLogo?.let {
+                        Glide.with(launcher!!)
+                                .load(content.provider?.logo!!.sources[0].url)
+                                .listener(object : RequestListener<Drawable> {
+                                    override fun onLoadFailed(e: GlideException?, model: Any,
+                                                              target: Target<Drawable>, isFirstResource: Boolean): Boolean {
+                                        it.visibility = View.GONE
+                                        return false
+                                    }
 
-                                override fun onResourceReady(resource: Drawable, model: Any,
-                                                             target: Target<Drawable>, dataSource: DataSource,
-                                                             isFirstResource: Boolean): Boolean {
-                                    return false
-                                }
-                            })
-                            .into(ivProviderLogo!!)
+                                    override fun onResourceReady(resource: Drawable, model: Any,
+                                                                 target: Target<Drawable>, dataSource: DataSource,
+                                                                 isFirstResource: Boolean): Boolean {
+                                        return false
+                                    }
+                                })
+                                .into(it)
+                    }
                 }
             } else {
-                ivProviderLogo!!.visibility = View.GONE
+                ivProviderLogo?.visibility = View.GONE
             }
         }
 
         if (playbackController != null) {
-            if (playbackController!!.mediaPlayer.isPlaying) {
+            if (playbackController?.mediaPlayer?.isPlaying == true) {
                 onPlaybackStateChanged(MediaPlayer.MediaState.PLAYING)
             } else {
                 onPlaybackStateChanged(MediaPlayer.MediaState.STOPPED)
@@ -204,10 +210,10 @@ class PlayerInfoFragment : BaseFragment(), View.OnClickListener, PlaybackControl
         }
 
         if (null != playbackController) {
-            tvCurrentPosition!!.text = format(playbackController!!.mediaPlayer.position)
-            tvDuration!!.text = format(playbackController!!.mediaPlayer.duration)
-            seekBar!!.max = playbackController!!.mediaPlayer.duration.toInt().toFloat()
-            seekBar!!.setProgress(playbackController!!.mediaPlayer.position.toInt().toFloat())
+            tvCurrentPosition?.text = format(playbackController?.mediaPlayer?.position ?: 0)
+            tvDuration?.text = format(playbackController?.mediaPlayer?.duration ?: 0)
+            seekBar?.max = playbackController?.mediaPlayer?.duration?.toFloat()!!
+            seekBar?.setProgress(playbackController?.mediaPlayer?.position?.toFloat()!!)
         }
     }
 
@@ -217,71 +223,70 @@ class PlayerInfoFragment : BaseFragment(), View.OnClickListener, PlaybackControl
             radius[0] = albumHeight / 16
             realSetCover(null, false, radius[0])
         } else {
-            ivAlbum!!.viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
+            ivAlbum?.viewTreeObserver?.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
                 override fun onGlobalLayout() {
                     albumHeight = ivAlbum!!.height
                     radius[0] = albumHeight / 16
                     realSetCover(null, false, radius[0])
-                    ivAlbum!!.viewTreeObserver.removeOnGlobalLayoutListener(this)
+                    ivAlbum?.viewTreeObserver?.removeOnGlobalLayoutListener(this)
                 }
             })
         }
     }
 
+    @SuppressLint("CheckResult")
     private fun realSetCover(content: Content?, shouldBlur: Boolean, radius: Int) {
         if (launcher == null) {
             return
         }
 
-        if (shouldBlur) {
-            Glide.with(launcher!!)
+        if (shouldBlur && content?.art?.sources != null &&
+                content.art?.sources?.size ?: 0 > 0) {
+            Glide.with(ivAlbum!!.context)
                     .asBitmap()
-                    .load(content!!.art!!.sources[0].url)
+                    .load(content.art!!.sources[0].url)
                     .apply(RequestOptions
                             .placeholderOf(R.drawable.cover_default)
                             .transform(RoundedCornersTransformation(radius, 0))
                             .error(R.drawable.cover_default))
-                    .listener(object : RequestListener<Bitmap> {
-                        override fun onLoadFailed(e: GlideException?,
-                                                  model: Any,
-                                                  target: Target<Bitmap>,
-                                                  isFirstResource: Boolean): Boolean {
-                            return false
+                    .into(object : SimpleTarget<Bitmap>() {
+                        override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
+                            ivAlbum?.setImageBitmap(resource)
+                            ivBlurBackground?.let { blur ->
+                                Blurry.with(launcher)
+                                        .sampling(4)
+                                        .color(Color.parseColor("#66212121"))
+                                        .from(resource)
+                                        .into(blur)
+                            }
                         }
 
-                        override fun onResourceReady(resource: Bitmap,
-                                                     model: Any,
-                                                     target: Target<Bitmap>,
-                                                     dataSource: DataSource,
-                                                     isFirstResource: Boolean): Boolean {
-                            Blurry.with(launcher)
-                                    .sampling(4)
-                                    .color(Color.parseColor("#66212121"))
-                                    .from(resource)
-                                    .into(ivBlurBackground!!)
-                            return false
+                        override fun onLoadFailed(errorDrawable: Drawable?) {
+                            super.onLoadFailed(errorDrawable)
+                            ivAlbum?.setImageResource(R.drawable.cover_default)
                         }
                     })
-                    .into(ivAlbum!!)
         } else {
-            Glide.with(launcher!!)
-                    .load(R.drawable.cover_default)
-                    .apply(RequestOptions
-                            .placeholderOf(R.drawable.cover_default)
-                            .transform(RoundedCornersTransformation(radius, 0)))
-                    .into(ivAlbum!!)
+            ivAlbum?.let {
+                Glide.with(launcher!!)
+                        .load(R.drawable.cover_default)
+                        .apply(RequestOptions
+                                .placeholderOf(R.drawable.cover_default)
+                                .transform(RoundedCornersTransformation(radius, 0)))
+                        .into(it)
+            }
         }
     }
 
     fun requestFocus() {
-        if (tvTitle != null && tvTitle!!.visibility == View.VISIBLE) {
-            tvTitle!!.requestFocus()
+        if (tvTitle != null && tvTitle?.visibility == View.VISIBLE) {
+            tvTitle?.requestFocus()
         }
     }
 
     fun abandonFocus() {
         if (tvTitle != null)
-            tvTitle!!.clearFocus()
+            tvTitle?.clearFocus()
     }
 
     override fun onClick(v: View) {
@@ -289,14 +294,14 @@ class PlayerInfoFragment : BaseFragment(), View.OnClickListener, PlaybackControl
         if (playbackController == null) {
             return
         }
-        val mediaPlayer = playbackController!!.mediaPlayer
+        val mediaPlayer = playbackController?.mediaPlayer
         when (v.tag.toString()) {
-            TAG_PREVIOUS -> playbackController!!.previousButtonPressed()
-            TAG_NEXT -> playbackController!!.nextButtonPressed()
-            TAG_PLAY_PAUSE -> if (mediaPlayer.isPlaying) {
-                playbackController!!.pauseButtonPressed()
+            TAG_PREVIOUS -> playbackController?.previousButtonPressed()
+            TAG_NEXT -> playbackController?.nextButtonPressed()
+            TAG_PLAY_PAUSE -> if (mediaPlayer?.isPlaying == true) {
+                playbackController?.pauseButtonPressed()
             } else {
-                playbackController!!.playButtonPressed()
+                playbackController?.playButtonPressed()
             }
         }
     }
@@ -310,57 +315,57 @@ class PlayerInfoFragment : BaseFragment(), View.OnClickListener, PlaybackControl
             return
         }
 
-        val mediaPlayer = playbackController!!.mediaPlayer
+        val mediaPlayer = playbackController?.mediaPlayer
 
         if (seekBarDragging) {
             return
         }
 
         if (position > 0) {
-            ivPlayPause!!.setImageResource(R.drawable.ic_pause_circle_outline_white_24dp)
-            seekBar!!.isEnabled = true
+            ivPlayPause?.setImageResource(R.drawable.ic_pause_circle_outline_white_24dp)
+            seekBar?.isEnabled = true
         } else {
-            ivPlayPause!!.setImageResource(R.drawable.ic_play_circle_outline_white_24dp)
+            ivPlayPause?.setImageResource(R.drawable.ic_play_circle_outline_white_24dp)
         }
 
         if (mediaPlayer != null) {
             if (mediaPlayer.duration <= 0) {
-                seekBar!!.isEnabled = false
+                seekBar?.isEnabled = false
             } else {
-                seekBar!!.isEnabled = true
-                if (seekBar!!.max != mediaPlayer.duration.toFloat())
-                    seekBar!!.max = mediaPlayer.duration.toInt().toFloat()
-                seekBar!!.setProgress(position.toInt().toFloat())
+                seekBar?.isEnabled = true
+                if (seekBar?.max != mediaPlayer.duration.toFloat())
+                    seekBar?.max = mediaPlayer.duration.toInt().toFloat()
+                seekBar?.setProgress(position.toInt().toFloat())
             }
         } else {
-            seekBar!!.setProgress(0f)
+            seekBar?.setProgress(0f)
         }
     }
 
     override fun onPlaybackStateChanged(state: MediaPlayer.MediaState) {
         if (state == MediaPlayer.MediaState.PLAYING) {
-            ivPlayPause!!.setImageResource(R.drawable.ic_pause_circle_outline_white_24dp)
-            seekBar!!.isEnabled = true
+            ivPlayPause?.setImageResource(R.drawable.ic_pause_circle_outline_white_24dp)
+            seekBar?.isEnabled = true
             ContentStorage.get().isMusicPlaying = true
         } else {
-            ivPlayPause!!.setImageResource(R.drawable.ic_play_circle_outline_white_24dp)
+            ivPlayPause?.setImageResource(R.drawable.ic_play_circle_outline_white_24dp)
             ContentStorage.get().isMusicPlaying = false
         }
         if (state == MediaPlayer.MediaState.STOPPED) {
-            ivPlayPause!!.setImageResource(R.drawable.ic_play_circle_outline_white_24dp)
+            ivPlayPause?.setImageResource(R.drawable.ic_play_circle_outline_white_24dp)
             ContentStorage.get().isMusicPlaying = false
         }
 
         if (null != playbackController) {
-            val mediaPlayer = playbackController!!.mediaPlayer
-            if (mediaPlayer.duration > 0) {
-                tvDuration!!.visibility = View.VISIBLE
-                tvCurrentPosition!!.visibility = View.VISIBLE
-                seekBar!!.isEnabled = true
+            val mediaPlayer = playbackController?.mediaPlayer
+            if (mediaPlayer?.duration ?: 0 > 0) {
+                tvDuration?.visibility = View.VISIBLE
+                tvCurrentPosition?.visibility = View.VISIBLE
+                seekBar?.isEnabled = true
             } else {
-                tvCurrentPosition!!.visibility = View.INVISIBLE
-                tvDuration!!.visibility = View.INVISIBLE
-                seekBar!!.isEnabled = false
+                tvCurrentPosition?.visibility = View.INVISIBLE
+                tvDuration?.visibility = View.INVISIBLE
+                seekBar?.isEnabled = false
             }
         }
     }
@@ -377,7 +382,7 @@ class PlayerInfoFragment : BaseFragment(), View.OnClickListener, PlaybackControl
         if (arg.type == LoggerHandler.RENDER_PLAYER_INFO) {
             val content = Gson().fromJson(arg.json.toString(), TemplateContent::class.java)
             ContentStorage.get().saveContent(content.template)
-            ivBack!!.post { setupView() }
+            ivBack?.post { setupView() }
         }
     }
 
@@ -386,24 +391,24 @@ class PlayerInfoFragment : BaseFragment(), View.OnClickListener, PlaybackControl
             return
         }
 
-        val mediaPlayer = playbackController!!.mediaPlayer
+        val mediaPlayer = playbackController?.mediaPlayer
         if (mediaPlayer != null) {
             if (mediaPlayer.duration > 0) {
-                tvDuration!!.visibility = View.VISIBLE
-                tvCurrentPosition!!.visibility = View.VISIBLE
-                seekBar!!.isEnabled = true
-                tvCurrentPosition!!.text = format(seekParams.progress.toLong())
-                tvDuration!!.text = format(mediaPlayer.duration)
+                tvDuration?.visibility = View.VISIBLE
+                tvCurrentPosition?.visibility = View.VISIBLE
+                seekBar?.isEnabled = true
+                tvCurrentPosition?.text = format(seekParams.progress.toLong())
+                tvDuration?.text = format(mediaPlayer.duration)
             } else {
-                tvCurrentPosition!!.visibility = View.INVISIBLE
-                tvDuration!!.visibility = View.INVISIBLE
-                seekBar!!.isEnabled = false
+                tvCurrentPosition?.visibility = View.INVISIBLE
+                tvDuration?.visibility = View.INVISIBLE
+                seekBar?.isEnabled = false
             }
-            tvCurrentPosition!!.text = format(seekParams.progress.toLong())
-            tvDuration!!.text = format(mediaPlayer.duration)
+            tvCurrentPosition?.text = format(seekParams.progress.toLong())
+            tvDuration?.text = format(mediaPlayer.duration)
         } else {
-            tvCurrentPosition!!.text = format(0)
-            tvDuration!!.text = format(0)
+            tvCurrentPosition?.text = format(0)
+            tvDuration?.text = format(0)
         }
         if (seekParams.fromUser) {
             seekBarProgressTarget = seekParams.progress
@@ -421,16 +426,16 @@ class PlayerInfoFragment : BaseFragment(), View.OnClickListener, PlaybackControl
             return
         }
 
-        val mediaPlayer = playbackController!!.mediaPlayer
+        val mediaPlayer = playbackController?.mediaPlayer
 
         if (seekBarProgressTarget != -1) {
-            mediaPlayer.position = seekBarProgressTarget.toLong()
+            mediaPlayer?.position = seekBarProgressTarget.toLong()
             seekBarProgressTarget = -1
         }
     }
 
     private fun getBitmapFromVectorDrawable(drawableId: Int): Bitmap {
-        val drawable = ContextCompat.getDrawable(context!!, drawableId)
+        val drawable = ContextCompat.getDrawable(launcher!!, drawableId)
 
         val bitmap = Bitmap.createBitmap(drawable!!.intrinsicWidth,
                 drawable.intrinsicHeight, Bitmap.Config.ARGB_8888)

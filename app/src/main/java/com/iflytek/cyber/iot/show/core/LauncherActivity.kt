@@ -710,6 +710,8 @@ class LauncherActivity : AppCompatActivity(), Observer {
     override fun onResume() {
         super.onResume()
         if (PermissionChecker.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
+                != PermissionChecker.PERMISSION_GRANTED || PermissionChecker.checkSelfPermission(
+                        this, Manifest.permission.READ_PHONE_STATE)
                 != PermissionChecker.PERMISSION_GRANTED) {
             requestPermission()
         }
@@ -717,7 +719,8 @@ class LauncherActivity : AppCompatActivity(), Observer {
 
     private fun requestPermission() {
         ActivityCompat.requestPermissions(this,
-                arrayOf(Manifest.permission.RECORD_AUDIO, Manifest.permission.ACCESS_FINE_LOCATION),
+                arrayOf(Manifest.permission.RECORD_AUDIO, Manifest.permission.ACCESS_FINE_LOCATION,
+                        Manifest.permission.READ_PHONE_STATE),
                 REQUEST_PERMISSION_CODE)
     }
 

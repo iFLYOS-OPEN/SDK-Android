@@ -428,33 +428,42 @@ class MainFragment : BaseFragment(), AMapLocationListener, Observer, PlaybackCon
     private fun updateMusicCover(content: Content?) {
         if (ivMusic != null && launcher != null && content?.art?.sources?.isEmpty() != true) {
             ivMusic?.let {
-                val url = content?.art?.sources?.get(0)?.url ?: return
-                Glide.with(launcher!!)
-                        .asBitmap()
-                        .load(url)
-                        .apply(RequestOptions()
-                                .placeholder(it.drawable)
-                                .error(R.drawable.cover_tiny)
-                                .transform(RoundedCornersTransformation(
-                                        it.height / 6,
-                                        0)))
-                        .listener(object : RequestListener<Bitmap> {
-                            override fun onLoadFailed(e: GlideException?,
-                                                      model: Any,
-                                                      target: Target<Bitmap>,
-                                                      isFirstResource: Boolean): Boolean {
-                                return false
-                            }
+                val url = content?.art?.sources?.get(0)?.url
+                if (url.isNullOrEmpty()) {
+                    val corner = it.height / 6
+                    Glide.with(it)
+                            .load(R.drawable.cover_tiny)
+                            .apply(RequestOptions()
+                                    .transform(RoundedCornersTransformation(corner, 0)))
+                            .into(it)
+                } else {
+                    Glide.with(launcher!!)
+                            .asBitmap()
+                            .load(url)
+                            .apply(RequestOptions()
+                                    .placeholder(it.drawable)
+                                    .error(R.drawable.cover_tiny)
+                                    .transform(RoundedCornersTransformation(
+                                            it.height / 6,
+                                            0)))
+                            .listener(object : RequestListener<Bitmap> {
+                                override fun onLoadFailed(e: GlideException?,
+                                                          model: Any,
+                                                          target: Target<Bitmap>,
+                                                          isFirstResource: Boolean): Boolean {
+                                    return false
+                                }
 
-                            override fun onResourceReady(resource: Bitmap,
-                                                         model: Any,
-                                                         target: Target<Bitmap>,
-                                                         dataSource: DataSource,
-                                                         isFirstResource: Boolean): Boolean {
-                                return false
-                            }
-                        })
-                        .into(it)
+                                override fun onResourceReady(resource: Bitmap,
+                                                             model: Any,
+                                                             target: Target<Bitmap>,
+                                                             dataSource: DataSource,
+                                                             isFirstResource: Boolean): Boolean {
+                                    return false
+                                }
+                            })
+                            .into(it)
+                }
             }
         } else {
             ivMusic?.let {
