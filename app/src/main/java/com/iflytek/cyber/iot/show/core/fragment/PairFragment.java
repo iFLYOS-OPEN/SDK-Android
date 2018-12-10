@@ -48,6 +48,7 @@ import java.util.Observable;
 import java.util.Observer;
 
 import androidx.navigation.Navigation;
+import androidx.navigation.fragment.NavHostFragment;
 import cn.iflyos.iace.iflyos.AuthProvider;
 
 public class PairFragment extends BaseFragment implements Observer {
@@ -61,6 +62,7 @@ public class PairFragment extends BaseFragment implements Observer {
     private String verificationUri;
     private String userCode;
 
+    private View view;
     private View loading;
     private View failed;
     private View tips;
@@ -69,10 +71,17 @@ public class PairFragment extends BaseFragment implements Observer {
 
     private TextView error;
 
+    private boolean shouldShowTips;
+    private boolean isExit = false;
+
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
         activity = (LauncherActivity) context;
+
+        if (getArguments() != null) {
+            shouldShowTips = getArguments().getBoolean("shouldShowTips", false);
+        }
     }
 
     @Nullable
@@ -80,6 +89,9 @@ public class PairFragment extends BaseFragment implements Observer {
     public View onCreateView(@NonNull LayoutInflater inflater,
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
+        if (container != null) {
+            container.removeAllViews();
+        }
         return inflater.inflate(R.layout.fragment_pair, container, false);
     }
 
@@ -89,13 +101,16 @@ public class PairFragment extends BaseFragment implements Observer {
             getLauncher().hideSimpleTips();
         }
 
-        view.findViewById(R.id.back)
-                .setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        activity.onBackPressed();
-                    }
-                });
+        view.findViewById(R.id.back).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (isExit) {
+                    return;
+                }
+                isExit = true;
+                NavHostFragment.findNavController(PairFragment.this).navigateUp();
+            }
+        });
 
         loading = view.findViewById(R.id.loading);
         failed = view.findViewById(R.id.failed);
@@ -231,6 +246,14 @@ public class PairFragment extends BaseFragment implements Observer {
                     }
                 });
             }
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (getLauncher() != null && shouldShowTips) {
+            getLauncher().showSimpleTips();
         }
     }
 }

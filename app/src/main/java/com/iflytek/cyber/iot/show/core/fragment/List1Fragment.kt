@@ -19,6 +19,8 @@ package com.iflytek.cyber.iot.show.core.fragment
 import android.content.Context
 import android.graphics.Color
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
@@ -35,15 +37,20 @@ import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import com.iflytek.cyber.iot.show.core.LauncherActivity
 import com.iflytek.cyber.iot.show.core.R
+import com.iflytek.cyber.iot.show.core.impl.Logger.LogEntry
+import com.iflytek.cyber.iot.show.core.impl.Logger.LoggerHandler
 import com.iflytek.cyber.iot.show.core.model.Constant
 import com.iflytek.cyber.iot.show.core.model.Image
 import com.iflytek.cyber.iot.show.core.model.ListItem
 import com.iflytek.cyber.iot.show.core.utils.InsetDividerDecoration
 import com.iflytek.cyber.iot.show.core.utils.RoundedCornersTransformation
+import java.util.*
 
-class List1Fragment : BaseFragment() {
+class List1Fragment : BaseFragment(), Observer {
 
     private var payload: JsonObject? = null
+    private var alreadyNavigateUp = false
+    private var dialogIdle = false
 
     override fun onAttach(context: Context?) {
         super.onAttach(context)
@@ -53,6 +60,7 @@ class List1Fragment : BaseFragment() {
 
         val json = arguments?.getString(LauncherActivity.EXTRA_TEMPLATE)
         payload = JsonParser().parse(json).asJsonObject
+        launcher?.addObserver(this)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -62,7 +70,10 @@ class List1Fragment : BaseFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         view.findViewById<ImageView>(R.id.iv_back).setOnClickListener {
-            findNavController().navigateUp()
+            alreadyNavigateUp = true
+            if (!dialogIdle) {
+                exit()
+            }
         }
         val skillIcon = view.findViewById<ImageView>(R.id.iv_skill_icon)
         try {
@@ -124,5 +135,47 @@ class List1Fragment : BaseFragment() {
                 icon.viewTreeObserver.removeOnGlobalLayoutListener(this)
             }
         })
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        launcher?.deleteObserver(this)
+    }
+
+    private fun exit() {
+        try {
+            findNavController().navigateUp()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    override fun update(o: Observable?, arg: Any?) {
+        if (o !is LoggerHandler.LoggerObservable) {
+            return
+        }
+
+        if (arg !is LogEntry) {
+            return
+        }
+
+        if (arg.type == LoggerHandler.DIALOG_STATE) {
+            try {
+                val template = arg.json.getJSONObject("template")
+                val state = template.getString("state")
+                when (state) {
+                    "IDLE" -> {
+                        dialogIdle = true
+                        if (!alreadyNavigateUp) {
+                            Handler(Looper.getMainLooper()).postDelayed({
+                                exit()
+                            }, 500)
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
     }
 }

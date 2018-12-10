@@ -6,6 +6,10 @@ apply plugin: 'kotlin-kapt'
 
 apply plugin: 'kotlin-android-extensions'
 
+def appStorePassword = System.getenv("STORE_PASSWORD")
+def appKeyAlias = System.getenv("KEY_ALIAS")
+def appKeyPassword = System.getenv("KEY_PASSWORD")
+
 repositories{
     flatDir {
         dirs 'libs'
@@ -38,7 +42,7 @@ android {
     }
 }
 
-def nav_version = "1.0.0-alpha06"
+def nav_version = "1.0.0-alpha07"
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
@@ -76,6 +80,9 @@ dependencies {
     implementation 'com.google.android.exoplayer:exoplayer-dash:2.7.1'
     implementation 'com.google.android.exoplayer:exoplayer-smoothstreaming:2.7.1'
     implementation 'com.google.android.exoplayer:exoplayer-hls:2.7.1'
+
+    // transform mp3 to pcm
+    implementation 'com.googlecode.soundlibs:jlayer:1.0.1.4'
 
     implementation 'com.google.zxing:core:3.3.2'
     implementation('com.journeyapps:zxing-android-embedded:3.5.0') {

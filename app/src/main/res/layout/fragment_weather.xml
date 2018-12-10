@@ -1,19 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><!--
-  ~ Copyright (C) 2018 iFLYTEK CO.,LTD.
-  ~
-  ~ Licensed under the Apache License, Version 2.0 (the "License");
-  ~ you may not use this file except in compliance with the License.
-  ~ You may obtain a copy of the License at
-  ~
-  ~     http://www.apache.org/licenses/LICENSE-2.0
-  ~
-  ~ Unless required by applicable law or agreed to in writing, software
-  ~ distributed under the License is distributed on an "AS IS" BASIS,
-  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  ~ See the License for the specific language governing permissions and
-  ~ limitations under the License.
-  -->
-
+<?xml version="1.0" encoding="utf-8"?>
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -47,22 +32,37 @@
     <android.support.constraint.ConstraintLayout
         android:id="@+id/header"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         app:layout_constraintEnd_toEndOf="@id/right_margin"
+        app:layout_constraintHeight_percent=".14"
         app:layout_constraintStart_toStartOf="@id/left_margin">
 
         <ImageView
             android:id="@+id/iv_back"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
             android:layout_marginTop="16dp"
+            android:layout_marginBottom="16dp"
             android:background="?selectableItemBackgroundBorderless"
             android:src="@drawable/ic_close_white_24dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:ignore="ContentDescription" />
+
+        <android.support.v7.widget.AppCompatTextView
+            android:id="@+id/tv_weather_title"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginStart="32dp"
+            android:textColor="@android:color/white"
+            app:autoSizeTextType="uniform"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintHeight_percent=".333"
+            app:layout_constraintStart_toEndOf="@id/iv_back"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintWidth_percent=".68"
+            tools:text="越秀区  4月16日 星期一" />
 
         <android.support.v7.widget.AppCompatImageView
             android:id="@+id/iv_skill_icon"
@@ -77,16 +77,22 @@
 
     </android.support.constraint.ConstraintLayout>
 
+    <android.support.constraint.Guideline
+        android:id="@+id/current_weather_left_margin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent=".244" />
+
     <ImageView
         android:id="@+id/current_weather_icon"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:paddingBottom="16dp"
-        android:paddingEnd="16dp"
         android:scaleType="centerCrop"
         app:layout_constraintDimensionRatio="1:1"
         app:layout_constraintHeight_percent=".333"
-        app:layout_constraintStart_toStartOf="@id/left_margin"
+        app:layout_constraintStart_toStartOf="@id/current_weather_left_margin"
         app:layout_constraintTop_toBottomOf="@id/header"
         tools:ignore="ContentDescription"
         tools:src="@android:color/white" />
@@ -96,7 +102,17 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        app:layout_constraintGuide_percent=".273" />
+        app:layout_constraintGuide_percent=".486" />
+
+    <View
+        android:id="@+id/line"
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:layout_marginTop="8dp"
+        android:background="#1effffff"
+        app:layout_constraintEnd_toEndOf="@id/right_margin"
+        app:layout_constraintStart_toStartOf="@id/left_margin"
+        app:layout_constraintTop_toBottomOf="@id/current_weather_icon" />
 
     <android.support.v7.widget.AppCompatTextView
         android:id="@+id/current_temperature"
@@ -107,10 +123,11 @@
         android:textAppearance="@style/TextAppearance.AppCompat.Body1"
         android:textColor="?android:textColorPrimary"
         app:autoSizeTextType="uniform"
-        app:layout_constraintHeight_percent=".2"
+        app:layout_constraintHeight_percent=".193"
         app:layout_constraintStart_toEndOf="@id/temp_margin"
         app:layout_constraintTop_toBottomOf="@id/header"
-        app:layout_constraintWidth_percent=".32"
+        app:layout_constraintWidth_percent=".27"
+        android:visibility="gone"
         tools:text="25℃" />
 
     <android.support.v7.widget.AppCompatTextView
@@ -126,40 +143,105 @@
         app:layout_constraintStart_toEndOf="@id/temp_margin"
         app:layout_constraintTop_toBottomOf="@id/current_temperature"
         app:layout_constraintWidth_percent=".205"
+        android:visibility="gone"
         tools:text="22℃ ~ 27℃" />
 
-    <android.support.v7.widget.AppCompatTextView
-        android:id="@+id/today"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_alignParentEnd="true"
-        android:layout_alignTop="@id/current_weather_icon"
-        android:layout_marginTop="16dp"
-        android:gravity="center_vertical|end"
-        android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-        android:textColor="?android:textColorPrimary"
-        app:autoSizeTextType="uniform"
-        app:layout_constraintEnd_toEndOf="@id/right_margin"
-        app:layout_constraintHeight_percent=".06"
-        app:layout_constraintTop_toBottomOf="@id/header"
-        app:layout_constraintWidth_percent=".153"
-        tools:text="4月16日 星期一" />
+    <android.support.constraint.Guideline
+        android:id="@+id/day_top_margin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent=".16" />
 
-    <android.support.v7.widget.AppCompatTextView
-        android:id="@+id/position"
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/high_content"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_alignEnd="@id/position"
-        android:layout_below="@id/position"
-        android:gravity="end"
-        android:textAppearance="@style/TextAppearance.AppCompat.Small"
-        android:textColor="?android:textColorPrimary"
-        app:autoSizeTextType="uniform"
-        app:layout_constraintEnd_toEndOf="@id/right_margin"
-        app:layout_constraintHeight_percent=".06"
-        app:layout_constraintTop_toBottomOf="@id/today"
-        app:layout_constraintWidth_percent=".153"
-        tools:text="广州市" />
+        app:layout_constraintHeight_percent=".123"
+        app:layout_constraintStart_toStartOf="@id/temp_margin"
+        app:layout_constraintTop_toBottomOf="@id/day_top_margin"
+        app:layout_constraintWidth_percent=".18">
+
+        <android.support.v7.widget.AppCompatTextView
+            android:id="@+id/tv_day_high_temperature"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:gravity="center_vertical"
+            android:maxLines="1"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+            android:textColor="?android:textColorPrimary"
+            app:autoSizeTextType="uniform"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintHeight_percent="1"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintWidth_percent=".6"
+            tools:text="27℃" />
+
+        <android.support.constraint.Guideline
+            android:id="@+id/up_left_margin"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent=".7" />
+
+        <ImageView
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:src="@drawable/ic_arrow_upward_black_24dp"
+            android:tint="#595959"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintDimensionRatio="1:1"
+            app:layout_constraintHeight_percent=".35"
+            app:layout_constraintStart_toEndOf="@id/up_left_margin"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </android.support.constraint.ConstraintLayout>
+
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/low_content"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintHeight_percent=".123"
+        app:layout_constraintStart_toStartOf="@id/temp_margin"
+        app:layout_constraintTop_toBottomOf="@id/high_content"
+        app:layout_constraintWidth_percent=".18">
+
+        <android.support.v7.widget.AppCompatTextView
+            android:id="@+id/tv_day_low_temperature"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:gravity="center_vertical"
+            android:maxLines="1"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+            android:textColor="?android:textColorPrimary"
+            app:autoSizeTextType="uniform"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintHeight_percent="1"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintWidth_percent=".6"
+            tools:text="22℃" />
+
+        <android.support.constraint.Guideline
+            android:id="@+id/down_left_margin"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent=".7" />
+
+        <ImageView
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:src="@drawable/ic_arrow_downward_black_24dp"
+            android:tint="#595959"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintDimensionRatio="1:1"
+            app:layout_constraintHeight_percent=".35"
+            app:layout_constraintStart_toEndOf="@id/down_left_margin"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </android.support.constraint.ConstraintLayout>
 
     <android.support.constraint.Guideline
         android:id="@+id/future_margin"
@@ -172,10 +254,11 @@
         android:id="@+id/future_days_weather"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:layout_marginTop="8dp"
         android:orientation="horizontal"
         app:layout_constraintEnd_toEndOf="@id/right_margin"
         app:layout_constraintHeight_percent=".4"
         app:layout_constraintStart_toStartOf="@id/left_margin"
-        app:layout_constraintTop_toBottomOf="@id/current_weather_icon" />
+        app:layout_constraintTop_toBottomOf="@id/line" />
 
 </android.support.constraint.ConstraintLayout>

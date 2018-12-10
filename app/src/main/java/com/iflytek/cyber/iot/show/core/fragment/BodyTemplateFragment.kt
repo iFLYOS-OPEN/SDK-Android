@@ -19,6 +19,7 @@ package com.iflytek.cyber.iot.show.core.fragment
 import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Bundle
+import android.support.constraint.ConstraintLayout
 import android.support.v4.app.Fragment
 import android.support.v4.widget.NestedScrollView
 import android.util.Log
@@ -31,6 +32,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.navigation.fragment.findNavController
+import cn.iflyos.iace.iflyos.MediaPlayer
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.bumptech.glide.request.RequestOptions
@@ -39,14 +41,12 @@ import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import com.iflytek.cyber.iot.show.core.LauncherActivity
 import com.iflytek.cyber.iot.show.core.R
-import com.iflytek.cyber.iot.show.core.impl.Logger.LogEntry
-import com.iflytek.cyber.iot.show.core.impl.Logger.LoggerHandler
+import com.iflytek.cyber.iot.show.core.impl.MediaPlayer.MediaPlayerHandler
 import com.iflytek.cyber.iot.show.core.impl.SpeechSynthesizer.SpeechSynthesizerHandler
 import com.iflytek.cyber.iot.show.core.utils.RoundedCornersTransformation
 import com.iflytek.cyber.iot.show.core.widget.HighlightTextView
-import java.util.*
 
-class BodyTemplateFragment : Fragment(), Observer {
+class BodyTemplateFragment : Fragment(), MediaPlayerHandler.OnMediaStateChangedListener {
 
     companion object {
         const val CLOSE_OFFSET = 5000L
@@ -68,6 +68,7 @@ class BodyTemplateFragment : Fragment(), Observer {
     private var updatingPosition = false
     private var lastTouchTime = 0L
     private var mSpeechSynthesizerHandler: SpeechSynthesizerHandler? = null
+    private var mMediaPlayer: MediaPlayerHandler? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_body_template, container, false)
@@ -133,6 +134,17 @@ class BodyTemplateFragment : Fragment(), Observer {
                 template?.let { template ->
                     showTemplate(template)
                 }
+
+                bodyView?.post {
+                    val mediaPlayer = mSpeechSynthesizerHandler?.mediaPlayer
+                    if (mediaPlayer is MediaPlayerHandler) {
+                        mMediaPlayer = mediaPlayer
+                        mMediaPlayer?.addOnMediaStateChangedListener(this)
+                        if (mMediaPlayer?.isPlaying == true) {
+                            onPlayStarted()
+                        }
+                    }
+                }
             }
         }
     }
@@ -142,7 +154,6 @@ class BodyTemplateFragment : Fragment(), Observer {
 
         val activity = activity
         if (activity is LauncherActivity) {
-            activity.addObserver(this)
             val handler = activity.getHandler("SpeechSynthesizer")
             if (handler is SpeechSynthesizerHandler)
                 mSpeechSynthesizerHandler = handler
@@ -154,8 +165,49 @@ class BodyTemplateFragment : Fragment(), Observer {
 
         val activity = activity
         if (activity is LauncherActivity) {
-            activity.deleteObserver(this)
+            mMediaPlayer?.removeOnMediaStateChangedListener(this)
+            mMediaPlayer = null
             mSpeechSynthesizerHandler = null
+        }
+    }
+
+    private fun onPlayStarted() {
+        updatingPosition = true
+        activity?.runOnUiThread {
+            scrollView?.smoothScrollTo(0, 0)
+            bodyView?.startAnimation()
+            positionUpdateRunnable.run()
+        }
+    }
+
+    private fun onPlayFinished() {
+        if (updatingPosition) {
+            updatingPosition = false
+            bodyView?.post {
+                bodyView?.stopAnimation()
+                if (largeImage) {
+                    scrollView?.smoothScrollTo(0, largeImageView?.height
+                            ?: 0)
+                } else {
+                    scrollView?.smoothScrollTo(0, 0)
+                }
+            }
+            bodyView?.postDelayed(endRunnable, CLOSE_OFFSET)
+        }
+    }
+
+    override fun onMediaStateChanged(state: MediaPlayer.MediaState) {
+        when (state) {
+            MediaPlayer.MediaState.PLAYING -> {
+                if (isVisible)
+                    onPlayStarted()
+            }
+            MediaPlayer.MediaState.STOPPED -> {
+                if (isVisible)
+                    onPlayFinished()
+            }
+            else -> {
+            }
         }
     }
 
@@ -168,50 +220,9 @@ class BodyTemplateFragment : Fragment(), Observer {
         }
     }
 
-    override fun update(o: Observable?, arg: Any?) {
-        if (o is LoggerHandler.LoggerObservable) {
-            if (arg is LogEntry) {
-                if (arg.type == LoggerHandler.DIALOG_STATE) {
-                    try {
-                        val template = arg.json.getJSONObject("template")
-                        val state = template.getString("state")
-                        when (state) {
-                            "SPEAKING" -> {
-                                updatingPosition = true
-                                bodyView?.post {
-                                    scrollView?.smoothScrollTo(0, 0)
-                                    bodyView?.startAnimation()
-                                    positionUpdateRunnable.run()
-                                }
-                            }
-                            "IDLE" -> {
-                                if (updatingPosition) {
-                                    updatingPosition = false
-                                    bodyView?.post {
-                                        bodyView?.stopAnimation()
-                                        if (largeImage) {
-                                            scrollView?.smoothScrollTo(0, largeImageView?.height
-                                                    ?: 0)
-                                        } else {
-                                            scrollView?.smoothScrollTo(0, 0)
-                                        }
-                                    }
-                                    bodyView?.postDelayed(endRunnable, CLOSE_OFFSET)
-                                }
-                            }
-                        }
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                        Log.d("JSON", template.toString())
-                    }
-                }
-            }
-        }
-    }
-
     private val positionUpdateRunnable = object : Runnable {
         override fun run() {
-            mSpeechSynthesizerHandler?.mediaPlayer?.let { player ->
+            mMediaPlayer?.let { player ->
                 val position = player.position
 
                 if (updatingPosition) {
@@ -227,8 +238,11 @@ class BodyTemplateFragment : Fragment(), Observer {
             val title = template.get("title").asJsonObject
             if (title.has("mainTitle"))
                 mainTitleView?.text = title?.get("mainTitle")?.asString
-            if (title.has("subTitle"))
+            if (title.has("subTitle") && !title?.get("subTitle")?.asString.isNullOrEmpty())
                 subTitleView?.text = title?.get("subTitle")?.asString
+            else {
+                subTitleView?.visibility = View.GONE
+            }
         }
         if (template.has("image")) {
             val imageStructure = template.get("image").asJsonObject

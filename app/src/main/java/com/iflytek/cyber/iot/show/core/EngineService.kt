@@ -22,6 +22,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Binder
+import android.os.Build
 import android.os.IBinder
 import android.support.v4.content.PermissionChecker
 import android.text.TextUtils
@@ -77,9 +78,11 @@ class EngineService : Service() {
         const val ACTION_START_ENGINE = ACTION_PREFIX + "START"
         const val ACTION_RECONNECT = ACTION_PREFIX + "RECONNECT"
         const val ACTION_TAP_TO_TALK = ACTION_PREFIX + "TAP_TO_TALK"
+        const val ACTION_STOP_CAPTURE = ACTION_PREFIX + "STOP_CAPTURE"
         const val ACTION_LOGOUT = ACTION_PREFIX + "LOGOUT"
         const val ACTION_LOGOUT_NOT_NOTIFY = ACTION_PREFIX + "LOGOUT_NOT_NOTIFY"
         const val ACTION_UPDATE_VOLUME = ACTION_PREFIX + "ACTION_UPDATE_VOLUME"
+        const val ACTION_OFFSET_VOLUME = ACTION_PREFIX + "ACTION_OFFSET_VOLUME"
         const val ACTION_UPDATE_MUTE = ACTION_PREFIX + "ACTION_UPDATE_MUTE"
         const val EXTRA_MUTE = "mute"
         const val EXTRA_VOLUME = "volume"
@@ -101,7 +104,6 @@ class EngineService : Service() {
                                         clientSecret: String,
                                         productId: String,
                                         productDsn: String) {
-        var productDsnMutable = productDsn
         mPreferences?.let { preferences ->
             val editor = preferences.edit()
             editor?.let {
@@ -110,9 +112,15 @@ class EngineService : Service() {
                         .putString(getString(R.string.preference_product_id), productId)
 
                 val pdsn = preferences.getString(getString(R.string.preference_product_dsn), "")
-                if (TextUtils.isEmpty(pdsn)) {
-                    productDsnMutable += UUID.randomUUID().toString()
-                    it.putString(getString(R.string.preference_product_dsn), productDsnMutable)
+                if (PermissionChecker.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE)
+                        == PermissionChecker.PERMISSION_GRANTED) {
+                    if (TextUtils.isEmpty(pdsn)) {
+                        val serial = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O_MR1)
+                            Build.SERIAL
+                        else
+                            Build.getSerial()
+                        it.putString(getString(R.string.preference_product_dsn), productDsn + serial)
+                    }
                 }
             }
             editor?.apply()
@@ -147,6 +155,8 @@ class EngineService : Service() {
 
     fun recreate() {
         if (PermissionChecker.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
+                == PermissionChecker.PERMISSION_GRANTED && PermissionChecker.checkSelfPermission(
+                        this, Manifest.permission.READ_PHONE_STATE)
                 == PermissionChecker.PERMISSION_GRANTED)
             create()
     }
@@ -199,10 +209,16 @@ class EngineService : Service() {
     }
 
     fun logout() {
+        mAudioPlayer?.mediaPlayer?.stop()
+        mSpeechSynthesizer?.mediaPlayer?.stop()
+        mAlerts?.mediaPlayer?.stop()
         mAuthProvider?.logout()
     }
 
     fun logoutWithNotNotify() {
+        mAudioPlayer?.mediaPlayer?.stop()
+        mSpeechSynthesizer?.mediaPlayer?.stop()
+        mAlerts?.mediaPlayer?.stop()
         mAuthProvider?.logoutWithNotNotify()
     }
 
@@ -290,7 +306,7 @@ class EngineService : Service() {
         } else {
             throw RuntimeException("Engine configuration failed")
         }
-//        mEngine?.setProperty(IflyosProperties.IVS_ENDPOINT, "https://ivs.iflyos.cn")
+        mEngine?.setProperty(IflyosProperties.IVS_ENDPOINT, "https://ivs.iflyos.cn")
 
         // Logger
         mLogger = LoggerHandler()
@@ -408,6 +424,9 @@ class EngineService : Service() {
                 ACTION_TAP_TO_TALK -> {
                     mSpeechRecognizer?.onTapToTalk()
                 }
+                ACTION_STOP_CAPTURE -> {
+                    mSpeechRecognizer?.stopCapture()
+                }
                 ACTION_LOGOUT -> {
                     logout()
                 }
@@ -425,11 +444,21 @@ class EngineService : Service() {
                 ACTION_UPDATE_VOLUME -> {
                     val volume = intent.getByteExtra(EXTRA_VOLUME, 50)
                     mAudioPlayer?.speaker?.localVolumeSet(volume)
-                    mAudioPlayer?.speaker?.localVolumeSet(volume)
+                    mSpeechSynthesizer?.speaker?.localVolumeSet(volume)
+                }
+                ACTION_OFFSET_VOLUME -> {
+                    val volume = intent.getByteExtra(EXTRA_VOLUME, 50)
+                    val current = mAudioPlayer?.speaker?.volume ?: 0.toByte()
+                    mAudioPlayer?.speaker?.localVolumeSet(Math.max(Math.min(volume + current, 100), 0).toByte())
+                    mSpeechSynthesizer?.speaker?.localVolumeSet(Math.max(Math.min(volume + current, 100), 0).toByte())
                 }
             }
         }
         return super.onStartCommand(intent, flags, startId)
+    }
+
+    fun reconnectIVS() {
+        mAuthProvider?.onInitialize()
     }
 
     fun speakerMute() = mAudioPlayer?.speaker?.isMuted
@@ -477,5 +506,11 @@ class EngineService : Service() {
             Log.i(sTag, "Engine stopped")
 
         System.exit(0) // End all
+    }
+
+    fun offsetVolume(offset: Byte) {
+        val volume = mAudioPlayer?.speaker?.volume ?: 0
+        mAudioPlayer?.speaker?.localVolumeSet(Math.max(Math.min(volume + offset, 100), 0).toByte())
+        mSpeechSynthesizer?.speaker?.localVolumeSet(Math.max(Math.min(volume + offset, 100), 0).toByte())
     }
 }

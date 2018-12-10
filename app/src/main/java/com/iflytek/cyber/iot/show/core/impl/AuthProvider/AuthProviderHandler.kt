@@ -18,17 +18,14 @@ package com.iflytek.cyber.iot.show.core.impl.AuthProvider
 
 import android.content.Context
 import android.content.SharedPreferences
-
+import cn.iflyos.iace.iflyos.AuthProvider
 import com.iflytek.cyber.iot.show.core.R
 import com.iflytek.cyber.iot.show.core.impl.Logger.LoggerHandler
-
 import org.json.JSONException
 import org.json.JSONObject
 
-import cn.iflyos.iace.iflyos.AuthProvider
-
 class AuthProviderHandler(private val mContext: Context, private val mLogger: LoggerHandler) : AuthProvider() {
-    private val mLwa: LoginWithIflyos?
+    private val mLwi: LoginWithIflyos?
     private var mAuthState: AuthProvider.AuthState = AuthProvider.AuthState.UNINITIALIZED
     private var mAuthToken = ""
     private val mPreferences: SharedPreferences = mContext.getSharedPreferences(
@@ -41,7 +38,7 @@ class AuthProviderHandler(private val mContext: Context, private val mLogger: Lo
 
         // Authenticate with LWA
 
-        mLwa = LoginWithIflyos(mLogger, mContext, mPreferences, this)
+        mLwi = LoginWithIflyos(mLogger, mContext, mPreferences, this)
     }
 
     override fun getAuthToken(): String {
@@ -52,15 +49,15 @@ class AuthProviderHandler(private val mContext: Context, private val mLogger: Lo
     }
 
     fun login() {
-        mLwa!!.login()
+        mLwi!!.login()
     }
 
     fun logout() {
-        mLwa!!.logout()
+        mLwi!!.logout()
     }
 
     fun logoutWithNotNotify() {
-        mLwa!!.logoutWithNotNotify()
+        mLwi!!.logoutWithNotNotify()
     }
 
     override fun getAuthState(): AuthProvider.AuthState {
@@ -76,6 +73,7 @@ class AuthProviderHandler(private val mContext: Context, private val mLogger: Lo
         try {
             jsonObject.put("type", LoggerHandler.AUTH_LOG_STATE)
             jsonObject.put("auth_state", mAuthState.toString())
+            jsonObject.put("auth_error", authError.toString())
         } catch (e: JSONException) {
             e.printStackTrace()
         }
@@ -93,7 +91,7 @@ class AuthProviderHandler(private val mContext: Context, private val mLogger: Lo
     }
 
     fun onInitialize() {
-        mLwa?.onInitialize()
+        mLwi?.onInitialize()
     }
 
     companion object {

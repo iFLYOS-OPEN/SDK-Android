@@ -27,7 +27,6 @@ import com.iflytek.cyber.iot.show.core.R;
 
 import java.util.concurrent.TimeUnit;
 
-import androidx.navigation.Navigation;
 import androidx.navigation.fragment.NavHostFragment;
 
 public class FinishFragment extends BaseFragment {
@@ -46,7 +45,7 @@ public class FinishFragment extends BaseFragment {
             @Override
             public void run() {
                 clearBackStack();
-                Navigation.findNavController(view).navigate(R.id.main_fragment);
+                NavHostFragment.findNavController(FinishFragment.this).navigate(R.id.main_fragment);
             }
         }, TimeUnit.SECONDS.toMillis(3));
 

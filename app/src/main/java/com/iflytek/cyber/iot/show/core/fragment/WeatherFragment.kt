@@ -26,9 +26,13 @@ import android.widget.TextView
 import androidx.navigation.Navigation
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
-import com.google.gson.*
+import com.google.gson.Gson
+import com.google.gson.JsonArray
+import com.google.gson.JsonObject
+import com.google.gson.JsonParser
 import com.iflytek.cyber.iot.show.core.LauncherActivity
 import com.iflytek.cyber.iot.show.core.R
+import com.iflytek.cyber.iot.show.core.impl.SpeechSynthesizer.SpeechSynthesizerHandler
 import com.iflytek.cyber.iot.show.core.model.Constant
 import com.iflytek.cyber.iot.show.core.model.Image
 import com.iflytek.cyber.iot.show.core.utils.RoundedCornersTransformation
@@ -38,10 +42,13 @@ class WeatherFragment : BaseFragment() {
     private var futureDaysWeatherContainer: LinearLayout? = null
     private var currentTemperature: TextView? = null
     private var todayTemperatureRange: TextView? = null
-    private var today: TextView? = null
-    private var position: TextView? = null
+    private var weatherTitle: TextView? = null
     private var todayWeatherIcon: ImageView? = null
     private var ivSkillIcon: ImageView? = null
+    private var highContent: View? = null
+    private var lowContent: View? = null
+    private var dayHighTemperature: TextView? = null
+    private var dayLowTemperature: TextView? = null
     private var payload: JsonObject? = null
 
     private var ivWeatherIcon: ImageView? = null
@@ -54,6 +61,8 @@ class WeatherFragment : BaseFragment() {
 
     private var isFutureWeatherType: Boolean = false
 
+    private var speechSynthesizer: SpeechSynthesizerHandler? = null
+
     override fun onAttach(context: Context?) {
         super.onAttach(context)
         if (arguments == null) {
@@ -63,19 +72,24 @@ class WeatherFragment : BaseFragment() {
         val json = arguments!!.getString(LauncherActivity.EXTRA_TEMPLATE)
         val element = JsonParser().parse(json!!)
         payload = element.asJsonObject
+
+        speechSynthesizer = launcher?.mEngineService?.getHandler("SpeechSynthesizer") as SpeechSynthesizerHandler
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val weatherForecastArray = payload!!.getAsJsonArray(Constant.PAYLOAD_WEATHER_FORECAST)
         val view: View
         if (weatherForecastArray != null && weatherForecastArray.size() > 0) {
-            isFutureWeatherType = !(payload!!.get("description") is JsonNull && payload!!.get("currentWeather") is JsonNull)
+            isFutureWeatherType = !(payload?.get("lowTemperature")?.asString.isNullOrEmpty()) && !(payload?.get("highTemperature")?.asString.isNullOrEmpty())
             if (isFutureWeatherType) {
                 view = inflater.inflate(R.layout.fragment_weather, container, false)
                 futureDaysWeatherContainer = view.findViewById(R.id.future_days_weather)
                 currentTemperature = view.findViewById(R.id.current_temperature)
-                position = view.findViewById(R.id.position)
-                today = view.findViewById(R.id.today)
+                highContent = view.findViewById(R.id.high_content)
+                lowContent = view.findViewById(R.id.low_content)
+                dayHighTemperature = view.findViewById(R.id.tv_day_high_temperature)
+                dayLowTemperature = view.findViewById(R.id.tv_day_low_temperature)
+                weatherTitle = view.findViewById(R.id.tv_weather_title)
                 todayTemperatureRange = view.findViewById(R.id.today_temperature_range)
                 todayWeatherIcon = view.findViewById(R.id.current_weather_icon)
                 ivSkillIcon = view.findViewById(R.id.iv_skill_icon)
@@ -126,10 +140,12 @@ class WeatherFragment : BaseFragment() {
                         generateWeatherItem(weatherForecastArray.get(i).asJsonObject),
                         layoutParams)
             }
-            currentTemperature!!.text = payload!!.get(Constant.PAYLOAD_CURRENT_WEATHER).asString
+
             val title = payload!!.getAsJsonObject(Constant.PAYLOAD_TITLE)
-            today!!.text = title.get(Constant.PAYLOAD_SUB_TITLE).asString
-            position!!.text = title.get(Constant.PAYLOAD_MAIN_TITLE).asString
+            val subTitle = title.get(Constant.PAYLOAD_SUB_TITLE).asString
+            val mainTitle = title.get(Constant.PAYLOAD_MAIN_TITLE).asString
+            weatherTitle?.text = String.format("%s  %s", subTitle, mainTitle)
+
             val currentWeatherIcon = payload!!.getAsJsonObject(Constant.PAYLOAD_CURRENT_WEATHER_ICON)
             if (!currentWeatherIcon.isJsonNull && context != null) {
                 val img = Gson().fromJson(currentWeatherIcon, Image::class.java)
@@ -139,9 +155,29 @@ class WeatherFragment : BaseFragment() {
                             .into(todayWeatherIcon!!)
                 }
             }
+
             val lowTemperature = payload!!.get(Constant.PAYLOAD_LOW_TEMPERATURE).asString
             val highTemperature = payload!!.get(Constant.PAYLOAD_HIGH_TEMPERATURE).asString
-            todayTemperatureRange!!.text = String.format("%s ~ %s", lowTemperature, highTemperature)
+
+            //是否是未来的某一天
+            val isSomeDay = (payload?.get("currentWeather")?.asString.isNullOrEmpty())
+            if (isSomeDay) {
+                highContent?.visibility = View.VISIBLE
+                lowContent?.visibility = View.VISIBLE
+                currentTemperature?.visibility = View.GONE
+                todayTemperatureRange?.visibility = View.GONE
+
+                dayHighTemperature?.text = highTemperature
+                dayLowTemperature?.text = lowTemperature
+            } else {
+                highContent?.visibility = View.GONE
+                lowContent?.visibility = View.GONE
+                currentTemperature?.visibility = View.VISIBLE
+                todayTemperatureRange?.visibility = View.VISIBLE
+
+                currentTemperature?.text = payload!!.get(Constant.PAYLOAD_CURRENT_WEATHER).asString
+                todayTemperatureRange?.text = String.format("%s ~ %s", lowTemperature, highTemperature)
+            }
 
             val skillIcon = payload!!.getAsJsonObject("skillIcon")
             if (!skillIcon.isJsonNull && context != null) {
@@ -189,7 +225,7 @@ class WeatherFragment : BaseFragment() {
             }
         }
         val tvFutureDay = view.findViewById<TextView>(R.id.tv_future_day)
-        tvFutureDay.text = weatherForecast.get(Constant.PAYLOAD_DATE).asString
+        tvFutureDay.text = weatherForecast.get(Constant.PAYLOAD_DAY).asString
         val tvFutureTemp = view.findViewById<TextView>(R.id.tv_future_temp)
         val lowValue = weatherForecast.get(Constant.PAYLOAD_LOW_TEMPERATURE).asString
         val highValue = weatherForecast.get(Constant.PAYLOAD_HIGH_TEMPERATURE).asString
@@ -265,5 +301,10 @@ class WeatherFragment : BaseFragment() {
             }
         }
         return view
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        speechSynthesizer?.mediaPlayer?.stop()
     }
 }

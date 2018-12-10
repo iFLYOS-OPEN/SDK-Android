@@ -17,14 +17,12 @@
 package com.iflytek.cyber.iot.show.core.fragment
 
 import android.app.Dialog
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
+import android.content.*
 import android.database.ContentObserver
 import android.graphics.Color
 import android.graphics.PorterDuff
 import android.graphics.drawable.ColorDrawable
+import android.net.ConnectivityManager
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
@@ -42,7 +40,6 @@ import com.iflytek.cyber.iot.show.core.EngineService
 import com.iflytek.cyber.iot.show.core.LauncherActivity
 import com.iflytek.cyber.iot.show.core.R
 import com.iflytek.cyber.iot.show.core.impl.MediaPlayer.MediaPlayerHandler
-import com.iflytek.cyber.iot.show.core.impl.MediaPlayer.MediaPlayerHandler.SpeakerHandler.*
 import com.iflytek.cyber.iot.show.core.utils.WifiInfoManager
 
 class SettingsFragment : DialogFragment(), View.OnClickListener {
@@ -68,7 +65,7 @@ class SettingsFragment : DialogFragment(), View.OnClickListener {
         override fun onStopTrackingTouch(seekBar: SeekBar) {
             val intent = Intent(context, EngineService::class.java)
             intent.action = EngineService.ACTION_UPDATE_VOLUME
-            intent.putExtra(EXTRA_VOLUME, seekBar.progress.toByte())
+            intent.putExtra(MediaPlayerHandler.EXTRA_VOLUME, seekBar.progress.toByte())
             context?.startService(intent)
         }
     }
@@ -122,12 +119,12 @@ class SettingsFragment : DialogFragment(), View.OnClickListener {
             if (intent == null || TextUtils.isEmpty(intent.action))
                 return
             when (intent.action) {
-                ACTION_VOLUME_CHANGED -> {
-                    val volume = intent.getByteExtra(EXTRA_VOLUME, 50)
+                MediaPlayerHandler.ACTION_VOLUME_CHANGED -> {
+                    val volume = intent.getByteExtra(MediaPlayerHandler.EXTRA_VOLUME, 50)
                     seekBarVolume?.progress = volume.toInt()
                 }
-                ACTION_MUTE_CHANGED -> {
-                    mute = intent.getBooleanExtra(MediaPlayerHandler.SpeakerHandler.EXTRA_MUTE, false)
+                MediaPlayerHandler.ACTION_MUTE_CHANGED -> {
+                    mute = intent.getBooleanExtra(MediaPlayerHandler.EXTRA_MUTE, false)
                     if (mute) {
                         ivVolume?.setImageResource(R.drawable.ic_volume_off_white_24dp)
                     } else {
@@ -242,17 +239,6 @@ class SettingsFragment : DialogFragment(), View.OnClickListener {
         seekBarVolume?.progressDrawable?.setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_IN)
         seekBarVolume?.thumb?.setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_IN)
         seekBarVolume?.max = 100
-        launcher?.mEngineService?.let { engineService ->
-            val volume = engineService.speakerVolume()
-            mute = engineService.speakerMute() == true
-
-            seekBarVolume?.progress = volume?.toInt() ?: 50
-            ivVolume?.setImageResource(
-                    if (mute)
-                        R.drawable.ic_volume_off_white_24dp
-                    else
-                        R.drawable.ic_volume_up_white_24dp)
-        }
         view.post {
             val height = view.height
 
@@ -272,34 +258,58 @@ class SettingsFragment : DialogFragment(), View.OnClickListener {
         WifiInfoManager.getManager().registerWifiRssiCallback(context) { this@SettingsFragment.updateNetworkRssi() }
     }
 
-    private fun updateWifiName() {
-        val context = context ?: return
-        val info = WifiInfoManager.getManager().getWifiInfo(context)
-        if (info != null) {
-            val ssid = info.ssid
-            val name = ssid.substring(1, ssid.length - 1)
-            wifiName!!.text = name
-        }
-    }
-
     private fun updateNetworkRssi() {
         val context = context ?: return
-        updateWifiName()
-        val level = WifiInfoManager.getManager().getWifiSignalLevel(context)
-        when (level) {
-            0 -> ivNetwork?.setImageResource(R.drawable.ic_signal_wifi_0_bar_white_24dp)
-            1 -> ivNetwork?.setImageResource(R.drawable.ic_signal_wifi_1_bar_white_24dp)
-            2 -> ivNetwork?.setImageResource(R.drawable.ic_signal_wifi_2_bar_white_24dp)
-            3 -> ivNetwork?.setImageResource(R.drawable.ic_signal_wifi_3_bar_white_24dp)
-            4 -> ivNetwork?.setImageResource(R.drawable.ic_signal_wifi_4_bar_white_24dp)
-            else -> ivNetwork?.setImageResource(R.drawable.ic_baseline_wifi_error_24px)
+        val manager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+
+        val info = manager.activeNetworkInfo ?: return
+
+        val netType = info.type
+        when (netType) {
+            ConnectivityManager.TYPE_WIFI -> {  //WIFI
+                val level = WifiInfoManager.getManager().getWifiSignalLevel(context)
+
+                val ssid = WifiInfoManager.getManager().getWifiInfo(context)?.ssid
+                ssid?.let {
+                    val name = ssid.substring(1, ssid.length - 1)
+                    wifiName?.text = name
+                }
+                when (level) {
+                    0 -> ivNetwork?.setImageResource(R.drawable.ic_signal_wifi_0_bar_white_24dp)
+                    1 -> ivNetwork?.setImageResource(R.drawable.ic_signal_wifi_1_bar_white_24dp)
+                    2 -> ivNetwork?.setImageResource(R.drawable.ic_signal_wifi_2_bar_white_24dp)
+                    3 -> ivNetwork?.setImageResource(R.drawable.ic_signal_wifi_3_bar_white_24dp)
+                    4 -> ivNetwork?.setImageResource(R.drawable.ic_signal_wifi_4_bar_white_24dp)
+                    else -> ivNetwork?.setImageResource(R.drawable.ic_baseline_wifi_error_24px)
+                }
+            }
+            ConnectivityManager.TYPE_MOBILE -> {   //MOBILE
+                ivNetwork?.setImageResource(R.drawable.ic_baseline_network)
+                wifiName?.text = getString(R.string.mobile_data)
+            }
+            else -> {
+                ivNetwork?.setImageResource(R.drawable.ic_baseline_wifi_error_24px)
+                wifiName?.text = getString(R.string.offline)
+            }
         }
     }
 
     override fun onResume() {
         super.onResume()
 
-        updateWifiName()
+        updateNetworkRssi()
+
+        launcher?.mEngineService?.let { engineService ->
+            val volume = engineService.speakerVolume()
+            mute = engineService.speakerMute() == true
+
+            seekBarVolume?.progress = volume?.toInt() ?: 50
+            ivVolume?.setImageResource(
+                    if (mute)
+                        R.drawable.ic_volume_off_white_24dp
+                    else
+                        R.drawable.ic_volume_up_white_24dp)
+        }
 
         if (null != dialog && null != dialog.window) {
             dialog.window!!.decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_LAYOUT_STABLE
@@ -361,12 +371,32 @@ class SettingsFragment : DialogFragment(), View.OnClickListener {
                 window.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
                 window.setWindowAnimations(R.style.SettingsAnimation)
             }
+            dialog.setOnKeyListener(DialogInterface.OnKeyListener { _, keyCode, event ->
+                if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
+                    if (event.action == KeyEvent.ACTION_DOWN) {
+                        val intent = Intent(context, EngineService::class.java)
+                        intent.action = EngineService.ACTION_OFFSET_VOLUME
+                        intent.putExtra(EngineService.EXTRA_VOLUME, 10.toByte())
+                        context?.startService(intent)
+                        return@OnKeyListener true
+                    }
+                } else if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
+                    if (event.action == KeyEvent.ACTION_DOWN) {
+                        val intent = Intent(context, EngineService::class.java)
+                        intent.action = EngineService.ACTION_OFFSET_VOLUME
+                        intent.putExtra(EngineService.EXTRA_VOLUME, (-10).toByte())
+                        context?.startService(intent)
+                        return@OnKeyListener true
+                    }
+                }
+                false
+            })
         }
 
         val activity = activity ?: return
         val intentFilter = IntentFilter()
-        intentFilter.addAction(ACTION_VOLUME_CHANGED)
-        intentFilter.addAction(ACTION_MUTE_CHANGED)
+        intentFilter.addAction(MediaPlayerHandler.ACTION_VOLUME_CHANGED)
+        intentFilter.addAction(MediaPlayerHandler.ACTION_MUTE_CHANGED)
         activity.registerReceiver(volumeChangeReceiver, intentFilter)
 
         try {

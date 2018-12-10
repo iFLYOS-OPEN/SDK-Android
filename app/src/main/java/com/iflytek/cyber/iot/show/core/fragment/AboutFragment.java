@@ -37,6 +37,7 @@ import com.iflytek.cyber.iot.show.core.model.ContentStorage;
 import androidx.navigation.fragment.NavHostFragment;
 
 public class AboutFragment extends BaseFragment {
+    private boolean changeBinding = false;
 
     @Nullable
     @Override
@@ -80,6 +81,7 @@ public class AboutFragment extends BaseFragment {
     }
 
     private void changeBinding() {
+        changeBinding = true;
         Activity activity = getActivity();
         if (activity == null)
             return;
@@ -87,7 +89,7 @@ public class AboutFragment extends BaseFragment {
         ContentStorage.get().saveContent(null);
 
         Intent intent = new Intent(activity, EngineService.class);
-        intent.setAction(EngineService.ACTION_LOGOUT_NOT_NOTIFY);
+        intent.setAction(EngineService.ACTION_LOGOUT);
         activity.startService(intent);
 
         clearBackStack();
@@ -97,5 +99,14 @@ public class AboutFragment extends BaseFragment {
     private void clearBackStack() {
         NavHostFragment.findNavController(this).popBackStack(R.id.main_fragment, true);
         NavHostFragment.findNavController(this).popBackStack(R.id.splash_fragment, true);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (getLauncher() != null) {
+            if (!changeBinding)
+                getLauncher().showSimpleTips();
+        }
     }
 }

@@ -22,6 +22,7 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.support.v7.widget.AppCompatTextView
 import android.util.AttributeSet
+import android.util.Log
 
 
 class HighlightTextView
@@ -38,6 +39,7 @@ class HighlightTextView
     private var animationStopped = false
 
     companion object {
+        private const val sTag = "HighlightTextView"
         private const val ALPHA_COVER = 84
     }
 
@@ -51,6 +53,7 @@ class HighlightTextView
         super.onDraw(canvas)
 
         if (!animationStopped) {
+            val height = measuredHeight
             val width = measuredWidth
 
             // 高亮上部遮罩
@@ -77,6 +80,7 @@ class HighlightTextView
                 timestampArray.add(0)
             }
         }
+        Log.d(sTag, "array: ${timestampArray.toArray()?.contentToString()}")
     }
 
     fun stopAnimation() {

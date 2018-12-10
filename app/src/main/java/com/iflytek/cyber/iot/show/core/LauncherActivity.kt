@@ -32,23 +32,28 @@ import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.util.TypedValue
+import android.view.KeyEvent
 import android.view.View
 import android.view.animation.*
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.navigation.NavController
 import androidx.navigation.NavOptions
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
 import cn.iflyos.iace.core.PlatformInterface
 import cn.iflyos.iace.iflyos.AuthProvider
 import cn.iflyos.iace.iflyos.IflyosClient
+import com.iflytek.cyber.iot.show.core.impl.AuthProvider.AuthProviderHandler
 import com.iflytek.cyber.iot.show.core.impl.Logger.LogEntry
 import com.iflytek.cyber.iot.show.core.impl.Logger.LoggerHandler
 import com.iflytek.cyber.iot.show.core.impl.SpeechRecognizer.SpeechRecognizerHandler
 import com.iflytek.cyber.iot.show.core.retrofit.SSLSocketFactoryCompat
+import com.iflytek.cyber.iot.show.core.utils.ConnectivityUtils
 import com.iflytek.cyber.iot.show.core.widget.RecognizeWaveView
 import jp.wasabeef.blurry.Blurry
 import kotlinx.android.synthetic.main.activity_launcher.*
+import java.lang.ref.SoftReference
 import java.lang.ref.WeakReference
 import java.security.cert.X509Certificate
 import java.util.*
@@ -76,6 +81,55 @@ class LauncherActivity : AppCompatActivity(), Observer {
 
     private val observerSet = HashSet<Observer>()
 
+    private val longPressHandler = LongPressHandler(this)
+    private var isNetworkAvailable: Boolean = false
+        get() {
+            return if (Build.VERSION.SDK_INT < 21) {
+                ConnectivityUtils.isNetworkAvailable(this)
+            } else {
+                field
+            }
+        }
+
+    private var mStatusType = StatusType.NORMAL
+    private var mStatusHidden = false
+    private val networkErrorClickListener = View.OnClickListener {
+        val navController = findNavController(R.id.fragment)
+        val currentDestinationId = navController.currentDestination?.id
+        if (mStatusHidden || (currentDestinationId != R.id.main_fragment &&
+                        currentDestinationId != R.id.player_fragment)) {
+            return@OnClickListener
+        }
+        val arguments = Bundle()
+        arguments.putBoolean("RESET_WIFI", true)
+        navController.navigate(R.id.action_main_to_wifi_fragment, arguments)
+    }
+    private val authorizeErrorClickListener = View.OnClickListener {
+        val navController = findNavController(R.id.fragment)
+        val currentDestinationId = navController.currentDestination?.id
+        if (mStatusHidden || (currentDestinationId != R.id.main_fragment &&
+                        currentDestinationId != R.id.player_fragment)) {
+            return@OnClickListener
+        }
+        val authProvider = mEngineService?.getHandler("AuthProvider")
+        if (authProvider is AuthProviderHandler)
+            authProvider.onAuthStateChanged(AuthProvider.AuthState.UNINITIALIZED,
+                    AuthProvider.AuthError.NO_ERROR)
+        val arguments = Bundle()
+        arguments.putBoolean("shouldShowTips", true)
+        navController.navigate(R.id.action_main_to_pair_fragment, arguments)
+    }
+
+    private val tapToTalkClickListener = View.OnClickListener {
+        if (mStatusHidden) {
+            return@OnClickListener
+        }
+        val intent = Intent(this, EngineService::class.java)
+        intent.action = EngineService.ACTION_TAP_TO_TALK
+        startService(intent)
+        handleVoiceStart()
+    }
+
     companion object {
         const val EXTRA_TEMPLATE = "template"
 
@@ -83,6 +137,17 @@ class LauncherActivity : AppCompatActivity(), Observer {
         private const val sTag = "LauncherActivity"
 
         private const val REQUEST_PERMISSION_CODE = 1001
+    }
+
+    enum class StatusType {
+        AUTHORIZE_ERROR,
+        NETWORK_ERROR,
+        NORMAL,
+        RETRYING,
+        SERVER_ERROR,
+        TIMEOUT_ERROR,
+        UNKNOWN_ERROR,
+        UNSUPPORTED_DEVICE_ERROR,
     }
 
     fun addObserver(observer: Observer) {
@@ -110,7 +175,9 @@ class LauncherActivity : AppCompatActivity(), Observer {
                                 LoggerHandler.AUTH_LOG_STATE -> {
                                     try {
                                         val authState = template.optString("auth_state")
+                                        val authError = template.optString("auth_error")
                                         if (authState == AuthProvider.AuthState.REFRESHED.toString()) {
+                                            mStatusType = StatusType.NORMAL
                                             val navController = findNavController(R.id.fragment)
                                             when (navController.currentDestination?.id) {
                                                 R.id.wifi_fragment, R.id.about_fragment -> {
@@ -131,30 +198,40 @@ class LauncherActivity : AppCompatActivity(), Observer {
                                                 if (controller.currentDestination?.id == R.id.splash_fragment)
                                                     NavHostFragment.findNavController(fragment).navigate(R.id.action_to_welcome_fragment)
                                             } else {
-                                                val controller = NavHostFragment.findNavController(fragment)
-                                                if (controller.currentDestination?.id == R.id.splash_fragment) {
-                                                    val navController = findNavController(R.id.fragment)
+                                                val navController = findNavController(R.id.fragment)
+                                                if (navController.currentDestination?.id == R.id.splash_fragment) {
                                                     navController.navigate(R.id.action_to_main_fragment)
-                                                    if (navController.currentDestination?.id != R.id.main_fragment) {
-                                                        val id = navController.currentDestination?.id
-                                                        when (id) {
-                                                            R.id.body_template_fragment,
-                                                            R.id.body_template_3_fragment, R.id.weather_fragment,
-                                                            R.id.list_fragment, R.id.about_fragment -> {
-                                                                navController.navigateUp()
-                                                            }
-                                                        }
+                                                }
+                                                val error = AuthProvider.AuthError.valueOf(authError)
+                                                when (error) {
+                                                    AuthProvider.AuthError.AUTHORIZATION_EXPIRED -> {
+                                                        mStatusType = StatusType.AUTHORIZE_ERROR
                                                     }
-                                                    when (navController.currentDestination?.id) {
-                                                        R.id.wifi_fragment, R.id.about_fragment -> {
-
-                                                        }
-                                                        else -> {
-                                                            runOnUiThread {
-                                                                showDisconnected()
-                                                            }
-                                                        }
+                                                    AuthProvider.AuthError.AUTHORIZATION_FAILED -> {
+                                                        mStatusType = if (isNetworkAvailable)
+                                                            StatusType.AUTHORIZE_ERROR
+                                                        else
+                                                            StatusType.NETWORK_ERROR
                                                     }
+                                                    AuthProvider.AuthError.SERVER_ERROR,
+                                                    AuthProvider.AuthError.INTERNAL_ERROR -> {
+                                                        mStatusType = StatusType.SERVER_ERROR
+                                                    }
+                                                    AuthProvider.AuthError.UNAUTHORIZED_CLIENT -> {
+                                                        mStatusType = StatusType.UNSUPPORTED_DEVICE_ERROR
+                                                    }
+                                                    AuthProvider.AuthError.UNKNOWN_ERROR -> {
+                                                        mStatusType = StatusType.UNKNOWN_ERROR
+                                                    }
+                                                    AuthProvider.AuthError.NO_ERROR -> {
+                                                        // ignore
+                                                    }
+                                                    else -> {
+                                                        mStatusType = StatusType.UNKNOWN_ERROR
+                                                    }
+                                                }
+                                                runOnUiThread {
+                                                    updateBottomBar()
                                                 }
                                             }
                                         } else {
@@ -184,28 +261,32 @@ class LauncherActivity : AppCompatActivity(), Observer {
                             when (status) {
                                 IflyosClient.ConnectionStatus.CONNECTED.toString() -> {
                                     runOnUiThread {
-                                        showConnected()
+                                        mStatusType = StatusType.NORMAL
+                                        updateBottomBar()
                                     }
                                 }
                                 IflyosClient.ConnectionStatus.DISCONNECTED.toString() -> {
-                                    val navController = findNavController(R.id.fragment)
-                                    if (navController.currentDestination?.id != R.id.main_fragment) {
-                                        val id = navController.currentDestination?.id
-                                        when (id) {
-                                            R.id.body_template_fragment,
-                                            R.id.body_template_3_fragment, R.id.weather_fragment,
-                                            R.id.list_fragment, R.id.about_fragment -> {
-                                                navController.navigateUp()
+                                    if (reason != IflyosClient.ConnectionChangedReason.ACL_CLIENT_REQUEST.toString()) {
+                                        val navController = findNavController(R.id.fragment)
+                                        if (navController.currentDestination?.id != R.id.main_fragment) {
+                                            val id = navController.currentDestination?.id
+                                            when (id) {
+                                                R.id.body_template_fragment,
+                                                R.id.body_template_3_fragment, R.id.weather_fragment,
+                                                R.id.list_fragment, R.id.about_fragment -> {
+                                                    navController.navigateUp()
+                                                }
                                             }
                                         }
-                                    }
-                                    when (navController.currentDestination?.id) {
-                                        R.id.wifi_fragment, R.id.about_fragment -> {
+                                        when (navController.currentDestination?.id) {
+                                            R.id.wifi_fragment, R.id.about_fragment -> {
 
-                                        }
-                                        else -> {
-                                            runOnUiThread {
-                                                showDisconnected()
+                                            }
+                                            else -> {
+                                                runOnUiThread {
+                                                    mStatusType = StatusType.NETWORK_ERROR
+                                                    updateBottomBar()
+                                                }
                                             }
                                         }
                                     }
@@ -229,7 +310,8 @@ class LauncherActivity : AppCompatActivity(), Observer {
                                             }
                                             else -> {
                                                 runOnUiThread {
-                                                    showDisconnected()
+                                                    mStatusType = StatusType.NETWORK_ERROR
+                                                    updateBottomBar()
                                                 }
                                             }
                                         }
@@ -241,6 +323,7 @@ class LauncherActivity : AppCompatActivity(), Observer {
                             val state = template.optString("state")
                             when (state) {
                                 IflyosClient.DialogState.LISTENING.toString() -> {
+                                    mEngineService?.stopAlert()
                                     try {
                                         val nav = findNavController(R.id.fragment)
                                         when (nav.currentDestination?.id) {
@@ -270,7 +353,19 @@ class LauncherActivity : AppCompatActivity(), Observer {
                             showTemplate(R.id.body_template_3_fragment, template.toString(), true)
                         }
                         LoggerHandler.LIST_TEMPLATE1 -> {
-                            showTemplate(R.id.list_fragment, template.toString(), true)
+                            showTemplate(R.id.list_fragment, template.toString())
+                        }
+                        LoggerHandler.EXCEPTION_LOG -> {
+                            val code = template.getString("code")
+                            when (code) {
+                                "UNAUTHORIZED_EXCEPTION" -> {
+                                    // Token 过期或已取消绑定
+                                    mStatusType = StatusType.AUTHORIZE_ERROR
+                                    runOnUiThread {
+                                        updateBottomBar()
+                                    }
+                                }
+                            }
                         }
                     }
                 } else
@@ -281,6 +376,68 @@ class LauncherActivity : AppCompatActivity(), Observer {
         }
     }
 
+    private fun updateBottomBar() {
+        when (mStatusType) {
+            StatusType.NORMAL -> {
+                tvTipsSimple?.setText(R.string.tips_sentence_simple)
+                tvTipsSimple?.setOnClickListener(tapToTalkClickListener)
+                ivLogo?.setOnClickListener(tapToTalkClickListener)
+                ivLogo?.setImageResource(R.drawable.ic_voice_bar_regular_white_32dp)
+            }
+            StatusType.AUTHORIZE_ERROR -> {
+                tvTipsSimple?.setText(R.string.authorize_error)
+                tvTipsSimple?.setOnClickListener(authorizeErrorClickListener)
+                ivLogo?.setOnClickListener(authorizeErrorClickListener)
+                ivLogo?.setImageResource(R.drawable.ic_voice_bar_exception_white_32dp)
+            }
+            StatusType.SERVER_ERROR -> {
+                tvTipsSimple?.setText(R.string.unknown_error)
+                tvTipsSimple?.setOnClickListener(null)
+                ivLogo?.setImageResource(R.drawable.ic_voice_bar_exception_white_32dp)
+                ivLogo?.setOnClickListener(null)
+            }
+            StatusType.NETWORK_ERROR -> {
+                tvTipsSimple?.setText(R.string.network_error)
+                tvTipsSimple?.setOnClickListener(networkErrorClickListener)
+                ivLogo?.setOnClickListener(networkErrorClickListener)
+                ivLogo?.setImageResource(R.drawable.ic_voice_bar_exception_white_32dp)
+            }
+            StatusType.UNKNOWN_ERROR -> {
+                tvTipsSimple?.setText(R.string.unknown_error)
+                tvTipsSimple?.setOnClickListener(null)
+                ivLogo?.setImageResource(R.drawable.ic_voice_bar_exception_white_32dp)
+                ivLogo?.setOnClickListener(null)
+            }
+            StatusType.RETRYING -> {
+                tvTipsSimple?.setText(R.string.retry_connecting)
+                tvTipsSimple?.setOnClickListener(null)
+                ivLogo?.setImageResource(R.drawable.ic_voice_bar_exception_white_32dp)
+                ivLogo?.setOnClickListener(null)
+            }
+            StatusType.UNSUPPORTED_DEVICE_ERROR -> {
+                tvTipsSimple?.setText(R.string.unsupported_device_error)
+                tvTipsSimple?.setOnClickListener(null)
+                ivLogo?.setImageResource(R.drawable.ic_voice_bar_exception_white_32dp)
+                ivLogo?.setOnClickListener(null)
+            }
+            else -> {
+
+            }
+        }
+        (findViewById<View>(R.id.error_next)?.parent as View).run {
+            post {
+                requestLayout()
+            }
+        }
+        if (!mStatusHidden)
+            if (mStatusType == StatusType.NORMAL) {
+                hideErrorBar()
+            } else {
+                Log.w(sTag, "show Error bar: $mStatusType")
+                showErrorBar()
+            }
+    }
+
     private fun showTemplate(id: Int, template: String) {
         showTemplate(id, template, false)
     }
@@ -289,55 +446,40 @@ class LauncherActivity : AppCompatActivity(), Observer {
         val nav = findNavController(R.id.fragment)
         when (nav.currentDestination?.id) {
             R.id.main_fragment, R.id.player_fragment -> {
-                val bundle = Bundle()
-                bundle.putString(EXTRA_TEMPLATE, template)
-
-                val navOptions = NavOptions.Builder()
-                        .setEnterAnim(R.anim.slide_in_top)
-                        .setExitAnim(android.R.anim.fade_out)
-                        .setPopExitAnim(R.anim.slide_page_pop_exit)
-                        .setPopEnterAnim(android.R.anim.fade_in)
-                        .build()
-                nav.navigate(id, bundle, navOptions)
-
-                if (withCount) {
-                    val message = Message.obtain()
-                    message.what = CounterHandler.START_COUNT
-                    message.arg1 = id
-                    counterHandler.sendMessage(message)
-                }
+                templateToFragment(nav, id, template, withCount)
+            }
+            else -> {
+                findViewById<View>(R.id.fragment).postDelayed({
+                    templateToFragment(nav, id, template, withCount)
+                }, 300)
             }
         }
     }
 
-    private fun showConnected() {
-        hideErrorBar()
-        val onClickListener = View.OnClickListener {
-            val intent = Intent(this, EngineService::class.java)
-            intent.action = EngineService.ACTION_TAP_TO_TALK
-            startService(intent)
-            handleVoiceStart()
-        }
-        tvTipsSimple?.setText(R.string.tips_sentence_simple)
-        tvTipsSimple?.setOnClickListener(onClickListener)
-        ivLogo?.setOnClickListener(onClickListener)
-        ivLogo?.setImageResource(R.drawable.ic_voice_bar_regular_white_32dp)
-    }
+    private fun templateToFragment(nav: NavController, id: Int, template: String, withCount: Boolean) {
+        nav.popBackStack(R.id.body_template_3_fragment, true)
+        nav.popBackStack(R.id.body_template_fragment, true)
+        nav.popBackStack(R.id.list_fragment, true)
+        nav.popBackStack(R.id.weather_fragment, true)
 
-    private fun showDisconnected() {
-        showErrorBar()
-        val onClickListener = View.OnClickListener {
-            val arguments = Bundle()
-            arguments.putBoolean("RESET_WIFI", true)
-            val navController = findNavController(R.id.fragment)
-            if (navController.currentDestination?.id == R.id.main_fragment) {
-                navController.navigate(R.id.action_main_to_wifi_fragment, arguments)
-            }
+        val bundle = Bundle()
+        bundle.putString(EXTRA_TEMPLATE, template)
+
+        val navOptions = NavOptions.Builder()
+                .setEnterAnim(R.anim.slide_in_top)
+                .setExitAnim(android.R.anim.fade_out)
+                .setPopExitAnim(R.anim.slide_page_pop_exit)
+                .setPopEnterAnim(android.R.anim.fade_in)
+                .build()
+        nav.navigate(id, bundle, navOptions)
+
+        if (withCount) {
+            counterHandler.removeCallbacksAndMessages(null)
+            val message = Message.obtain()
+            message.what = CounterHandler.START_COUNT
+            message.arg1 = id
+            counterHandler.sendMessage(message)
         }
-        tvTipsSimple?.setText(R.string.network_error)
-        tvTipsSimple?.setOnClickListener(onClickListener)
-        ivLogo?.setOnClickListener(onClickListener)
-        ivLogo?.setImageResource(R.drawable.ic_voice_bar_exception_white_32dp)
     }
 
     private val iatRunnable = Runnable {
@@ -355,7 +497,6 @@ class LauncherActivity : AppCompatActivity(), Observer {
     }
 
     private fun hideErrorBar() {
-        Log.d(sTag, "hideErrorBar")
         error_bar.animate().cancel()
         error_bar.animate()
                 .alpha(0f)
@@ -377,7 +518,6 @@ class LauncherActivity : AppCompatActivity(), Observer {
     }
 
     private fun showErrorBar() {
-        Log.d(sTag, "showErrorBar")
         error_bar.animate().cancel()
         error_bar.animate()
                 .alpha(1f)
@@ -399,6 +539,7 @@ class LauncherActivity : AppCompatActivity(), Observer {
     }
 
     fun hideSimpleTips() {
+        mStatusHidden = true
         hideErrorBar()
         ivLogo?.run {
             val scaleAnimation = ScaleAnimation(1f, 0f, 1f, 0f, (width / 2).toFloat(), (height / 2).toFloat())
@@ -465,6 +606,7 @@ class LauncherActivity : AppCompatActivity(), Observer {
         tipsSet.map {
             it?.startAnimation(animationSet)
         }
+        ivIatLogo?.isClickable = true
         ivIatLogo?.run {
             val scaleAnimation = ScaleAnimation(0f, 1f, 0f, 1f, (width / 2).toFloat(), (height / 2).toFloat())
             scaleAnimation.duration = 200
@@ -493,31 +635,32 @@ class LauncherActivity : AppCompatActivity(), Observer {
     }
 
     fun showSimpleTips() {
-        if (mEngineService?.connectionStatus() != IflyosClient.ConnectionStatus.CONNECTED) {
-            showErrorBar()
-        }
+        mStatusHidden = false
+        updateBottomBar()
         ivLogo?.run {
-            val scaleAnimation = ScaleAnimation(0f, 1f, 0f, 1f, (width / 2).toFloat(), (height / 2).toFloat())
-            scaleAnimation.duration = 200
-            scaleAnimation.startOffset = 150
-            scaleAnimation.setAnimationListener(object : Animation.AnimationListener {
-                override fun onAnimationStart(animation: Animation?) {
-                    scaleX = 1f
-                    scaleY = 1f
-                }
+            if (scaleX == 0f && scaleY == 0f) {
+                val scaleAnimation = ScaleAnimation(0f, 1f, 0f, 1f, (width / 2).toFloat(), (height / 2).toFloat())
+                scaleAnimation.duration = 200
+                scaleAnimation.startOffset = 150
+                scaleAnimation.setAnimationListener(object : Animation.AnimationListener {
+                    override fun onAnimationStart(animation: Animation?) {
+                        scaleX = 1f
+                        scaleY = 1f
+                    }
 
-                override fun onAnimationRepeat(animation: Animation?) {
+                    override fun onAnimationRepeat(animation: Animation?) {
 
-                }
+                    }
 
-                override fun onAnimationEnd(animation: Animation?) {
-                    scaleX = 1f
-                    scaleY = 1f
-                }
+                    override fun onAnimationEnd(animation: Animation?) {
+                        scaleX = 1f
+                        scaleY = 1f
+                    }
 
 
-            })
-            startAnimation(scaleAnimation)
+                })
+                startAnimation(scaleAnimation)
+            }
         }
         ivLogo?.isClickable = true
 
@@ -560,6 +703,7 @@ class LauncherActivity : AppCompatActivity(), Observer {
             it?.startAnimation(animationSet)
         }
 
+        ivIatLogo?.isClickable = false
         ivIatLogo?.run {
             val scaleAnimation = ScaleAnimation(1f, 0f, 1f, 0f, (width / 2).toFloat(), (height / 2).toFloat())
             scaleAnimation.duration = 150
@@ -645,7 +789,11 @@ class LauncherActivity : AppCompatActivity(), Observer {
 
         setImmersiveFlags()
 
+        hideIatPage()
+
         bindService(Intent(this, EngineService::class.java), connection, Context.BIND_AUTO_CREATE)
+
+        isNetworkAvailable = ConnectivityUtils.isNetworkAvailable(this)
 
         // api 21 以上该广播过时
         @Suppress("DEPRECATION")
@@ -659,10 +807,34 @@ class LauncherActivity : AppCompatActivity(), Observer {
                 networkCallback = object : ConnectivityManager.NetworkCallback() {
                     override fun onAvailable(network: Network?) {
                         super.onAvailable(network)
-                        if (mEngineService?.connectionStatus() != IflyosClient.ConnectionStatus.PENDING) {
-                            val service = Intent(this@LauncherActivity, EngineService::class.java)
-                            service.action = EngineService.ACTION_RECONNECT
-                            startService(service)
+                        isNetworkAvailable = true
+                        if (mEngineService?.connectionStatus() == IflyosClient.ConnectionStatus.DISCONNECTED) {
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                mEngineService?.reconnectIVS()
+                            } else {
+                                val service = Intent(this@LauncherActivity, EngineService::class.java)
+                                service.action = EngineService.ACTION_RECONNECT
+                                startService(service)
+                            }
+
+                            mStatusType = StatusType.RETRYING
+                            runOnUiThread {
+                                updateBottomBar()
+                            }
+                        }
+                    }
+
+                    override fun onLost(network: Network?) {
+                        super.onLost(network)
+                        isNetworkAvailable = false
+                        val networkAvailable = ConnectivityUtils.isNetworkAvailable(this@LauncherActivity)
+                        mStatusType = if (networkAvailable) {
+                            StatusType.NORMAL
+                        } else {
+                            StatusType.NETWORK_ERROR
+                        }
+                        runOnUiThread {
+                            updateBottomBar()
                         }
                     }
                 }
@@ -689,7 +861,11 @@ class LauncherActivity : AppCompatActivity(), Observer {
             val intent = Intent(this, EngineService::class.java)
             intent.action = EngineService.ACTION_TAP_TO_TALK
             startService(intent)
-            handleVoiceStart()
+        }
+        ivIatLogo?.setOnClickListener {
+            val intent = Intent(this, EngineService::class.java)
+            intent.action = EngineService.ACTION_STOP_CAPTURE
+            startService(intent)
         }
 
         ivBlur?.post {
@@ -734,7 +910,9 @@ class LauncherActivity : AppCompatActivity(), Observer {
                         mEngineService?.addObserver(this@LauncherActivity)
                         if (mEngineService?.getAuthState() == AuthProvider.AuthState.UNINITIALIZED
                                 && mEngineService?.getLocalAccessToken().isNullOrEmpty()) {
-                            NavHostFragment.findNavController(fragment).navigate(R.id.action_to_welcome_fragment)
+                            if (NavHostFragment.findNavController(fragment).currentDestination?.id == R.id.splash_fragment) {
+                                NavHostFragment.findNavController(fragment).navigate(R.id.action_to_welcome_fragment)
+                            }
                         }
                     } else {
                         AlertDialog.Builder(this)
@@ -745,7 +923,7 @@ class LauncherActivity : AppCompatActivity(), Observer {
                                     requestPermission()
                                 }
                                 .setNegativeButton(R.string.close) { _, _ ->
-                                    finish()
+                                    finish() //TODO: As a Launcher, app wouldn't finish at fact, remove this in future
                                 }
                                 .show()
                     }
@@ -800,7 +978,7 @@ class LauncherActivity : AppCompatActivity(), Observer {
             when (intent?.action) {
                 ConnectivityManager.CONNECTIVITY_ACTION -> {
                     // api 21 以上应使用 networkCallback
-                    if (mEngineService?.connectionStatus() != IflyosClient.ConnectionStatus.PENDING) {
+                    if (mEngineService?.connectionStatus() == IflyosClient.ConnectionStatus.DISCONNECTED) {
                         val connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE)
                         if (connectivityManager is ConnectivityManager) {
                             val networkInfo = connectivityManager.activeNetworkInfo
@@ -808,6 +986,12 @@ class LauncherActivity : AppCompatActivity(), Observer {
                                 val service = Intent(this@LauncherActivity, EngineService::class.java)
                                 service.action = EngineService.ACTION_RECONNECT
                                 startService(service)
+
+                                mStatusType = StatusType.RETRYING
+                                updateBottomBar()
+                            } else {
+                                mStatusType = StatusType.NETWORK_ERROR
+                                updateBottomBar()
                             }
                         }
                     }
@@ -907,8 +1091,95 @@ class LauncherActivity : AppCompatActivity(), Observer {
         companion object {
             internal const val START_COUNT = 0x1
             internal const val CONTINUE_COUNT = 0x2
-            internal const val MAX_COUNT_SECONDS = 15
+            internal const val MAX_COUNT_SECONDS = 20
             internal const val SHOW_COUNT_SECONDS = 10
         }
     }
+
+    private fun offsetVolume(volume: Byte) {
+        mEngineService?.offsetVolume(volume)
+    }
+
+    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
+        if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
+            longPressHandler.sendEmptyMessage(LongPressHandler.VOLUME_DOWN)
+            return true
+        } else if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
+            longPressHandler.sendEmptyMessage(LongPressHandler.VOLUME_UP)
+            return true
+        }
+        return super.onKeyDown(keyCode, event)
+    }
+
+    override fun onKeyUp(keyCode: Int, event: KeyEvent?): Boolean {
+        when (keyCode) {
+            KeyEvent.KEYCODE_VOLUME_UP, KeyEvent.KEYCODE_VOLUME_DOWN -> {
+                longPressHandler.longPressEnable = false
+                longPressHandler.sendEmptyMessage(LongPressHandler.VOLUME_REPORT)
+                return true
+            }
+        }
+        return super.onKeyUp(keyCode, event)
+    }
+
+    override fun onKeyLongPress(keyCode: Int, event: KeyEvent?): Boolean {
+        when (keyCode) {
+            KeyEvent.KEYCODE_VOLUME_DOWN -> {
+                longPressHandler.longPressEnable = true
+                longPressHandler.sendEmptyMessage(LongPressHandler.VOLUME_DOWN)
+                return true
+            }
+            KeyEvent.KEYCODE_VOLUME_UP -> {
+                longPressHandler.longPressEnable = true
+                longPressHandler.sendEmptyMessage(LongPressHandler.VOLUME_UP)
+                return true
+            }
+        }
+        return super.onKeyLongPress(keyCode, event)
+    }
+
+    private class LongPressHandler(activity: LauncherActivity) : Handler() {
+        val softReference = SoftReference<LauncherActivity>(activity)
+        var longPressEnable = false
+
+        companion object {
+            const val VOLUME_UP = 1
+            const val VOLUME_DOWN = 0
+            const val VOLUME_REPORT = 2
+
+            private const val VOLUME_OFFSET_UP: Byte = 10
+            private const val VOLUME_OFFSET_DOWN: Byte = -10
+        }
+
+        override fun handleMessage(msg: Message?) {
+            val activity = softReference.get()
+            activity?.let {
+                when (msg?.what) {
+                    VOLUME_DOWN -> {
+                        activity.offsetVolume(VOLUME_OFFSET_DOWN)
+                        if (longPressEnable) {
+                            sendEmptyMessageDelayed(VOLUME_DOWN, 200)
+                        } else {
+
+                        }
+                    }
+                    VOLUME_UP -> {
+                        activity.offsetVolume(VOLUME_OFFSET_UP)
+                        if (longPressEnable) {
+                            sendEmptyMessageDelayed(VOLUME_UP, 200)
+                        } else {
+
+                        }
+                    }
+                    VOLUME_REPORT -> {
+
+                    }
+                    else -> {
+                        // ignore
+                    }
+                }
+            }
+        }
+    }
+
 }

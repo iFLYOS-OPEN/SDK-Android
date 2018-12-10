@@ -16,6 +16,7 @@
 
 package com.iflytek.cyber.iot.show.core.fragment
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
@@ -28,10 +29,13 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.support.constraint.ConstraintLayout
+import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
+import android.support.v4.content.PermissionChecker
 import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.app.AlertDialog
 import android.support.v7.widget.RecyclerView
+import android.text.TextUtils
 import android.util.Log
 import android.util.TypedValue
 import android.view.LayoutInflater
@@ -42,6 +46,7 @@ import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.navigation.Navigation
+import androidx.navigation.fragment.findNavController
 import com.iflytek.cyber.iot.show.core.LauncherActivity
 import com.iflytek.cyber.iot.show.core.R
 import com.iflytek.cyber.iot.show.core.SelfBroadcastReceiver
@@ -74,16 +79,6 @@ class WifiFragment : BaseFragment() {
 
     private var resetWifi: Boolean = false
 
-    private var onCloseListener: OnCloseListener? = null
-
-    interface OnCloseListener {
-        fun onClose()
-    }
-
-    fun setOnCloseListener(onCloseListener: OnCloseListener) {
-        this.onCloseListener = onCloseListener
-    }
-
     override fun onAttach(context: Context?) {
         super.onAttach(context)
         if (context is LauncherActivity) {
@@ -99,6 +94,7 @@ class WifiFragment : BaseFragment() {
     override fun onCreateView(inflater: LayoutInflater,
                               container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
+        container?.removeAllViews()
         val view = inflater.inflate(R.layout.fragment_wifi, container, false)
         next = view.findViewById(R.id.next)
         refresher = view.findViewById(R.id.refresher)
@@ -150,6 +146,24 @@ class WifiFragment : BaseFragment() {
         if (null != activity) {
             activity?.hideSimpleTips()
         }
+
+        if (null != activity) {
+            if (ActivityCompat.checkSelfPermission(activity!!, Manifest.permission.ACCESS_FINE_LOCATION)
+                    != PermissionChecker.PERMISSION_GRANTED) {
+                requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), REQUEST_LOCATION_CODE)
+            }
+        }
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == REQUEST_LOCATION_CODE && grantResults.isNotEmpty()
+                && grantResults[0] == PermissionChecker.PERMISSION_GRANTED &&
+                permissions.isNotEmpty() && permissions[0] == Manifest.permission.ACCESS_FINE_LOCATION) {
+            wm?.startScan()
+        } else {
+            findNavController().navigateUp()
+        }
     }
 
     override fun onResume() {
@@ -160,7 +174,7 @@ class WifiFragment : BaseFragment() {
 
         wm?.isWifiEnabled = true
         @Suppress("DEPRECATION")
-        wm?.startScan()
+        wm?.startScan() // TODO: 持续刷新
     }
 
     override fun onPause() {
@@ -188,6 +202,8 @@ class WifiFragment : BaseFragment() {
                 if (config.status == WifiConfiguration.Status.CURRENT) {
                     connected = ssid
                 }
+
+                connected = wm?.connectionInfo?.ssid
             }
 
             val map = HashMap<String, ScanResult>()
@@ -217,9 +233,9 @@ class WifiFragment : BaseFragment() {
                 o2.level - o1.level
             })
             scans = list
-            adapter?.notifyDataSetChanged()
+            adapter?.notifyDataSetChanged() // TODO: 处理持续刷新连续动画
 
-            next?.isEnabled = connected != null
+            next?.isEnabled = connected != null && !TextUtils.equals(connected, "<unknown ssid>")
 
             refresher?.isRefreshing = false
         }
@@ -449,6 +465,7 @@ class WifiFragment : BaseFragment() {
     companion object {
 
         private const val TAG = "WifiFragment"
+        private const val REQUEST_LOCATION_CODE = 10423
 
         private fun isEncrypted(scan: ScanResult): Boolean {
             // [ESS]

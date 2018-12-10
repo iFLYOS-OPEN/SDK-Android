@@ -23,18 +23,29 @@
     <string name="tips_simple">嘿，小飞</string>
     <string name="tips_sentence_simple">嘿，小飞，明天出门要带伞吗？</string>
     <string name="about">关于</string>
+    <string name="xiaofei_online">小飞在线</string>
+    <string name="network_error">网络出错，请检查网络</string>
+    <string name="authorize_error">登录过期，请重新绑定设备</string>
+    <string name="timeout_error">请求超时，请在稳定网络连接下重试</string>
+    <string name="unknown_error">出现错误，请稍后再试</string>
+    <string name="wifi_password">Wi-Fi 密码</string>
+    <string name="mobile_data">移动数据</string>
+    <string name="offline">离线</string>
 
     <!-- PlayerInfoFragment -->
     <string name="default_music_title">唤醒小飞，轻松听歌</string>
+
+    <!-- Config -->
     <string name="next_step">下一步</string>
     <string name="connect_wifi">连接 Wi-Fi</string>
     <string name="bind_iflyos_account">绑定讯飞OS账号</string>
     <string name="pairing_tips">请在手机上打开 小飞在线 APP，扫码添加设备</string>
     <string name="binding_failed">绑定失败</string>
+    <string name="retry_connecting">正在尝试重连</string>
+    <string name="unsupported_device_error">不支持的设备</string>
+
+    <!-- About -->
     <string name="about_iflyos">关于iFLYOS</string>
     <string name="system_version">系统版本</string>
     <string name="change_binding">更换绑定</string>
-    <string name="xiaofei_online">小飞在线</string>
-    <string name="network_error">网络出错，请检查网络</string>
-    <string name="wifi_password">Wi-Fi 密码</string>
 </resources>

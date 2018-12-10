@@ -18,11 +18,13 @@ package com.iflytek.cyber.iot.show.core.impl.Logger
 
 import android.util.Log
 import cn.iflyos.iace.logger.Logger
+import com.google.gson.JsonParser
 import org.json.JSONException
 import org.json.JSONObject
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.io.PrintStream
+import java.nio.charset.StandardCharsets
 import java.util.*
 
 class LoggerHandler : Logger() {
@@ -46,6 +48,7 @@ class LoggerHandler : Logger() {
         const val DIALOG_STATE = 14
         const val BODY_TEMPLATE3 = 15
         const val CONNECTION_STATE = 16
+        const val EXCEPTION_LOG = 17
         const val AUTH_LOG_URL = 0
         const val AUTH_LOG_STATE = 1
 
@@ -97,6 +100,44 @@ class LoggerHandler : Logger() {
         }
 
         mObservable?.log(json, logType)
+    }
+
+    override fun logEvent(level: Level?, time: Long, source: String?, message: ByteArray?): Boolean {
+        return logEvent(level, time, source, String(message
+                ?: ByteArray(0), StandardCharsets.UTF_8))
+    }
+
+    override fun logEvent(level: Level?, time: Long, source: String?, message: String?): Boolean {
+        if (level == Level.ERROR) {
+            if (source == "IVS") {
+                try {
+                    val array = message?.split(Regex(":"), 3)
+                    if (array?.size == 3) {
+                        if (array[1] == "onExceptionReceived") {
+                            when (array[0]) {
+                                "MessageRequest", "AudioInputProcessor" -> {
+                                    val jsonSplit = array[2].split(Regex("="), 2)
+                                    if (jsonSplit.size == 2) {
+                                        val exceptionJson = JsonParser().parse(
+                                                jsonSplit[1].replace("\\", "")).asJsonObject
+                                        if (exceptionJson.getAsJsonObject("header")
+                                                        .getAsJsonPrimitive("name")
+                                                        .asString == "Exception") {
+                                            val payload = exceptionJson.getAsJsonObject("payload")
+                                            postDisplayCard(
+                                                    JSONObject(payload.toString()), EXCEPTION_LOG)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+        }
+        return true
     }
 
     class LoggerObservable : Observable() {

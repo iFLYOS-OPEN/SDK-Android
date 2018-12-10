@@ -131,7 +131,7 @@ internal class LoginWithIVSCBL(private val mContext: Context,
 
                         // Log response
                         mLogger.postInfo(sTag,
-                                String.format("Verification URI with user code: %s?cbl-code=%s",
+                                String.format("Verification URI with user code: %s?user_code=%s",
                                         uri, code))
 
                         requestDeviceToken(responseJSON)

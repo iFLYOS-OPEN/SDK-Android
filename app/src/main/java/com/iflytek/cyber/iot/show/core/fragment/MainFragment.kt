@@ -52,6 +52,7 @@ import com.bumptech.glide.request.target.Target
 import com.google.gson.FieldNamingPolicy
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
+import com.iflytek.cyber.iot.show.core.BuildConfig
 import com.iflytek.cyber.iot.show.core.LauncherActivity
 import com.iflytek.cyber.iot.show.core.R
 import com.iflytek.cyber.iot.show.core.impl.Logger.LogEntry
@@ -132,8 +133,6 @@ class MainFragment : BaseFragment(), AMapLocationListener, Observer, PlaybackCon
             setupLocation()
 
             settingsFragment = SettingsFragment()
-
-            launcher?.showSimpleTips()
         }
         return contentView
     }
@@ -261,6 +260,7 @@ class MainFragment : BaseFragment(), AMapLocationListener, Observer, PlaybackCon
         mLocationOption?.locationMode = AMapLocationClientOption.AMapLocationMode.Hight_Accuracy
         mLocationOption?.isOnceLocation = true
         mLocationClient?.setLocationOption(mLocationOption)
+        mLocationClient?.startLocation()
     }
 
     override fun onAttach(context: Context?) {
@@ -301,7 +301,7 @@ class MainFragment : BaseFragment(), AMapLocationListener, Observer, PlaybackCon
 
         val retrofit = Retrofit.Builder()
                 .client(client)
-                .baseUrl("https://homeweb.iflyos.cn")
+                .baseUrl("https://home.iflyos.cn")
                 .addConverterFactory(GsonConverterFactory.create(gson))
                 .build()
 
@@ -358,6 +358,7 @@ class MainFragment : BaseFragment(), AMapLocationListener, Observer, PlaybackCon
         super.onResume()
         updatePlayState()
         updateMusicCover(ContentStorage.get().currentContent)
+        launcher?.showSimpleTips()
     }
 
     private fun updatePlayState() {
@@ -368,6 +369,9 @@ class MainFragment : BaseFragment(), AMapLocationListener, Observer, PlaybackCon
         } else {
             if (ivPlaying?.background is AnimationDrawable) {
                 (ivPlaying?.background as AnimationDrawable).stop()
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+                    ivPlaying?.setBackgroundResource(R.drawable.ic_equalizer1_white_48dp)
+                }
             }
         }
     }
