@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright (C) 2019 iFLYTEK CO.,LTD.
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/windowBackground">
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/bottom_bar_top"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.88" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/start_margin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.031" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/end_margin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.969" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/top_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.13" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/title_start_margin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.078" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/back_start_margin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.012" />
+
+    <ImageView
+        android:id="@+id/iv_close"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="?selectableItemBackgroundBorderless"
+        android:src="@drawable/ic_previous_white_32dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@id/top_bar"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintHeight_percent="0.093"
+        app:layout_constraintStart_toStartOf="@id/back_start_margin"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:padding="12dp"
+        tools:visibility="visible" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/title"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:gravity="center_vertical"
+        android:text="@string/connect_wifi"
+        android:textColor="@android:color/white"
+        app:autoSizeTextType="uniform"
+        app:layout_constraintBottom_toBottomOf="@id/top_bar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHeight_percent=".06"
+        app:layout_constraintStart_toStartOf="@id/start_margin"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/refresher"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="@id/bottom_bar_top"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/top_bar"
+        app:layout_constraintWidth_percent="0.547">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/aps"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+    <View
+        android:id="@+id/wifi_bottom_divider"
+        style="@style/SetupWidget.BottomDivider"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintHeight_percent="0.0017"
+        app:layout_constraintTop_toTopOf="@id/bottom_bar_top" />
+
+
+    <ImageButton
+        android:id="@+id/back"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="?selectableItemBackgroundBorderless"
+        android:src="@drawable/ic_previous_white_32dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintHeight_percent="0.0933"
+        app:layout_constraintStart_toStartOf="@id/back_start_margin"
+        app:layout_constraintTop_toBottomOf="@id/bottom_bar_top"
+        tools:padding="12dp" />
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/next"
+        style="@style/Widget.AppCompat.Button.Colored"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@drawable/bg_next_step"
+        android:enabled="false"
+        android:theme="@style/Theme.AppCompat.Light"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintDimensionRatio="88:34"
+        app:layout_constraintEnd_toEndOf="@id/end_margin"
+        app:layout_constraintHeight_percent="0.057"
+        app:layout_constraintTop_toTopOf="@id/bottom_bar_top"
+        tools:enabled="true"
+        tools:text="@string/next_step"
+        tools:textSize="12sp" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

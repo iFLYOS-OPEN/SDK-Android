@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/fragment_container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <View
+        android:id="@+id/cover"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:alpha="0"
+        android:background="#66000000"
+        android:clickable="true"
+        android:focusable="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:alpha="1" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/start_margin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.047" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/iat_bottom"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.967" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/iat_start"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.102" />
+
+    <View
+        android:id="@+id/error_divider"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:alpha="0"
+        android:background="#ff4d4d"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHeight_percent="0.013"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:alpha="1" />
+
+    <View
+        android:id="@+id/error_bar"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:alpha="0"
+        android:background="@drawable/bg_error_bar"
+        app:layout_constraintBottom_toTopOf="@id/error_divider"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHeight_percent="0.133"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:alpha="1" />
+
+    <TextView
+        android:id="@+id/tips_simple"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:alpha="0"
+        android:textColor="@android:color/white"
+        app:layout_constraintBottom_toBottomOf="@id/iat_bottom"
+        app:layout_constraintStart_toStartOf="@id/iat_start" />
+
+    <ImageView
+        android:id="@+id/error_next"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:alpha="0"
+        android:src="@drawable/ic_next_white_24dp"
+        app:layout_constraintBottom_toBottomOf="@id/tips_simple"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintHeight_percent="0.05"
+        app:layout_constraintStart_toEndOf="@id/tips_simple"
+        app:layout_constraintTop_toTopOf="@id/tips_simple" />
+
+    <ImageView
+        android:id="@+id/logo"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:scaleX="0"
+        android:scaleY="0"
+        app:layout_constraintBottom_toBottomOf="@id/tips_simple"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintHeight_percent="0.053"
+        app:layout_constraintStart_toStartOf="@id/start_margin"
+        app:layout_constraintTop_toTopOf="@id/tips_simple"
+        tools:src="@drawable/ic_voice_bar_regular_white_32dp" />
+
+    <com.iflytek.cyber.iot.show.core.overlay.widget.RecognizeWaveView
+        android:id="@+id/recognize_view"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <View
+        android:id="@+id/tips_margin"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintHeight_percent="0.08"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/tips_1_guide"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.193" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/tips_2_guide"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.319" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/tips_3_guide"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.446" />
+
+    <TextView
+        android:id="@+id/iat_text"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:ellipsize="start"
+        android:singleLine="true"
+        android:textColor="@android:color/white"
+        app:layout_constraintBottom_toBottomOf="@id/iat_bottom"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@id/iat_start"
+        tools:alpha="1"
+        tools:text="用户说的话" />
+
+    <ImageView
+        android:id="@+id/iat_logo"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:scaleX="0"
+        android:scaleY="0"
+        android:src="@drawable/ic_voice_bar_listening_white_32dp"
+        app:layout_constraintBottom_toBottomOf="@id/iat_text"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintHeight_percent="0.053"
+        app:layout_constraintStart_toStartOf="@id/start_margin"
+        app:layout_constraintTop_toTopOf="@id/iat_text"
+        tools:scaleX="1"
+        tools:scaleY="1" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

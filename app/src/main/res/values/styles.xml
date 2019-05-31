@@ -1,0 +1,97 @@
+<!--
+  ~ Copyright (C) 2019 iFLYTEK CO.,LTD.
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.AppCompat.NoActionBar">
+        <!-- Customize your theme here. -->
+        <item name="android:windowBackground">@color/windowBackground</item>
+    </style>
+
+    <style name="SetupWidget" />
+
+    <style name="SetupWidget.Title">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">72dp</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:paddingStart">32dp</item>
+        <item name="android:paddingEnd">32dp</item>
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:textSize">24sp</item>
+    </style>
+
+    <style name="SetupWidget.ContentContainer">
+        <item name="android:layout_width">600dp</item>
+        <item name="android:layout_gravity">center_horizontal</item>
+    </style>
+
+    <style name="SetupWidget.BottomDivider">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">1dp</item>
+        <item name="android:background">#1effffff</item>
+    </style>
+
+    <style name="SetupWidget.BottomBar">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:gravity">center_vertical</item>
+    </style>
+
+    <style name="SetupWidget.BottomButton" />
+
+    <style name="SetupWidget.BottomButton.Back" parent="Widget.AppCompat.Button.Borderless">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">0dp</item>
+        <item name="android:background">?selectableItemBackgroundBorderless</item>
+        <item name="android:src">@drawable/ic_previous_white_32dp</item>
+    </style>
+
+    <style name="SetupWidget.BottomButton.Next" parent="Widget.AppCompat.Button.Colored">
+        <item name="android:textSize">16sp</item>
+        <item name="android:theme">@style/ThemeOverlay.AppCompat</item>
+    </style>
+
+    <style name="SettingsAnimation">
+        <item name="android:windowEnterAnimation">@anim/slide_in_bottom</item>
+        <item name="android:windowExitAnimation">@anim/slide_out_top</item>
+    </style>
+
+    <style name="AboutAnimation">
+        <item name="android:windowEnterAnimation">@anim/slide_in_right</item>
+        <item name="android:windowExitAnimation">@anim/slide_out_right</item>
+        <item name="android:windowHideAnimation">@null</item>
+        <item name="android:windowShowAnimation">@null</item>
+    </style>
+
+    <style name="AboutDialog" parent="Theme.AppCompat.Dialog">
+        <item name="android:windowFrame">@null</item>
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowTitleStyle">@null</item>
+        <item name="android:colorBackgroundCacheHint">@null</item>
+        <item name="android:windowAnimationStyle">@style/AboutAnimation</item>
+        <item name="android:windowSoftInputMode">stateUnspecified|adjustPan</item>
+    </style>
+
+    <style name="WeatherTheme" parent="Theme.AppCompat">
+        <item name="android:windowBackground">@android:color/black</item>
+        <item name="android:textColorPrimary">@color/textColorDarkPrimary</item>
+        <item name="android:textColorSecondary">@color/textColorDarkSecondary</item>
+        <item name="android:textColorTertiary">@color/textColorDarkTertiary</item>
+    </style>
+
+</resources>

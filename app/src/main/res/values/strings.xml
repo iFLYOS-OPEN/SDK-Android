@@ -1,0 +1,100 @@
+<!--
+  ~ Copyright (C) 2019 iFLYTEK CO.,LTD.
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+<resources>
+    <string name="app_name">ShowCore</string>
+
+    <!-- Preference -->
+    <string name="preference_file_key">com.iflytek.cyber.iot.show.core.AppSharedPreferences</string>
+    <string name="preference_client_id">Client ID Key</string>
+    <string name="preference_client_secret">Client Secret Key</string>
+    <string name="preference_product_id">Product ID Key</string>
+    <string name="preference_product_dsn">Product DSN Key</string>
+    <string name="preference_refresh_token">Refresh Token Key</string>
+    <string name="preference_login_method">Login Method Key</string>
+
+    <!-- Dialog -->
+    <string name="dialog_title_permission">申请权限</string>
+    <string name="dialog_permission_failed">申请 %s 权限失败</string>
+    <string name="permission_record_audio">录音</string>
+    <string name="retry">重新</string>
+    <string name="close">关闭</string>
+
+    <!-- MainFragment -->
+    <string name="settings">设置</string>
+    <string name="music">音乐</string>
+    <string name="tips_simple">蓝小飞</string>
+    <string name="tips_sentence_simple">蓝小飞，明天出门要带伞吗？</string>
+    <string name="about">关于</string>
+
+    <!-- PlayerInfoFragment -->
+    <string name="default_music_title">唤醒小飞，轻松听歌</string>
+    <string name="next_step">下一步</string>
+    <string name="connect_wifi">连接 Wi-Fi</string>
+    <string name="bind_iflyos_account">绑定讯飞OS账号</string>
+    <string name="pairing_tips">请在手机上打开 小飞在线 APP，扫码添加设备</string>
+    <string name="binding_failed">绑定失败</string>
+    <string name="about_iflyos">关于iFLYOS</string>
+    <string name="system_version">系统版本</string>
+    <string name="change_binding">更换绑定</string>
+    <string name="xiaofei_online">小飞在线</string>
+    <string name="change">更换</string>
+    <string name="recognize_profile">识别引擎</string>
+    <string name="message_near_field">近场（0~3米）</string>
+    <string name="message_far_field">远场（0~10米）</string>
+    <string name="network_error">网络出错，请检查网络</string>
+    <string name="authorize_error">登录过期，请重新绑定设备</string>
+    <string name="timeout_error">请求超时，请在稳定网络连接下重试</string>
+    <string name="unknown_error">出现错误，请稍后再试</string>
+    <string name="unsupported_device_error">不支持的设备</string>
+    <string name="wifi_password">Wi-Fi 密码</string>
+    <string name="mobile_data">移动数据</string>
+    <string name="offline">离线</string>
+    <string name="retry_connecting">正在尝试重连</string>
+    <string name="recording_is_occupied">录音被占用</string>
+    <string name="recording_is_occupied_message">请确定后台程序中无占用录音的应用。</string>
+
+    <string-array name="default_tips">
+        <item>蓝小飞，明天天气怎么样？</item>
+        <item>蓝小飞，爸爸的爸爸叫什么？</item>
+        <item>蓝小飞，长歌行怎么背</item>
+        <item>蓝小飞，明天早上8点叫我起床</item>
+        <item>蓝小飞，倒计时1分钟</item>
+        <item>蓝小飞，100美元可以换成多少人民币？</item>
+        <item>蓝小飞，1公里等于多少厘米？</item>
+        <item>蓝小飞，马到成功是什么意思？</item>
+        <item>蓝小飞，打开客厅的灯</item>
+    </string-array>
+    <string-array name="player_tips">
+        <item>蓝小飞，播放轻音乐</item>
+        <item>蓝小飞，打开白噪音</item>
+        <item>蓝小飞，我要听陈奕迅的阴天快乐</item>
+        <item>蓝小飞，来点开心的歌</item>
+        <item>蓝小飞，我要听火影忍者的主题曲</item>
+    </string-array>
+    <string-array name="alert_tips">
+        <item>蓝小飞，暂停</item>
+        <item>蓝小飞，停止闹钟</item>
+    </string-array>
+    <string-array name="weather_tips">
+        <item>蓝小飞，明天呢？</item>
+        <item>蓝小飞，广州呢？</item>
+    </string-array>
+    <string-array name="option_tips">
+        <item>蓝小飞，选择第一个</item>
+        <item>蓝小飞，第五个</item>
+        <item>蓝小飞，最后一个</item>
+    </string-array>
+</resources>

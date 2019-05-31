@@ -1,0 +1,27 @@
+<!--
+  ~ Copyright (C) 2019 iFLYTEK CO.,LTD.
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="32dp"
+    android:height="32dp"
+    android:viewportWidth="32"
+    android:viewportHeight="32">
+  <path
+      android:pathData="M5.8603,0L26.1397,0C28.1774,0 28.9164,0.2122 29.6614,0.6106C30.4063,1.009 30.991,1.5937 31.3894,2.3386C31.7878,3.0836 32,3.8226 32,5.8603L32,32C27.4583,30.4861 22.7022,29.7143 17.9148,29.7143L5.8603,29.7143C3.8226,29.7143 3.0836,29.5021 2.3386,29.1037C1.5937,28.7053 1.009,28.1206 0.6106,27.3756C0.2122,26.6307 0,25.8917 0,23.854L0,5.8603C-0,3.8226 0.2122,3.0836 0.6106,2.3386C1.009,1.5937 1.5937,1.009 2.3386,0.6106C3.0836,0.2122 3.8226,0 5.8603,0ZM11.4461,9.8373C10.1871,9.3867 8.8325,9.1284 7.4133,9.1284C7.35,9.1284 7.2872,9.1341 7.2238,9.1353C7.8815,7.7799 9.2907,6.8396 10.9286,6.8379C10.7749,6.2544 10.5919,5.6818 10.3825,5.1217C10.3701,5.1217 10.359,5.12 10.3467,5.12C7.1071,5.12 4.48,7.6837 4.48,10.8463C4.48,12.5745 4.7282,14.2455 5.1863,15.8305C6.1098,15.9382 7.0473,16 8,16C9.0073,16 9.9976,15.9307 10.9715,15.8105C11.3282,14.4035 11.52,12.9336 11.52,11.4189C11.52,10.8858 11.4918,10.359 11.4461,9.8373ZM20.4061,9.8373C19.1471,9.3867 17.7925,9.1284 16.3733,9.1284C16.31,9.1284 16.2472,9.1341 16.1838,9.1353C16.8415,7.7799 18.2507,6.8396 19.8886,6.8379C19.7349,6.2544 19.5519,5.6818 19.3425,5.1217C19.3301,5.1217 19.319,5.12 19.3067,5.12C16.0671,5.12 13.44,7.6837 13.44,10.8463C13.44,12.5745 13.6882,14.2455 14.1463,15.8305C15.0698,15.9382 16.0073,16 16.96,16C17.9673,16 18.9576,15.9307 19.9315,15.8105C20.2882,14.4035 20.48,12.9336 20.48,11.4189C20.48,10.8858 20.4518,10.359 20.4061,9.8373Z"
+      android:strokeWidth="1"
+      android:fillColor="#FFFFFF"
+      android:fillType="evenOdd"
+      android:strokeColor="#00000000"/>
+</vector>

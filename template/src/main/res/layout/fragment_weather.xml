@@ -1,0 +1,291 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    style="@style/WeatherTheme"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?android:windowBackground"
+    android:orientation="vertical">
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/left_margin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent=".045" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/right_margin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintGuide_percent=".955" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/top_margin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent=".22" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/header"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="#01000000"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHeight_percent=".16"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/top_left_margin"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent=".027" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/top_right_margin"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintGuide_percent=".955" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/top_title_left_margin"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent=".102" />
+
+        <ImageView
+            android:id="@+id/iv_back"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="16dp"
+            android:background="?selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_close_white_24dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintDimensionRatio="1:1"
+            app:layout_constraintHeight_percent="0.583"
+            app:layout_constraintStart_toStartOf="@id/top_left_margin"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:ignore="ContentDescription"
+            tools:padding="12dp" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tv_weather_title"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:textColor="@android:color/white"
+            app:autoSizeTextType="uniform"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintHeight_percent=".333"
+            app:layout_constraintStart_toStartOf="@id/top_title_left_margin"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintWidth_percent=".68"
+            tools:text="越秀区  4月16日 星期一" />
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/iv_skill_icon"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintDimensionRatio="1:1"
+            app:layout_constraintEnd_toEndOf="@id/top_right_margin"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintWidth_percent=".047"
+            tools:background="@android:color/white" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/current_weather_left_margin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent=".244" />
+
+    <ImageView
+        android:id="@+id/current_weather_icon"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:paddingBottom="16dp"
+        android:scaleType="centerCrop"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintHeight_percent=".333"
+        app:layout_constraintStart_toStartOf="@id/current_weather_left_margin"
+        app:layout_constraintTop_toBottomOf="@id/header"
+        tools:ignore="ContentDescription"
+        tools:src="@android:color/white" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/temp_margin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent=".486" />
+
+    <View
+        android:id="@+id/line"
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:layout_marginTop="8dp"
+        android:background="#1effffff"
+        app:layout_constraintEnd_toEndOf="@id/right_margin"
+        app:layout_constraintStart_toStartOf="@id/left_margin"
+        app:layout_constraintTop_toBottomOf="@id/current_weather_icon" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/current_temperature"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:gravity="center_vertical"
+        android:maxLines="1"
+        android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+        android:textColor="?android:textColorPrimary"
+        android:visibility="gone"
+        app:autoSizeTextType="uniform"
+        app:layout_constraintHeight_percent=".193"
+        app:layout_constraintStart_toEndOf="@id/temp_margin"
+        app:layout_constraintTop_toBottomOf="@id/header"
+        app:layout_constraintWidth_percent=".27"
+        tools:text="25℃" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/today_temperature_range"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="8dp"
+        android:layout_weight="2"
+        android:textAppearance="@style/TextAppearance.AppCompat.Small"
+        android:textColor="?android:textColorTertiary"
+        android:visibility="gone"
+        app:autoSizeTextType="uniform"
+        app:layout_constraintHeight_percent=".067"
+        app:layout_constraintStart_toEndOf="@id/temp_margin"
+        app:layout_constraintTop_toBottomOf="@id/current_temperature"
+        app:layout_constraintWidth_percent=".205"
+        tools:text="22℃ ~ 27℃" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/day_top_margin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent=".16" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/high_content"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintHeight_percent=".123"
+        app:layout_constraintStart_toStartOf="@id/temp_margin"
+        app:layout_constraintTop_toBottomOf="@id/day_top_margin"
+        app:layout_constraintWidth_percent=".18">
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tv_day_high_temperature"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:gravity="center_vertical"
+            android:maxLines="1"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+            android:textColor="?android:textColorPrimary"
+            app:autoSizeTextType="uniform"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintHeight_percent="1"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintWidth_percent=".6"
+            tools:text="27℃" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/up_left_margin"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent=".7" />
+
+        <ImageView
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:src="@drawable/ic_arrow_upward_black_24dp"
+            android:tint="#595959"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintDimensionRatio="1:1"
+            app:layout_constraintHeight_percent=".35"
+            app:layout_constraintStart_toEndOf="@id/up_left_margin"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/low_content"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintHeight_percent=".123"
+        app:layout_constraintStart_toStartOf="@id/temp_margin"
+        app:layout_constraintTop_toBottomOf="@id/high_content"
+        app:layout_constraintWidth_percent=".18">
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tv_day_low_temperature"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:gravity="center_vertical"
+            android:maxLines="1"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+            android:textColor="?android:textColorPrimary"
+            app:autoSizeTextType="uniform"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintHeight_percent="1"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintWidth_percent=".6"
+            tools:text="22℃" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/down_left_margin"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent=".7" />
+
+        <ImageView
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:src="@drawable/ic_arrow_downward_black_24dp"
+            android:tint="#595959"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintDimensionRatio="1:1"
+            app:layout_constraintHeight_percent=".35"
+            app:layout_constraintStart_toEndOf="@id/down_left_margin"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/future_margin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent=".547" />
+
+    <LinearLayout
+        android:id="@+id/future_days_weather"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="8dp"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="@id/right_margin"
+        app:layout_constraintHeight_percent=".4"
+        app:layout_constraintStart_toStartOf="@id/left_margin"
+        app:layout_constraintTop_toBottomOf="@id/line" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

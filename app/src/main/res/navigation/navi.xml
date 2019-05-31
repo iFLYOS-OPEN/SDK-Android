@@ -1,0 +1,290 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2019 iFLYTEK CO.,LTD.
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    app:startDestination="@id/splash_fragment">
+    <fragment
+        android:id="@+id/splash_fragment"
+        android:name="com.iflytek.cyber.iot.show.core.fragment.SplashFragment"
+        tools:layout="@layout/fragment_splash">
+
+        <action
+            android:id="@+id/action_to_main_fragment"
+            app:destination="@id/main_fragment"
+            tools:layout="@layout/fragment_main" />
+
+        <action
+            android:id="@+id/action_to_welcome_fragment"
+            app:destination="@id/welcome_fragment"
+            tools:layout="@layout/fragment_welcome" />
+
+    </fragment>
+    <fragment
+        android:id="@+id/main_fragment"
+        android:name="com.iflytek.cyber.iot.show.core.fragment.MainFragment"
+        tools:layout="@layout/fragment_main">
+
+        <action
+            android:id="@+id/action_to_weather_fragment"
+            app:destination="@id/weather_fragment"
+            app:enterAnim="@anim/slide_in_top"
+            app:popExitAnim="@anim/slide_page_pop_exit"
+            tools:layout="@layout/fragment_weather" />
+
+        <action
+            android:id="@+id/action_to_player_fragment"
+            app:destination="@id/player_fragment"
+            app:enterAnim="@anim/slide_in_top"
+            app:exitAnim="@android:anim/fade_out"
+            app:popEnterAnim="@android:anim/fade_in"
+            app:popExitAnim="@anim/slide_page_pop_exit"
+            tools:layout="@layout/fragment_player_info" />
+
+        <action
+            android:id="@+id/action_to_body_fragment"
+            app:destination="@id/body_template_fragment"
+            app:enterAnim="@anim/slide_in_top"
+            app:popExitAnim="@anim/slide_page_pop_exit" />
+
+        <action
+            android:id="@+id/action_to_body_3_fragment"
+            app:destination="@id/body_template_3_fragment"
+            app:enterAnim="@anim/slide_in_top"
+            app:popExitAnim="@anim/slide_page_pop_exit" />
+
+        <action
+            android:id="@+id/action_to_list_fragment"
+            app:destination="@id/list_fragment"
+            app:enterAnim="@anim/slide_in_top"
+            app:popExitAnim="@anim/slide_page_pop_exit" />
+
+        <action
+            android:id="@+id/action_main_to_wifi_fragment"
+            app:destination="@id/wifi_fragment"
+            app:enterAnim="@anim/slide_in_top"
+            app:exitAnim="@android:anim/fade_out"
+            app:popEnterAnim="@android:anim/fade_in"
+            app:popExitAnim="@anim/slide_page_pop_exit" />
+
+        <action
+            android:id="@+id/action_main_to_pair_fragment"
+            app:destination="@id/pair_fragment"
+            app:enterAnim="@anim/slide_in_top"
+            app:exitAnim="@android:anim/fade_out"
+            app:popEnterAnim="@android:anim/fade_in"
+            app:popExitAnim="@anim/slide_page_pop_exit" />
+        <action
+            android:id="@+id/action_main_fragment_to_option_template_fragment"
+            app:destination="@id/option_template_fragment" />
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/player_fragment"
+        android:name="com.iflytek.cyber.iot.show.core.fragment.PlayerInfoFragment"
+        tools:layout="@layout/fragment_player_info">
+
+        <action
+            android:id="@+id/action_main_to_wifi_fragment"
+            app:destination="@id/wifi_fragment"
+            app:enterAnim="@anim/slide_in_top"
+            app:exitAnim="@android:anim/fade_out"
+            app:popEnterAnim="@android:anim/fade_in"
+            app:popExitAnim="@anim/slide_page_pop_exit" />
+
+        <action
+            android:id="@+id/action_main_to_pair_fragment"
+            app:destination="@id/pair_fragment"
+            app:enterAnim="@anim/slide_in_top"
+            app:exitAnim="@android:anim/fade_out"
+            app:popEnterAnim="@android:anim/fade_in"
+            app:popExitAnim="@anim/slide_page_pop_exit" />
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/weather_fragment"
+        android:name="com.iflytek.cyber.iot.show.core.template.WeatherFragment"
+        tools:layout="@layout/fragment_weather">
+
+        <action
+            android:id="@+id/action_main_to_wifi_fragment"
+            app:destination="@id/wifi_fragment"
+            app:enterAnim="@anim/slide_in_top"
+            app:exitAnim="@android:anim/fade_out"
+            app:popEnterAnim="@android:anim/fade_in"
+            app:popExitAnim="@anim/slide_page_pop_exit" />
+
+        <action
+            android:id="@+id/action_main_to_pair_fragment"
+            app:destination="@id/pair_fragment"
+            app:enterAnim="@anim/slide_in_top"
+            app:exitAnim="@android:anim/fade_out"
+            app:popEnterAnim="@android:anim/fade_in"
+            app:popExitAnim="@anim/slide_page_pop_exit" />
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/body_template_fragment"
+        android:name="com.iflytek.cyber.iot.show.core.template.BodyTemplateFragment">
+
+        <action
+            android:id="@+id/action_main_to_wifi_fragment"
+            app:destination="@id/wifi_fragment"
+            app:enterAnim="@anim/slide_in_top"
+            app:exitAnim="@android:anim/fade_out"
+            app:popEnterAnim="@android:anim/fade_in"
+            app:popExitAnim="@anim/slide_page_pop_exit" />
+
+        <action
+            android:id="@+id/action_main_to_pair_fragment"
+            app:destination="@id/pair_fragment"
+            app:enterAnim="@anim/slide_in_top"
+            app:exitAnim="@android:anim/fade_out"
+            app:popEnterAnim="@android:anim/fade_in"
+            app:popExitAnim="@anim/slide_page_pop_exit" />
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/body_template_3_fragment"
+        android:name="com.iflytek.cyber.iot.show.core.template.BodyTemplate3Fragment">
+
+        <action
+            android:id="@+id/action_main_to_wifi_fragment"
+            app:destination="@id/wifi_fragment"
+            app:enterAnim="@anim/slide_in_top"
+            app:exitAnim="@android:anim/fade_out"
+            app:popEnterAnim="@android:anim/fade_in"
+            app:popExitAnim="@anim/slide_page_pop_exit" />
+
+        <action
+            android:id="@+id/action_main_to_pair_fragment"
+            app:destination="@id/pair_fragment"
+            app:enterAnim="@anim/slide_in_top"
+            app:exitAnim="@android:anim/fade_out"
+            app:popEnterAnim="@android:anim/fade_in"
+            app:popExitAnim="@anim/slide_page_pop_exit" />
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/option_template_fragment"
+        android:name="com.iflytek.cyber.iot.show.core.template.OptionTemplateFragment">
+
+        <action
+            android:id="@+id/action_main_to_wifi_fragment"
+            app:destination="@id/wifi_fragment"
+            app:enterAnim="@anim/slide_in_top"
+            app:exitAnim="@android:anim/fade_out"
+            app:popEnterAnim="@android:anim/fade_in"
+            app:popExitAnim="@anim/slide_page_pop_exit" />
+
+        <action
+            android:id="@+id/action_main_to_pair_fragment"
+            app:destination="@id/pair_fragment"
+            app:enterAnim="@anim/slide_in_top"
+            app:exitAnim="@android:anim/fade_out"
+            app:popEnterAnim="@android:anim/fade_in"
+            app:popExitAnim="@anim/slide_page_pop_exit" />
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/about_fragment"
+        android:name="com.iflytek.cyber.iot.show.core.fragment.AboutFragment"
+        tools:layout="@layout/fragment_about" />
+
+    <fragment
+        android:id="@+id/list_fragment"
+        android:name="com.iflytek.cyber.iot.show.core.template.List1Fragment"
+        tools:layout="@layout/fragment_list">
+
+        <action
+            android:id="@+id/action_main_to_wifi_fragment"
+            app:destination="@id/wifi_fragment"
+            app:enterAnim="@anim/slide_in_top"
+            app:exitAnim="@android:anim/fade_out"
+            app:popEnterAnim="@android:anim/fade_in"
+            app:popExitAnim="@anim/slide_page_pop_exit" />
+
+        <action
+            android:id="@+id/action_main_to_pair_fragment"
+            app:destination="@id/pair_fragment"
+            app:enterAnim="@anim/slide_in_top"
+            app:exitAnim="@android:anim/fade_out"
+            app:popEnterAnim="@android:anim/fade_in"
+            app:popExitAnim="@anim/slide_page_pop_exit" />
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/welcome_fragment"
+        android:name="com.iflytek.cyber.iot.show.core.fragment.WelcomeFragment"
+        tools:layout="@layout/fragment_welcome">
+
+        <action
+            android:id="@+id/action_to_wifi_fragment"
+            app:destination="@id/wifi_fragment"
+            app:enterAnim="@anim/setup_page_enter"
+            app:exitAnim="@anim/setup_page_exit"
+            app:popEnterAnim="@anim/setup_page_pop_enter"
+            app:popExitAnim="@anim/setup_page_pop_exit" />
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/pair_fragment"
+        android:name="com.iflytek.cyber.iot.show.core.fragment.PairFragment"
+        tools:layout="@layout/fragment_pair">
+
+        <action
+            android:id="@+id/action_to_finish_fragment"
+            app:destination="@id/finish_fragment"
+            app:enterAnim="@anim/setup_page_popup_enter" />
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/wifi_fragment"
+        android:name="com.iflytek.cyber.iot.show.core.fragment.WifiFragment"
+        tools:layout="@layout/fragment_wifi">
+
+        <action
+            android:id="@+id/action_to_pair_fragment"
+            app:destination="@id/pair_fragment"
+            app:enterAnim="@anim/setup_page_enter"
+            app:exitAnim="@anim/setup_page_exit"
+            app:popEnterAnim="@anim/setup_page_pop_enter"
+            app:popExitAnim="@anim/setup_page_pop_exit" />
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/finish_fragment"
+        android:name="com.iflytek.cyber.iot.show.core.fragment.FinishFragment"
+        tools:layout="@layout/fragment_finish">
+
+        <action
+            android:id="@+id/action_to_main_fragment"
+            app:destination="@id/main_fragment" />
+
+    </fragment>
+
+</navigation>

@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="@drawable/bg_option"
+    tools:layout_height="100dp">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/content_end"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.953" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/content_start"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.023" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/image_start"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.086" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/text_start"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.266" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/pri_text_top"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_percent="0.22" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/sec_text_top"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_percent="0.54" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/ter_end"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.953" />
+
+        <com.shehuan.niv.NiceImageView
+            android:id="@+id/image"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="@drawable/img_bg_option"
+            android:scaleType="centerCrop"
+            app:corner_radius="12dp"
+            app:layout_constraintDimensionRatio="156:100"
+            app:layout_constraintStart_toStartOf="@id/image_start"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintWidth_percent="0.156" />
+
+        <TextView
+            android:id="@+id/primary_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@android:color/white"
+            app:layout_constraintStart_toStartOf="@id/text_start"
+            app:layout_constraintTop_toTopOf="@id/pri_text_top"
+            tools:text="Item title"
+            tools:textSize="20sp" />
+
+        <TextView
+            android:id="@+id/secondary_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:alpha="0.7"
+            android:textColor="@android:color/white"
+            app:layout_constraintStart_toStartOf="@id/text_start"
+            app:layout_constraintTop_toTopOf="@id/sec_text_top"
+            tools:text="Item secondary text"
+            tools:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/tertiary_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@android:color/white"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="@id/ter_end"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="8.8"
+            tools:textSize="20sp" />
+
+        <TextView
+            android:id="@+id/index"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:alpha="0.3"
+            android:gravity="center"
+            android:textColor="@android:color/white"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintDimensionRatio="1"
+            app:layout_constraintHeight_percent="0.4"
+            app:layout_constraintStart_toStartOf="@id/content_start"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="1" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</FrameLayout>

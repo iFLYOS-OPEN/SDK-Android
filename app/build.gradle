@@ -1,0 +1,111 @@
+apply plugin: 'com.android.application'
+
+apply plugin: 'kotlin-android'
+
+apply plugin: 'kotlin-kapt'
+
+apply plugin: 'kotlin-android-extensions'
+
+repositories {
+    flatDir {
+        dirs 'libs'
+    }
+}
+
+android {
+    compileSdkVersion 28
+    defaultConfig {
+        applicationId "com.iflytek.cyber.iot.show.core"
+        minSdkVersion 19
+        targetSdkVersion 28
+        versionCode 2
+        versionName "2.0"
+
+        buildConfigField "String", "CLIENT_ID", '"ceb62135-38a7-42c3-b721-842f3ed596a8"'
+        buildConfigField "String", "AUTH_URL", '"https://auth.iflyos.cn/oauth/device"'
+
+        ndk {
+            // Specifies the ABI configurations of your native
+            // libraries Gradle should build and package with your APK.
+            abiFilters 'armeabi-v7a'
+        }
+
+        // Enabling multidex support.
+        multiDexEnabled true
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    externalNativeBuild {
+        cmake {
+            path "CMakeLists.txt"
+            buildStagingDirectory "../build/ivw_cmake" // 唤醒模块编译目录
+        }
+    }
+
+    sourceSets {
+        main {
+            jniLibs.srcDirs 'jniLibs'
+        }
+    }
+}
+
+def nav_version = "2.1.0-alpha04"
+
+dependencies {
+    // libs 目录概述
+    //   * ivs-android-sdk3.aar     ivs sdk
+    //   * iqiyi-tv-r58697.jar      爱奇艺TV版 sdk
+    //   * MiguAreaSDK2.1.1.aar     咪咕音乐设备端 sdk
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation(name: 'MiguAreaSDK2.1.1', ext: 'aar')
+    implementation(name: 'ivs-android-sdk3', ext: 'aar')
+    implementation project(':template') // 显示模板封装
+
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+
+    // use -ktx for Kotlin
+    implementation "androidx.navigation:navigation-fragment-ktx:$nav_version"
+    implementation "androidx.navigation:navigation-ui-ktx:$nav_version"
+
+    implementation 'com.google.code.gson:gson:2.8.5'
+    implementation 'com.squareup.okio:okio:2.0.0'
+    implementation 'com.squareup.okhttp3:logging-interceptor:3.11.0'
+    implementation 'com.squareup.okhttp3:okhttp:3.11.0'
+    implementation 'com.squareup.okhttp3:okhttp-urlconnection:3.11.0'
+    implementation 'com.squareup.retrofit2:retrofit:2.4.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.4.0'
+
+    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
+    implementation 'androidx.appcompat:appcompat:1.0.2'
+    implementation 'androidx.core:core:1.0.2'
+    implementation 'com.google.android.material:material:1.1.0-alpha07'
+    implementation 'androidx.cardview:cardview:1.0.0'
+    implementation 'androidx.recyclerview:recyclerview:1.0.0'
+
+    implementation 'com.github.warkiz.widget:indicatorseekbar:2.1.0'
+
+    implementation 'jp.wasabeef:blurry:2.1.1'
+    implementation 'com.github.bumptech.glide:glide:4.9.0'
+    implementation 'com.amap.api:location:4.2.0'
+
+    implementation 'commons-net:commons-net:3.6'
+
+    // Don't update exoplayer version,
+    // or it will cause some crash because of calling method in different thread
+    implementation 'com.google.android.exoplayer:exoplayer-core:2.10.1'
+    implementation 'com.google.android.exoplayer:exoplayer-dash:2.10.1'
+    implementation 'com.google.android.exoplayer:exoplayer-smoothstreaming:2.10.1'
+    implementation 'com.google.android.exoplayer:exoplayer-hls:2.10.1'
+
+    // transform mp3 to pcm
+    implementation 'com.googlecode.soundlibs:jlayer:1.0.1.4'
+
+    implementation 'com.google.zxing:core:3.3.2'
+    implementation('com.journeyapps:zxing-android-embedded:3.5.0') {
+        exclude group: 'com.android.support'
+    }
+}

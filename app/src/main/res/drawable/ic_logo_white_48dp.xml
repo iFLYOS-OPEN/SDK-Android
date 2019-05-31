@@ -1,0 +1,27 @@
+<!--
+  ~ Copyright (C) 2019 iFLYTEK CO.,LTD.
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="48"
+    android:viewportHeight="48">
+  <path
+      android:pathData="M17.0349,14.3469C15.1954,13.6723 13.2163,13.2857 11.1429,13.2857C11.0503,13.2857 10.9586,13.2943 10.866,13.296C11.8269,11.2671 13.8857,9.8597 16.2789,9.8571C16.0543,8.9837 15.7869,8.1266 15.4809,7.2883C15.4629,7.2883 15.4466,7.2857 15.4286,7.2857C10.6954,7.2857 6.8571,11.1231 6.8571,15.8571C6.8571,18.444 7.2197,20.9451 7.8891,23.3177C9.2383,23.4789 10.608,23.5714 12,23.5714C13.4717,23.5714 14.9186,23.4677 16.3414,23.2877C16.8626,21.1817 17.1429,18.9814 17.1429,16.7143C17.1429,15.9163 17.1017,15.1277 17.0349,14.3469ZM30.7491,14.3469C28.9097,13.6723 26.9306,13.2857 24.8571,13.2857C24.7646,13.2857 24.6729,13.2943 24.5803,13.296C25.5411,11.2671 27.6,9.8597 29.9931,9.8571C29.7686,8.9837 29.5011,8.1266 29.1951,7.2883C29.1771,7.2883 29.1609,7.2857 29.1429,7.2857C24.4097,7.2857 20.5714,11.1231 20.5714,15.8571C20.5714,18.444 20.934,20.9451 21.6034,23.3177C22.9526,23.4789 24.3223,23.5714 25.7143,23.5714C27.186,23.5714 28.6329,23.4677 30.0557,23.2877C30.5769,21.1817 30.8571,18.9814 30.8571,16.7143C30.8571,15.9163 30.816,15.1277 30.7491,14.3469Z"
+      android:strokeWidth="1"
+      android:fillColor="#FFFFFF"
+      android:fillType="evenOdd"
+      android:strokeColor="#00000000"/>
+</vector>

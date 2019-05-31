@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright (C) 2019 iFLYTEK CO.,LTD.
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/settings_container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/transparent">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:background="#232425"
+        android:elevation="2dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHeight_percent=".333"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/left_margin"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent=".039" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/top_margin"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_percent=".2" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/wifi_content"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_centerVertical="true"
+            android:background="?selectableItemBackgroundBorderless"
+            android:clickable="true"
+            android:focusable="true"
+            app:layout_constraintDimensionRatio="1:1"
+            app:layout_constraintHeight_percent=".6"
+            app:layout_constraintStart_toStartOf="@id/left_margin"
+            app:layout_constraintTop_toTopOf="@id/top_margin">
+
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/text_top_margin"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                app:layout_constraintGuide_percent=".17" />
+
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/text_bottom_margin"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                app:layout_constraintGuide_percent=".83" />
+
+            <ImageView
+                android:id="@+id/network"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:src="@drawable/ic_signal_wifi_4_bar_white_24dp"
+                app:layout_constraintDimensionRatio="1:1"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHeight_percent=".33"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@id/text_top_margin" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/wifi_name"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:gravity="center"
+                android:singleLine="true"
+                app:layout_constraintBottom_toBottomOf="@id/text_bottom_margin"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                tools:text="WiFi" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/slider_left_margin"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent=".246" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/slider_right_margin"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent=".752" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/volume_top_margin"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_percent=".2" />
+
+        <ImageView
+            android:id="@+id/iv_volume"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="?selectableItemBackgroundBorderless"
+            android:clickable="true"
+            android:focusable="true"
+            android:src="@drawable/ic_volume_down_white_24dp"
+            app:layout_constraintDimensionRatio="1:1"
+            app:layout_constraintHeight_percent=".12"
+            app:layout_constraintStart_toStartOf="@id/slider_left_margin"
+            app:layout_constraintTop_toTopOf="@+id/volume_top_margin" />
+
+        <androidx.appcompat.widget.AppCompatSeekBar
+            android:id="@+id/volume_bar"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="@id/iv_volume"
+            app:layout_constraintEnd_toEndOf="@id/slider_right_margin"
+            app:layout_constraintStart_toEndOf="@id/iv_volume"
+            app:layout_constraintTop_toTopOf="@id/iv_volume" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/brightness_top_margin"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_percent=".62" />
+
+        <ImageView
+            android:id="@+id/iv_brightness"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="?selectableItemBackgroundBorderless"
+            android:clickable="true"
+            android:focusable="true"
+            android:src="@drawable/ic_brightness_low_white_24dp"
+            app:layout_constraintDimensionRatio="1:1"
+            app:layout_constraintHeight_percent=".12"
+            app:layout_constraintStart_toStartOf="@id/slider_left_margin"
+            app:layout_constraintTop_toTopOf="@+id/brightness_top_margin" />
+
+        <androidx.appcompat.widget.AppCompatSeekBar
+            android:id="@+id/brightness_bar"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="@id/iv_brightness"
+            app:layout_constraintEnd_toEndOf="@id/slider_right_margin"
+            app:layout_constraintStart_toEndOf="@id/iv_volume"
+            app:layout_constraintTop_toTopOf="@id/iv_brightness" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/right_margin"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent=".844" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/about"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_centerVertical="true"
+            android:background="?selectableItemBackgroundBorderless"
+            android:clickable="true"
+            android:focusable="true"
+            app:layout_constraintDimensionRatio="1:1"
+            app:layout_constraintHeight_percent=".6"
+            app:layout_constraintStart_toStartOf="@id/right_margin"
+            app:layout_constraintTop_toTopOf="@id/top_margin">
+
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/about_top_margin"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                app:layout_constraintGuide_percent=".167" />
+
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/about_bottom_margin"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                app:layout_constraintGuide_percent=".833" />
+
+            <ImageView
+                android:id="@+id/iv_about"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:src="@drawable/ic_about_white_24dp"
+                app:layout_constraintDimensionRatio="1:1"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHeight_percent=".33"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@id/about_top_margin" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tv_about"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:gravity="center"
+                android:singleLine="true"
+                android:text="@string/about"
+                app:layout_constraintBottom_toBottomOf="@id/about_bottom_margin"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/empty_guide"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent=".33" />
+
+    <FrameLayout
+        android:id="@+id/empty_content"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/empty_guide" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

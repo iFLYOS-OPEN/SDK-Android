@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/black">
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/top_guideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.158" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/start_guideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.039" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/back_start_guideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.027" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/body_bottom_guideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.667" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/title_start_guideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.102" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/end_guideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.953" />
+
+    <ImageView
+        android:id="@+id/back_icon"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="?selectableItemBackgroundBorderless"
+        android:contentDescription="@android:string/cancel"
+        android:padding="12dp"
+        android:src="@drawable/ic_previous_white_32dp"
+        app:layout_constraintBottom_toBottomOf="@id/top_guideline"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintHeight_percent="0.093"
+        app:layout_constraintStart_toStartOf="@id/back_start_guideline"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/skill_icon"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="@id/top_guideline"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintEnd_toEndOf="@id/end_guideline"
+        app:layout_constraintHeight_percent="0.08"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/title"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:gravity="center_vertical"
+        android:textColor="@android:color/white"
+        app:autoSizeTextType="uniform"
+        app:layout_constraintBottom_toBottomOf="@id/back_icon"
+        app:layout_constraintEnd_toEndOf="@id/end_guideline"
+        app:layout_constraintHeight_percent="0.053"
+        app:layout_constraintStart_toStartOf="@id/title_start_guideline"
+        app:layout_constraintTop_toTopOf="@id/back_icon"
+        tools:text="翻译" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="@id/body_bottom_guideline"
+        app:layout_constraintEnd_toEndOf="@id/end_guideline"
+        app:layout_constraintHeight_percent="0.385"
+        app:layout_constraintStart_toStartOf="@id/start_guideline">
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_field"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:gravity="center"
+            android:textColor="@android:color/white"
+            app:autoSizeTextType="uniform"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHeight_percent="0.71"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Apple" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/sub_text_field"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:gravity="center"
+            android:textColor="#7f8187"
+            app:autoSizeTextType="uniform"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHeight_percent="0.251"
+            app:layout_constraintStart_toStartOf="parent"
+            tools:text="苹果" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

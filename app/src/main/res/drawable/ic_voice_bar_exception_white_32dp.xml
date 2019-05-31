@@ -1,0 +1,27 @@
+<!--
+  ~ Copyright (C) 2019 iFLYTEK CO.,LTD.
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="32dp"
+    android:height="32dp"
+    android:viewportWidth="32"
+    android:viewportHeight="32">
+  <path
+      android:pathData="M5.8603,0L26.1397,0C28.1774,0 28.9164,0.2122 29.6614,0.6106C30.4063,1.009 30.991,1.5937 31.3894,2.3386C31.7878,3.0836 32,3.8226 32,5.8603L32,32C27.4583,30.4861 22.7022,29.7143 17.9148,29.7143L5.8603,29.7143C3.8226,29.7143 3.0836,29.5021 2.3386,29.1037C1.5937,28.7053 1.009,28.1206 0.6106,27.3756C0.2122,26.6307 0,25.8917 0,23.854L0,5.8603C-0,3.8226 0.2122,3.0836 0.6106,2.3386C1.009,1.5937 1.5937,1.009 2.3386,0.6106C3.0836,0.2122 3.8226,0 5.8603,0ZM3.2,7.4201L6.6666,10.8L3.2,14.1799L5.0667,16L10.4,10.8L5.0667,5.6L3.2,7.4201ZM20.8,14.1799L17.3335,10.8L20.8,7.4201L18.9333,5.6L13.6,10.8L18.9333,16L20.8,14.1799Z"
+      android:strokeWidth="1"
+      android:fillColor="#FFFFFF"
+      android:fillType="evenOdd"
+      android:strokeColor="#00000000"/>
+</vector>

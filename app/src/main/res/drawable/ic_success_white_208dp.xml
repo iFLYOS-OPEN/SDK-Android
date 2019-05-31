@@ -1,0 +1,25 @@
+<!--
+  ~ Copyright (C) 2019 iFLYTEK CO.,LTD.
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<vector android:height="208dp" android:viewportHeight="208"
+    android:viewportWidth="208" android:width="208dp" xmlns:android="http://schemas.android.com/apk/res/android">
+    <path android:fillColor="#FFFFFF" android:fillType="evenOdd"
+        android:pathData="M91.4,119.4l-16.8,-16.8l-5.6,5.6l22.4,22.4l48,-48l-5.6,-5.6z"
+        android:strokeColor="#00000000" android:strokeWidth="1"/>
+    <path android:fillColor="#FFFFFF" android:fillType="evenOdd"
+        android:pathData="M104,208C46.562,208 0,161.438 0,104C0,46.562 46.562,0 104,0C161.438,0 208,46.562 208,104C208,161.438 161.438,208 104,208ZM104,200C157.019,200 200,157.019 200,104C200,50.981 157.019,8 104,8C50.981,8 8,50.981 8,104C8,157.019 50.981,200 104,200Z"
+        android:strokeColor="#00000000" android:strokeWidth="1"/>
+</vector>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="corner_radius_size">8dp</dimen>
+    <dimen name="image_corner_radius_size">12dp</dimen>
+    <dimen name="cover_radius_size">24dp</dimen>
+    <dimen name="line_height">0.5dp</dimen>
+</resources>

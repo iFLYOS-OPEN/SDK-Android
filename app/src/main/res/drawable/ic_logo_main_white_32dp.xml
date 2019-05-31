@@ -1,0 +1,39 @@
+<!--
+  ~ Copyright (C) 2019 iFLYTEK CO.,LTD.
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="64dp"
+    android:height="64dp"
+    android:viewportWidth="64"
+    android:viewportHeight="64">
+    <path
+        android:pathData="M20.5111,0.5C14.084,0.5 11.3019,1.0372 8.421,2.578C5.9008,3.9258 3.9258,5.9008 2.578,8.421C1.0372,11.3019 0.5,14.084 0.5,20.5111L0.5,43.4889C0.5,49.916 1.0372,52.6981 2.578,55.579C3.9258,58.0992 5.9008,60.0742 8.421,61.422C11.3019,62.9627 14.084,63.5 20.5111,63.5L43.4889,63.5C49.916,63.5 52.6981,62.9627 55.579,61.422C58.0992,60.0742 60.0742,58.0992 61.422,55.579C62.9627,52.6981 63.5,49.916 63.5,43.4889L63.5,20.5111C63.5,14.084 62.9627,11.3019 61.422,8.421C60.0742,5.9008 58.0992,3.9258 55.579,2.578C52.6981,1.0372 49.916,0.5 43.4889,0.5L20.5111,0.5Z"
+        android:strokeWidth="1"
+        android:fillColor="#FFFFFF"
+        android:strokeColor="#E0E0E0"
+        android:fillType="evenOdd"/>
+    <path
+        android:pathData="M22.7131,18.5577C20.2606,17.6583 17.6217,17.1429 14.8571,17.1429C14.7337,17.1429 14.6114,17.1543 14.488,17.1566C15.7691,14.4514 18.5143,12.5749 21.7051,12.5714C21.4057,11.4069 21.0491,10.264 20.6411,9.1463C20.6171,9.1463 20.5954,9.1429 20.5714,9.1429C14.2606,9.1429 9.1429,14.2594 9.1429,20.5714C9.1429,24.0206 9.6263,27.3554 10.5189,30.5189C12.3177,30.7337 14.144,30.8571 16,30.8571C17.9623,30.8571 19.8914,30.7189 21.7886,30.4789C22.4834,27.6709 22.8571,24.7371 22.8571,21.7143C22.8571,20.6503 22.8023,19.5989 22.7131,18.5577Z"
+        android:strokeWidth="1"
+        android:fillColor="#5280FF"
+        android:fillType="evenOdd"
+        android:strokeColor="#00000000"/>
+    <path
+        android:pathData="M40.9989,18.5577C38.5463,17.6583 35.9074,17.1429 33.1429,17.1429C33.0194,17.1429 32.8971,17.1543 32.7737,17.1566C34.0549,14.4514 36.8,12.5749 39.9909,12.5714C39.6914,11.4069 39.3349,10.264 38.9269,9.1463C38.9029,9.1463 38.8811,9.1429 38.8571,9.1429C32.5463,9.1429 27.4286,14.2594 27.4286,20.5714C27.4286,24.0206 27.912,27.3554 28.8046,30.5189C30.6034,30.7337 32.4297,30.8571 34.2857,30.8571C36.248,30.8571 38.1771,30.7189 40.0743,30.4789C40.7691,27.6709 41.1429,24.7371 41.1429,21.7143C41.1429,20.6503 41.088,19.5989 40.9989,18.5577Z"
+        android:strokeWidth="1"
+        android:fillColor="#5280FF"
+        android:fillType="evenOdd"
+        android:strokeColor="#00000000"/>
+</vector>

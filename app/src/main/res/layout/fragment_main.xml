@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright (C) 2019 iFLYTEK CO.,LTD.
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <ImageSwitcher
+        android:id="@+id/iv_index"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:background="@drawable/bg_index4" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/top_margin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.08" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/start_margin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.047" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/clock"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:maxLines="1"
+        android:textColor="@android:color/white"
+        app:fontFamily="sans-serif-medium"
+        app:layout_constraintStart_toStartOf="@id/start_margin"
+        app:layout_constraintTop_toTopOf="@id/top_margin"
+        tools:text="10:45"
+        tools:textSize="80sp" />
+
+    <View
+        android:id="@+id/date_start_margin"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintStart_toStartOf="@id/clock"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintWidth_percent="0.012" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/date"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_below="@id/clock"
+        android:textColor="@android:color/white"
+        app:autoSizeTextType="uniform"
+        app:layout_constraintHeight_percent="0.06"
+        app:layout_constraintStart_toEndOf="@id/date_start_margin"
+        app:layout_constraintTop_toBottomOf="@id/clock"
+        app:layout_constraintWidth_percent="0.563"
+        tools:text="4月16日 星期二" />
+
+    <View
+        android:id="@+id/img_weather_guide"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintHeight_percent="0.047"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/date" />
+
+    <ImageView
+        android:id="@+id/img_weather"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintHeight_percent="0.134"
+        app:layout_constraintStart_toStartOf="@id/clock"
+        app:layout_constraintTop_toBottomOf="@id/img_weather_guide" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/tv_temperature"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="8dp"
+        android:textColor="@android:color/white"
+        app:autoSizeTextType="uniform"
+        app:fontFamily="sans-serif-medium"
+        app:layout_constraintBottom_toBottomOf="@id/img_weather"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHeight_percent="0.08"
+        app:layout_constraintStart_toEndOf="@id/img_weather"
+        app:layout_constraintTop_toTopOf="@id/img_weather"
+        app:layout_goneMarginStart="8dp" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/tv_weather_desc"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="4dp"
+        android:maxLines="2"
+        android:textColor="@color/weather_desc_color"
+        app:layout_constraintHeight_percent="0.12"
+        app:layout_constraintStart_toStartOf="@id/date"
+        app:layout_constraintTop_toBottomOf="@id/img_weather"
+        app:layout_constraintWidth_percent="0.563" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/end_margin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.949" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/music_end_margin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.855" />
+
+    <ImageView
+        android:id="@+id/settings"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="8dp"
+        android:background="?selectableItemBackgroundBorderless"
+        android:clickable="true"
+        android:contentDescription="@string/music"
+        android:focusable="true"
+        android:padding="5dp"
+        android:src="@drawable/ic_settings_white_64dp"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintEnd_toEndOf="@id/end_margin"
+        app:layout_constraintHeight_percent="0.107"
+        app:layout_constraintTop_toTopOf="@id/clock" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="8dp"
+        android:padding="8dp"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintEnd_toEndOf="@id/music_end_margin"
+        app:layout_constraintHeight_percent=".107"
+        app:layout_constraintTop_toTopOf="@id/clock">
+
+        <ImageView
+            android:id="@+id/music"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="?selectableItemBackgroundBorderless"
+            android:clickable="true"
+            android:contentDescription="@string/music"
+            android:focusable="true"
+            android:src="@drawable/cover_tiny" />
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:alpha="0.08"
+            android:background="@android:color/black"
+            tools:ignore="ContentDescription" />
+
+        <View
+            android:id="@+id/music_foreground"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/playing_guide"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_percent="0.94" />
+
+        <ImageView
+            android:id="@+id/iv_playing"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toBottomOf="@id/playing_guide"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHeight_percent=".6"
+            app:layout_constraintStart_toStartOf="parent"
+            tools:ignore="ContentDescription" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

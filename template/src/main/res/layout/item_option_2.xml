@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="@drawable/bg_option"
+    tools:layout_width="220dp">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/card_start"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.098" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/card_end"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.902" />
+
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/cover_container"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintDimensionRatio="196:277"
+            app:layout_constraintEnd_toEndOf="@id/card_end"
+            app:layout_constraintStart_toStartOf="@id/card_start"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <com.shehuan.niv.NiceImageView
+                android:id="@+id/image"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:background="@drawable/img_bg_option"
+                android:scaleType="centerCrop"
+                app:corner_radius="12dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/index"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:background="@drawable/bg_index"
+                android:gravity="center"
+                android:maxLines="1"
+                android:paddingStart="4dp"
+                android:paddingEnd="4dp"
+                android:textColor="@android:color/white"
+                app:autoSizeTextType="uniform"
+                app:layout_constraintDimensionRatio="35:28"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintWidth_percent="0.179"
+                tools:text="1"
+                tools:textSize="18sp" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/text_container"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:orientation="vertical"
+            app:layout_constraintDimensionRatio="196:114"
+            app:layout_constraintEnd_toEndOf="@id/card_end"
+            app:layout_constraintStart_toStartOf="@id/card_start"
+            app:layout_constraintTop_toBottomOf="@id/cover_container">
+
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/text_top"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:orientation="horizontal"
+                app:layout_constraintGuide_percent="0.12" />
+
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/text_end"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:orientation="horizontal"
+                app:layout_constraintGuide_percent="0.12" />
+
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/ter_text_end"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:orientation="horizontal"
+                app:layout_constraintGuide_percent="0.12" />
+
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/sub_text_top"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:orientation="horizontal"
+                app:layout_constraintGuide_percent="0.421" />
+
+            <TextView
+                android:id="@+id/tertiary_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/option_tertiary_color"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@id/primary_text"
+                tools:text="8.8"
+                tools:textSize="14sp" />
+
+            <View
+                android:id="@+id/text_placeholder"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                app:layout_constraintEnd_toStartOf="@id/tertiary_text"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintWidth_percent="0.0822" />
+
+            <TextView
+                android:id="@+id/primary_text"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textColor="@android:color/white"
+                app:layout_constraintEnd_toStartOf="@id/text_placeholder"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@id/text_top"
+                tools:text="黑暗心灵"
+                tools:textSize="22sp" />
+
+            <TextView
+                android:id="@+id/secondary_text"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:alpha="0.7"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textColor="@android:color/white"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@id/sub_text_top"
+                tools:text="超能力大冒险"
+                tools:textSize="16sp" />
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</FrameLayout>

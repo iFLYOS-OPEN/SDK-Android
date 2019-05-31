@@ -1,0 +1,27 @@
+<!--
+  ~ Copyright (C) 2019 iFLYTEK CO.,LTD.
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="32dp"
+    android:height="32dp"
+    android:viewportWidth="32"
+    android:viewportHeight="32">
+  <path
+      android:pathData="M14.4491,14.076C12.5606,13.4 10.5287,13.0126 8.4,13.0126C8.305,13.0126 8.2108,13.0212 8.1158,13.0229C9.1022,10.9898 11.216,9.5794 13.673,9.5768C13.4424,8.7016 13.1678,7.8426 12.8537,7.0026C12.8352,7.0026 12.8185,7 12.8,7C7.9406,7 4,10.8455 4,15.5895C4,18.1818 4.3722,20.6882 5.0595,23.0658C6.4446,23.2272 7.8509,23.32 9.28,23.32C10.791,23.32 12.2764,23.2161 13.7372,23.0357C14.2722,20.9253 14.56,18.7203 14.56,16.4484C14.56,15.6487 14.5178,14.8585 14.4491,14.076ZM27.8891,14.076C26.0006,13.4 23.9687,13.0126 21.84,13.0126C21.745,13.0126 21.6508,13.0212 21.5558,13.0229C22.5422,10.9898 24.656,9.5794 27.113,9.5768C26.8824,8.7016 26.6078,7.8426 26.2937,7.0026C26.2752,7.0026 26.2585,7 26.24,7C21.3806,7 17.44,10.8455 17.44,15.5895C17.44,18.1818 17.8122,20.6882 18.4995,23.0658C19.8846,23.2272 21.2909,23.32 22.72,23.32C24.231,23.32 25.7164,23.2161 27.1772,23.0357C27.7122,20.9253 28,18.7203 28,16.4484C28,15.6487 27.9578,14.8585 27.8891,14.076Z"
+      android:strokeWidth="1"
+      android:fillColor="#FFFFFF"
+      android:fillType="evenOdd"
+      android:strokeColor="#00000000"/>
+</vector>

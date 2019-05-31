@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="windowBackground">#0f1722</color>
+    <color name="setup_primary">#1784e9</color>
+    <color name="setup_primary_disabled">#9f9f9f</color>
+    <color name="setup_primary_pressed">#49B6FF</color>
+    <color name="setup_background">#0f1722</color>
+    <color name="option_tertiary_color">#FFD377</color>
+    <color name="weather_desc_color">#b3ffffff</color>
+    <color name="settings_background">#0f1722</color>
+    <color name="tips_color">#80ffffff</color>
+    <color name="divider">#1effffff</color>
+    <color name="dividerLight">#1e000000</color>
+    <color name="textColorLightPrimary">#0f1722</color>
+    <color name="textColorLightSecondary">#7f8187</color>
+    <color name="textColorDarkPrimary">#ffffff</color>
+    <color name="textColorDarkSecondary">#b3b3b3</color>
+    <color name="textColorDarkTertiary">#7f7f7f</color>
+</resources>
