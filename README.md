@@ -11,7 +11,7 @@ iFLYOS Android SDK
 
 ## SDK 部分
 
-* `app/libs/*.aar` SDK 模块，负责维护、管理语音服务流程
+* `app/libs/ivs-android-sdk3.aar` SDK 模块，负责维护、管理语音服务流程
 
 ## 文档
 

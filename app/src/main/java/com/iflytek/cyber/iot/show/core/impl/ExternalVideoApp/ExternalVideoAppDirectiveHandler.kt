@@ -177,16 +177,26 @@ class ExternalVideoAppDirectiveHandler : ExternalVideoAppHandler.OnDirectiveHand
     }
 
     override fun onReleaseChannel() {
-        iFLYOSManager.getInstance().sendMsg(iFLYOSInterface.IFLYOS_DO_EXTVIDPLAYER_REPORT_STATUS, "false")
+        var needRelease = false
+        arrayOf(PKG_IQIYI_SPEAKER, PKG_IQIYI_TV).map {
+            if (appStateMap[it]?.isForeground == true) {
+                needRelease = true
+                return@map
+            }
+        }
 
-        context?.let { context ->
-            try {
-                val intent = Intent(context, LauncherActivity::class.java)
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
-                context.applicationContext.startActivity(intent)
-            } catch (e: Exception) {
-                e.printStackTrace()
+        if (needRelease) {
+            iFLYOSManager.getInstance().sendMsg(iFLYOSInterface.IFLYOS_DO_EXTVIDPLAYER_REPORT_STATUS, "false")
+
+            context?.let { context ->
+                try {
+                    val intent = Intent(context, LauncherActivity::class.java)
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
+                    context.applicationContext.startActivity(intent)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
             }
         }
 

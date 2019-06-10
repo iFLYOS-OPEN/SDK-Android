@@ -912,7 +912,7 @@ class LauncherActivity : AppCompatActivity(), TemplateFragment.TemplateCallback 
         if (iFLYOSManager.currentInstance() == null) {
             manager = iFLYOSManager.getInstance()
 
-            manager?.init(applicationContext, "${cacheDir.path}/iflyos/config.json", iflyosListener, genenrateAdditionalParams())
+            manager?.init(applicationContext, BuildConfig.CLIENT_ID, "${cacheDir.path}/iflyos/config.json", iflyosListener, generateAdditionalParams())
         } else {
             manager = iFLYOSManager.currentInstance()
 
@@ -1015,7 +1015,7 @@ class LauncherActivity : AppCompatActivity(), TemplateFragment.TemplateCallback 
         })
     }
 
-    private fun genenrateAdditionalParams(): JsonObject {
+    private fun generateAdditionalParams(): JsonObject {
         // 配置上报自定义端能力
         val additionalParams = JsonObject()
         val customCap = JsonObject()
@@ -1092,7 +1092,7 @@ class LauncherActivity : AppCompatActivity(), TemplateFragment.TemplateCallback 
             // 请求 ACCESS_COARSE_LOCATION 权限用于请求天气预报，若不需要亦可移除。
             requestPermission()
         } else {
-            manager?.updateParams(genenrateAdditionalParams())
+            manager?.updateParams(generateAdditionalParams())
         }
 
         try {
@@ -1119,6 +1119,19 @@ class LauncherActivity : AppCompatActivity(), TemplateFragment.TemplateCallback 
                 }
             } else {
                 Log.d(sTag, "AppStateObserver started.")
+
+                val packages = packageManager.getInstalledPackages(0)
+                val installedPkgName = HashSet<String>()
+                if (!packages.isNullOrEmpty()) {
+                    packages.map {
+                        if (it.packageName == ExternalVideoAppConstant.PKG_IQIYI_TV
+                                || it.packageName == ExternalVideoAppConstant.PKG_IQIYI_SPEAKER) {
+                            installedPkgName.add(it.packageName)
+                        }
+                    }
+                }
+
+                extVideoAppDirectiveHandler.resetAppStates(installedPkgName.toTypedArray())
             }
         } catch (e: Exception) {
             e.printStackTrace()
@@ -1358,7 +1371,7 @@ class LauncherActivity : AppCompatActivity(), TemplateFragment.TemplateCallback 
                                         "$packageName.overlay.IatActivity")
                                 intent.action = "$packageName.overlay.action.START"
                                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
+                                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
                                 intent.component = componentName
                                 applicationContext.startActivity(intent)
                                 overridePendingTransition(0, 0)
@@ -1397,7 +1410,7 @@ class LauncherActivity : AppCompatActivity(), TemplateFragment.TemplateCallback 
                             val componentName = ComponentName("$packageName.overlay", "$packageName.overlay.IatActivity")
                             intent.action = "$packageName.overlay.action.START"
                             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                            intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
+                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
                             intent.component = componentName
                             applicationContext.startActivity(intent)
                             overridePendingTransition(0, 0)
@@ -1719,7 +1732,7 @@ class LauncherActivity : AppCompatActivity(), TemplateFragment.TemplateCallback 
                                     "$packageName.overlay.TemplateActivity")
                             intent.action = "$packageName.overlay.action.BLANK"
                             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                            intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
+                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
                             intent.component = componentName
                             applicationContext.startActivity(intent)
                             overridePendingTransition(0, 0)

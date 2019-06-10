@@ -25,6 +25,7 @@ import android.net.NetworkInfo
 import android.net.wifi.ScanResult
 import android.net.wifi.WifiConfiguration
 import android.net.wifi.WifiManager
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -240,12 +241,22 @@ class WifiFragment : BaseFragment() {
     private fun handleScanResult() {
         configs.clear()
         wm?.let {
-            for (config in it.configuredNetworks) {
-                val ssid = config.SSID.substring(1, config.SSID.length - 1)
-                configs[ssid] = config
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) {
+                for (config in it.configuredNetworks) {
+                    val ssid = config.SSID.substring(1, config.SSID.length - 1)
+                    configs[ssid] = config
 
-                if (config.status == WifiConfiguration.Status.CURRENT) {
-                    connected = ssid
+                    if (config.status == WifiConfiguration.Status.CURRENT) {
+                        connected = ssid
+                    }
+                }
+            } else {
+                val connManager = context?.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+                val networkInfo = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI)
+                if (networkInfo.isConnected) {
+                    val wifiInfo = it.connectionInfo
+                    val ssid = wifiInfo.ssid
+                    connected = ssid.substring(1, ssid.length - 1)
                 }
             }
 
@@ -458,9 +469,13 @@ class WifiFragment : BaseFragment() {
                         status.visibility = View.VISIBLE
                         status.text = if (failed) "密码错误" else "正在连接…"
                     }
+                    scan.SSID == connected -> {
+                        status.visibility = View.VISIBLE
+                        status.text = "已连接"
+                    }
                     config != null -> {
                         status.visibility = View.VISIBLE
-                        status.text = if (scan.SSID == connected) "已连接" else "已保存"
+                        status.text = "已保存"
                     }
                     else -> status.visibility = View.GONE
                 }

@@ -82,9 +82,9 @@ class RecognizeWaveView @JvmOverloads constructor(context: Context, attrs: Attri
                 updateWaveVolume(wave1, value, offset, Runnable {
                     shouldAnimVolume = true
                 })
-                postDelayed({ updateWaveVolume(wave3, value, offset) }, VOLUME_CHANGED_OFFSET)
-                postDelayed({ updateWaveVolume(wave2, value, offset) }, VOLUME_CHANGED_OFFSET * 2)
-                postDelayed({ updateWaveVolume(wave4, value, offset) }, VOLUME_CHANGED_OFFSET * 3)
+                volumeUpdateHandler.postDelayed({ updateWaveVolume(wave3, value, offset) }, VOLUME_CHANGED_OFFSET)
+                volumeUpdateHandler.postDelayed({ updateWaveVolume(wave2, value, offset) }, VOLUME_CHANGED_OFFSET * 2)
+                volumeUpdateHandler.postDelayed({ updateWaveVolume(wave4, value, offset) }, VOLUME_CHANGED_OFFSET * 3)
             }
             volumeUpdateHandler.postDelayed(this, 1000L / 60) // 60fps
         }
@@ -187,7 +187,8 @@ class RecognizeWaveView @JvmOverloads constructor(context: Context, attrs: Attri
     }
 
     fun releaseRunnable() {
-        removeCallbacks(updateVolumeRunnable)
+        shouldAnimVolume = false
+        volumeUpdateHandler.removeCallbacksAndMessages(null)
     }
 
     fun updateVolume(volume: Double) {

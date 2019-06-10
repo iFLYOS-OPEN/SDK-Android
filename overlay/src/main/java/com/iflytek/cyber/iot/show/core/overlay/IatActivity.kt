@@ -38,6 +38,8 @@ class IatActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_iat)
 
+        Log.d(TAG, "onCreate")
+
         recognize_view.post {
             val height = fragment_container.height
 
@@ -81,9 +83,11 @@ class IatActivity : AppCompatActivity() {
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
 
+        Log.d(TAG, "onNewIntent")
+
         mark = System.currentTimeMillis()
 
-        recognize_view.releaseRunnable()
+        recognize_view.startEnterAnimation()
 
         iat_logo.scaleX = 0f
         iat_logo.scaleY = 0f
