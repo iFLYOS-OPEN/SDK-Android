@@ -413,7 +413,8 @@ class PlayerInfoFragment : BaseFragment(), View.OnClickListener, OnSeekChangeLis
             ContentStorage.get().isMusicPlaying = false
 //            progressHandler.removeCallbacks(progressCallback)
         }
-        if (state == MediaPlayer.MediaState.STOPPED) {
+        if (state == MediaPlayer.MediaState.STOPPED
+                || state == MediaPlayer.MediaState.FINISH) {
             ivPlayPause?.setImageResource(R.drawable.ic_play_circle_outline_white_24dp)
             ContentStorage.get().isMusicPlaying = false
             setSeekBarEnabled(enabled = false, resetProgress = false)

@@ -53,6 +53,7 @@ import androidx.navigation.fragment.NavHostFragment
 import cn.iflyos.sdk.android.impl.alerts.AlertsPlayerHandler
 import cn.iflyos.sdk.android.impl.cbl.CBLAuthDelegate
 import cn.iflyos.sdk.android.impl.common.iFLYOSPlayerHandler
+import cn.iflyos.sdk.android.impl.custom.CustomAgent
 import cn.iflyos.sdk.android.impl.externalvideoapp.ExternalVideoAppHandler
 import cn.iflyos.sdk.android.impl.iflyosclient.iFLYOSClientHandler
 import cn.iflyos.sdk.android.impl.mediaplayer.MediaPlayerHandler
@@ -241,7 +242,7 @@ class LauncherActivity : AppCompatActivity(), TemplateFragment.TemplateCallback 
 
         private const val REQUEST_PERMISSION_CODE = 1001
 
-        // 各个提示语 id
+        // 各个提示语数组 id
         const val TIPS_DEFAULT = R.array.default_tips
         const val TIPS_WEATHER = R.array.weather_tips
         const val TIPS_PLAYER = R.array.player_tips
@@ -314,43 +315,58 @@ class LauncherActivity : AppCompatActivity(), TemplateFragment.TemplateCallback 
                 ivLogo?.setImageResource(R.drawable.ic_voice_bar_regular_white_32dp)
             }
             StatusType.AUTHORIZE_ERROR -> {
-                currentTips = R.string.authorize_error
-                tvTipsSimple?.setText(R.string.authorize_error)
-                tvTipsSimple?.setOnClickListener(authorizeErrorClickListener)
-                ivLogo?.setOnClickListener(authorizeErrorClickListener)
+                val isNetworkAvailable = ConnectivityUtils.isNetworkAvailable(this)
+                if (isNetworkAvailable) {
+                    if (currentTips != R.string.authorize_error) {
+                        updateTipsWithResId(R.string.authorize_error)
+                    }
+                    tvTipsSimple?.setOnClickListener(authorizeErrorClickListener)
+                    ivLogo?.setOnClickListener(authorizeErrorClickListener)
+                } else {
+                    if (currentTips != R.string.network_error) {
+                        updateTipsWithResId(R.string.network_error)
+                    }
+                    tvTipsSimple?.setOnClickListener(networkErrorClickListener)
+                    ivLogo?.setOnClickListener(networkErrorClickListener)
+                }
                 ivLogo?.setImageResource(R.drawable.ic_voice_bar_exception_white_32dp)
             }
             StatusType.SERVER_ERROR -> {
-                currentTips = R.string.unknown_error
-                tvTipsSimple?.setText(R.string.unknown_error)
+                if (currentTips != R.string.unknown_error) {
+                    updateTipsWithResId(R.string.unknown_error)
+                }
                 tvTipsSimple?.setOnClickListener(null)
                 ivLogo?.setImageResource(R.drawable.ic_voice_bar_exception_white_32dp)
                 ivLogo?.setOnClickListener(null)
             }
             StatusType.NETWORK_ERROR -> {
-                currentTips = R.string.network_error
-                tvTipsSimple?.setText(R.string.network_error)
+                if (currentTips != R.string.network_error) {
+                    updateTipsWithResId(R.string.network_error)
+                }
                 tvTipsSimple?.setOnClickListener(networkErrorClickListener)
                 ivLogo?.setOnClickListener(networkErrorClickListener)
                 ivLogo?.setImageResource(R.drawable.ic_voice_bar_exception_white_32dp)
             }
             StatusType.UNKNOWN_ERROR -> {
-                currentTips = R.string.unknown_error
-                tvTipsSimple?.setText(R.string.unknown_error)
+                if (currentTips != R.string.unknown_error) {
+                    updateTipsWithResId(R.string.unknown_error)
+                }
                 tvTipsSimple?.setOnClickListener(null)
                 ivLogo?.setImageResource(R.drawable.ic_voice_bar_exception_white_32dp)
                 ivLogo?.setOnClickListener(null)
             }
             StatusType.RETRYING -> {
-                currentTips = R.string.retry_connecting
-                tvTipsSimple?.setText(R.string.retry_connecting)
+                if (currentTips != R.string.retry_connecting) {
+                    updateTipsWithResId(R.string.retry_connecting)
+                }
                 tvTipsSimple?.setOnClickListener(null)
                 ivLogo?.setImageResource(R.drawable.ic_voice_bar_exception_white_32dp)
                 ivLogo?.setOnClickListener(null)
             }
             StatusType.UNSUPPORTED_DEVICE_ERROR -> {
-                currentTips = R.string.unsupported_device_error
-                tvTipsSimple?.setText(R.string.unsupported_device_error)
+                if (currentTips != R.string.unsupported_device_error) {
+                    updateTipsWithResId(R.string.unsupported_device_error)
+                }
                 tvTipsSimple?.setOnClickListener(null)
                 ivLogo?.setImageResource(R.drawable.ic_voice_bar_exception_white_32dp)
                 ivLogo?.setOnClickListener(null)
@@ -455,6 +471,50 @@ class LauncherActivity : AppCompatActivity(), TemplateFragment.TemplateCallback 
         }
     }
 
+    fun updateTipsWithResId(resId: Int) {
+        currentTips = resId
+
+        val tips = getString(resId)
+
+        Log.d(sTag, "UpdateTips: $tips")
+
+        currentTipsAnimator?.cancel()
+
+        // 若底部状态栏正在隐藏状态，则直接设置文本，否则进行透明度变换动画
+        if (mStatusHidden) {
+            tvTipsSimple?.text = tips
+        } else {
+            val animator = ValueAnimator.ofFloat(0f, 1f)
+            animator.addUpdateListener {
+                val value = it.animatedValue as Float
+                if (value < 0.5f) {
+                    tvTipsSimple?.alpha = 1 - value * 2
+                } else {
+                    if (tvTipsSimple?.text.toString() != tips.toString()) {
+                        tvTipsSimple?.text = tips
+                    }
+                    tvTipsSimple?.alpha = value * 2 - 1
+                }
+            }
+            animator.interpolator = LinearInterpolator()
+            animator.duration = 1000
+            animator.addListener(object : AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: Animator?) {
+                    super.onAnimationEnd(animation)
+                    if (animation == currentTipsAnimator)
+                        currentTipsAnimator = null
+                }
+
+                override fun onAnimationCancel(animation: Animator?) {
+                    super.onAnimationCancel(animation)
+                    if (animation == currentTipsAnimator)
+                        currentTipsAnimator = null
+                }
+            })
+            animator.start()
+        }
+    }
+
     /**
      * 根据 id 和 template 数据显示 TemplateRuntime
      *
@@ -462,6 +522,7 @@ class LauncherActivity : AppCompatActivity(), TemplateFragment.TemplateCallback 
      * @param template 下发的指令的 payload
      */
     private fun showTemplate(id: Int, template: String) {
+        Log.d(sTag, template)
         handleVoiceEnd()
         val nav = findNavController(R.id.fragment)
         when (nav.currentDestination?.id) {
@@ -967,6 +1028,18 @@ class LauncherActivity : AppCompatActivity(), TemplateFragment.TemplateCallback 
                                     }
                                 }
                             }
+                            else -> {
+                                // 若一打开就无网络，则此时 handler 为空，在网络恢复可用后应初始化 IVS
+                                // 但在部分设备上，若上一次打开前无网络，这次一打开就有网络，onAvailable 也会被回调一次，此时做判断以区分
+                                if (isNetworkLost) {
+                                    manager?.initializeIvs()
+
+                                    // 重新定位以触发获取一次天气
+                                    (getCurrentFragment() as? MainFragment)?.let {
+                                        it.startLocation()
+                                    }
+                                }
+                            }
                         }
                     }
 
@@ -1007,12 +1080,38 @@ class LauncherActivity : AppCompatActivity(), TemplateFragment.TemplateCallback 
             override fun onRefresh(authState: AuthState) {
                 if (authState == AuthState.INVALID_REFRESH_TOKEN) {
                     if (NavHostFragment.findNavController(fragment).currentDestination?.id == R.id.splash_fragment) {
-                        hideSimpleTips()
-                        NavHostFragment.findNavController(fragment).navigate(R.id.action_to_welcome_fragment)
+                        val isNetworkAvailable = ConnectivityUtils.isNetworkAvailable(this@LauncherActivity)
+                        if (manager?.isConnectedIvs == true) {
+                            isNetworkLost = true
+                            NavHostFragment.findNavController(fragment).navigate(R.id.action_to_main_fragment)
+                            mStatusType = if (isNetworkAvailable) {
+                                StatusType.AUTHORIZE_ERROR
+                            } else {
+                                StatusType.NETWORK_ERROR
+                            }
+                        } else {
+                            hideSimpleTips()
+                            NavHostFragment.findNavController(fragment).navigate(R.id.action_to_welcome_fragment)
+                        }
+                    } else {
+                        setStatusType(StatusType.AUTHORIZE_ERROR)
                     }
                 }
             }
         })
+
+        val customAgent = object : CustomAgent(manager!!) {
+            override fun onCustomDirective(directive: String) {
+                // handle your custom
+                System.out.println("custom: $directive")
+            }
+
+        }
+        manager?.setCustomAgent(customAgent)
+        // 设置成功后，可执行以下操作
+//        customAgent.sendCustomEvent("{}")
+        // 请注意该操作非同步，调用更新 Context 后马上开始语音交互可能导致 Context 未生效
+//        customAgent.updateContext("{}")
     }
 
     private fun generateAdditionalParams(): JsonObject {
@@ -1023,6 +1122,16 @@ class LauncherActivity : AppCompatActivity(), TemplateFragment.TemplateCallback 
         // 目前支持：爱奇艺tv版，爱奇艺语音版
         customCap.addProperty("ExternalVideoApp", "1.0")
         additionalParams.add("customCap", customCap)
+
+//        定义授权 scope 类型
+//        val cblAuthDelegate = JsonObject()
+//        cblAuthDelegate.addProperty("scope", "user_ivs_all")
+//        additionalParams.add("cblAuthDelegate", cblAuthDelegate)
+
+//        自定义设备标识
+//        val deviceInfo = JsonObject()
+//        deviceInfo.addProperty("deviceSerialNumber", "deviceId...")
+//        additionalParams.add("deviceInfo", deviceInfo)
 
         // 自定义唤醒词可参考以下代码，将唤醒词资源路径传入即可，详细内容请参阅文档相关章节描述
 //        val customWakeUp = JsonObject()

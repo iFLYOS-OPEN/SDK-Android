@@ -296,6 +296,10 @@ class MainFragment : BaseFragment(), AMapLocationListener, ObserverListener,
         mLocationClient?.startLocation()
     }
 
+    fun startLocation() {
+        mLocationClient?.startLocation()
+    }
+
     override fun onAttach(context: Context) {
         super.onAttach(context)
 
