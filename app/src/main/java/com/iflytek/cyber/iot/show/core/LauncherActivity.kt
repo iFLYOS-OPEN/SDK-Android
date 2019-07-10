@@ -116,6 +116,7 @@ class LauncherActivity : AppCompatActivity(), TemplateFragment.TemplateCallback 
     private var ivLogo: ImageView? = null // 主界面的左下角 Logo，点击可开始识别
     private var recognizeWaveView: RecognizeWaveView? = null // 唤醒界面的波形动画
     private val finishedSourceIdMap = HashMap<String, String>() // 已经播放结束的资源
+    private var customAgent: CustomAgent? = null
 
     private var manager: iFLYOSManager? = null // iFLYOS 管理器，单例
 
@@ -1099,19 +1100,6 @@ class LauncherActivity : AppCompatActivity(), TemplateFragment.TemplateCallback 
                 }
             }
         })
-
-        val customAgent = object : CustomAgent(manager!!) {
-            override fun onCustomDirective(directive: String) {
-                // handle your custom
-                System.out.println("custom: $directive")
-            }
-
-        }
-        manager?.setCustomAgent(customAgent)
-        // 设置成功后，可执行以下操作
-//        customAgent.sendCustomEvent("{}")
-        // 请注意该操作非同步，调用更新 Context 后马上开始语音交互可能导致 Context 未生效
-//        customAgent.updateContext("{}")
     }
 
     private fun generateAdditionalParams(): JsonObject {
@@ -1551,6 +1539,22 @@ class LauncherActivity : AppCompatActivity(), TemplateFragment.TemplateCallback 
 
                         mStatusType = StatusType.NORMAL
                         updateBottomBar()
+
+
+                        val customAgent = object : CustomAgent(manager!!) {
+                            override fun onCustomDirective(directive: String) {
+                                // handle your custom
+                                System.out.println("custom: $directive")
+                            }
+
+                        }
+                        manager?.setCustomAgent(customAgent)
+                        this@LauncherActivity.customAgent = customAgent
+//                         设置成功后，可执行以下操作
+//                        customAgent.sendCustomEvent("{}")
+//                         请注意该操作非同步，调用更新 Context 后马上开始语音交互可能导致 Context 未生效
+//                        customAgent.updateContext("{}")
+//                        customAgent.updateContext("{\"context\": \"test\"}")
 
                         (manager?.getHandler(PlatformInterface.SpecialHandler.TEMPLATETUNTIME.value())
                                 as? TemplateRuntimeHandler)?.setTimerEnable(false)
