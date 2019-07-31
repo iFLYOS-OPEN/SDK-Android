@@ -16,10 +16,12 @@
 
 package com.iflytek.cyber.iot.show.core.template
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.*
+import android.widget.HorizontalScrollView
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -44,6 +46,7 @@ class WeatherFragment : TemplateFragment() {
     private var dayHighTemperature: TextView? = null
     private var dayLowTemperature: TextView? = null
     private var payload: JsonObject? = null
+    private var scrollView: HorizontalScrollView? = null
 
     private var ivWeatherIcon: ImageView? = null
     private var tvWeatherQuality: TextView? = null
@@ -73,6 +76,7 @@ class WeatherFragment : TemplateFragment() {
             isFutureWeatherType = !(payload?.get("lowTemperature")?.asString.isNullOrEmpty()) && !(payload?.get("highTemperature")?.asString.isNullOrEmpty())
             if (isFutureWeatherType) {
                 view = inflater.inflate(R.layout.fragment_weather, container, false)
+                scrollView = view.findViewById(R.id.scroll_future_days_weather)
                 futureDaysWeatherContainer = view.findViewById(R.id.future_days_weather)
                 currentTemperature = view.findViewById(R.id.current_temperature)
                 highContent = view.findViewById(R.id.high_content)
@@ -85,6 +89,7 @@ class WeatherFragment : TemplateFragment() {
                 ivSkillIcon = view.findViewById(R.id.iv_skill_icon)
             } else {
                 view = inflater.inflate(R.layout.layout_future_weather, container, false)
+                scrollView = view.findViewById(R.id.scroll_future_days_weather)
                 tvFutureTitle = view.findViewById(R.id.tv_title)
                 futureContent = view.findViewById(R.id.future_days_weather)
             }
@@ -96,7 +101,7 @@ class WeatherFragment : TemplateFragment() {
             tvDescription = view.findViewById(R.id.tv_description)
         }
         ivBackIcon = view.findViewById(R.id.iv_back)
-        ivBackIcon?.setOnClickListener { v -> navigateUp() }
+        ivBackIcon?.setOnClickListener { _ -> navigateUp() }
         return view
     }
 
@@ -113,6 +118,7 @@ class WeatherFragment : TemplateFragment() {
         return super.getTemplatePayload()
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         if (payload == null) {
@@ -127,22 +133,31 @@ class WeatherFragment : TemplateFragment() {
             }
         }
 
-        (payload?.get(Constant.PAYLOAD_WEATHER_FORECAST) as? JsonArray)
-                ?.let { weatherForecastArray ->
-                    if (weatherForecastArray.size() > 0) {
-                        if (isFutureWeatherType) {
-                            setupWeatherContent(weatherForecastArray)
+        view.post {
+            (payload?.get(Constant.PAYLOAD_WEATHER_FORECAST) as? JsonArray)
+                    ?.let { weatherForecastArray ->
+                        if (weatherForecastArray.size() > 0) {
+                            if (isFutureWeatherType) {
+                                setupWeatherContent(weatherForecastArray)
+                            } else {
+                                setupFutureWeather(weatherForecastArray)
+                            }
                         } else {
-                            setupFutureWeather(weatherForecastArray)
+                            setupWeatherQuality()
                         }
-                    } else {
-                        setupWeatherQuality()
-                    }
-                } ?: run {
-            setupWeatherQuality()
+                    } ?: run {
+                setupWeatherQuality()
+            }
+
         }
 
         view.setOnTouchListener { _, event ->
+            if (event.action == KeyEvent.ACTION_DOWN || event.action == KeyEvent.ACTION_UP) {
+                onScrollableBodyTouched(this, payload.toString())
+            }
+            false
+        }
+        scrollView?.setOnTouchListener { _, event ->
             if (event.action == KeyEvent.ACTION_DOWN || event.action == KeyEvent.ACTION_UP) {
                 onScrollableBodyTouched(this, payload.toString())
             }
@@ -152,8 +167,15 @@ class WeatherFragment : TemplateFragment() {
 
     private fun setupWeatherContent(weatherForecastArray: JsonArray) {
         try {
-            val layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT)
-            layoutParams.weight = 1f
+            val arraySize = weatherForecastArray.size()
+
+            val padding: Int = ((view?.width ?: 0) * .047).toInt()
+            futureDaysWeatherContainer?.setPadding(padding, 0, padding, 0)
+
+            val layoutParams = LinearLayout.LayoutParams(
+                    ((scrollView?.width
+                            ?: 0) - padding * 2) / Math.min(6, arraySize),
+                    LinearLayout.LayoutParams.WRAP_CONTENT)
             futureDaysWeatherContainer?.gravity = Gravity.CENTER
             for (i in 0 until weatherForecastArray.size()) {
                 futureDaysWeatherContainer?.addView(
@@ -235,6 +257,7 @@ class WeatherFragment : TemplateFragment() {
 
     private fun generateWeatherItem(weatherForecast: JsonObject): View {
         val view = LayoutInflater.from(context).inflate(R.layout.item_future_weather, null)
+
         val ivFutureIcon = view.findViewById<ImageView>(R.id.iv_future_icon)
         (weatherForecast.get(Constant.PAYLOAD_IMAGE) as? JsonObject)?.let { image ->
             val context = context ?: return@let
@@ -287,9 +310,14 @@ class WeatherFragment : TemplateFragment() {
                         (title.get(Constant.PAYLOAD_SUB_TITLE) as? JsonPrimitive)?.asString,
                         (title.get(Constant.PAYLOAD_MAIN_TITLE) as? JsonPrimitive)?.asString)
             }
+            val padding: Int = ((view?.width ?: 0) * .047).toInt()
+            futureContent?.setPadding(padding, 0, padding, 0)
 
-            val layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT)
-            layoutParams.weight = 1f
+            val arraySize = weatherForecastArray.size()
+            val layoutParams = LinearLayout.LayoutParams(
+                    ((scrollView?.width
+                            ?: 0) - padding * 2) / Math.min(6, arraySize),
+                    LinearLayout.LayoutParams.WRAP_CONTENT)
             futureContent?.gravity = Gravity.CENTER
             for (i in 0 until weatherForecastArray.size()) {
                 futureContent?.addView(
@@ -304,6 +332,7 @@ class WeatherFragment : TemplateFragment() {
 
     private fun generateFutureWeatherItem(weatherForecast: JsonObject): View {
         val view = LayoutInflater.from(context).inflate(R.layout.item_weather_forcast, null)
+
         val tvWeek = view.findViewById<TextView>(R.id.tv_week)
         val tvTime = view.findViewById<TextView>(R.id.tv_time)
         val icon = view.findViewById<ImageView>(R.id.iv_future_icon)

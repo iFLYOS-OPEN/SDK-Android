@@ -86,15 +86,22 @@
         android:orientation="horizontal"
         app:layout_constraintGuide_percent=".84" />
 
-    <LinearLayout
-        android:id="@+id/future_days_weather"
+    <HorizontalScrollView
+        android:id="@+id/scroll_future_days_weather"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:orientation="horizontal"
+        android:scrollbars="none"
         app:layout_constraintBottom_toBottomOf="@id/bottom_margin"
-        app:layout_constraintEnd_toEndOf="@id/right_margin"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHeight_percent="1"
-        app:layout_constraintStart_toStartOf="@id/left_margin"
-        app:layout_constraintTop_toBottomOf="@id/header" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/header">
+
+        <LinearLayout
+            android:id="@+id/future_days_weather"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="horizontal" />
+    </HorizontalScrollView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

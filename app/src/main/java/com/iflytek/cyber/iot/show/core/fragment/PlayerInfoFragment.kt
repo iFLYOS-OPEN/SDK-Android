@@ -93,7 +93,7 @@ class PlayerInfoFragment : BaseFragment(), View.OnClickListener, OnSeekChangeLis
     private val manager = iFLYOSManager.getInstance()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view = inflater.inflate(R.layout.fragment_player_info, container, false)
+        val view = inflater.inflate(R.layout.fragment_player_info, null)
         return view
     }
 

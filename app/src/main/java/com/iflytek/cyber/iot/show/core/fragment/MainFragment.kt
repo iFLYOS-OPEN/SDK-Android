@@ -37,7 +37,6 @@ import android.widget.ImageSwitcher
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.widget.AppCompatTextView
-import androidx.navigation.fragment.NavHostFragment.findNavController
 import androidx.navigation.fragment.findNavController
 import cn.iflyos.sdk.android.impl.common.iFLYOSPlayerHandler
 import cn.iflyos.sdk.android.impl.mediaplayer.MediaPlayerHandler
@@ -69,6 +68,7 @@ import com.iflytek.cyber.iot.show.core.model.ContentStorage
 import com.iflytek.cyber.iot.show.core.model.TemplateContent
 import com.iflytek.cyber.iot.show.core.utils.GpsUtils
 import com.iflytek.cyber.iot.show.core.utils.RoundedCornersTransformation
+import com.iflytek.cyber.iot.show.core.utils.navigateSafe
 import com.iflytek.cyber.iot.show.core.weather.Weather
 import com.iflytek.cyber.iot.show.core.weather.WeatherApi
 import okhttp3.OkHttpClient
@@ -130,7 +130,7 @@ class MainFragment : BaseFragment(), AMapLocationListener, ObserverListener,
             ivPlaying = contentView?.findViewById(R.id.iv_playing)
 
             ivMusic?.setOnClickListener {
-                findNavController().navigate(R.id.action_to_player_fragment)
+                findNavController().navigateSafe(R.id.action_to_player_fragment)
             }
 
             setupView()
@@ -226,6 +226,9 @@ class MainFragment : BaseFragment(), AMapLocationListener, ObserverListener,
             tvWeather?.setTextSize(TypedValue.COMPLEX_UNIT_PX, viewGroup.height * 0.04f)
             clock?.setTextSize(TypedValue.COMPLEX_UNIT_PX, viewGroup.height * 0.133f)
 
+            val asleepClock = activity?.findViewById<TextView>(R.id.asleep_clock)
+            asleepClock?.setTextSize(TypedValue.COMPLEX_UNIT_PX, viewGroup.height * 0.133f)
+
             val gradientDrawable = GradientDrawable()
             gradientDrawable.cornerRadius = (musicForeground?.height ?: 0) / 6f
             gradientDrawable.setStroke(Math.max(1f, (musicForeground?.height
@@ -252,7 +255,8 @@ class MainFragment : BaseFragment(), AMapLocationListener, ObserverListener,
             if (Build.VERSION.SDK_INT >= 23) {
                 if (Settings.System.canWrite(context)) {
                     fragmentManager?.let { fragmentManager ->
-                        settingsFragment.show(fragmentManager, "Settings")
+                        if (!settingsFragment.isAdded)
+                            settingsFragment.show(fragmentManager, "Settings")
                     }
                 } else {
                     AlertDialog.Builder(context)
@@ -268,7 +272,8 @@ class MainFragment : BaseFragment(), AMapLocationListener, ObserverListener,
                 }
             } else {
                 fragmentManager?.let { fragmentManager ->
-                    settingsFragment.show(fragmentManager, "Settings")
+                    if (!settingsFragment.isAdded)
+                        settingsFragment.show(fragmentManager, "Settings")
                 }
             }
         }
@@ -333,6 +338,9 @@ class MainFragment : BaseFragment(), AMapLocationListener, ObserverListener,
         val hour = calendar.get(Calendar.HOUR_OF_DAY)
         val minute = calendar.get(Calendar.MINUTE)
         clock?.text = String.format(Locale.getDefault(), "%02d:%02d", hour, minute)
+
+        val asleepClock = activity?.findViewById<TextView>(R.id.asleep_clock)
+        asleepClock?.text = String.format(Locale.getDefault(), "%02d:%02d", hour, minute)
 
         val format = SimpleDateFormat("MM'月'dd'日' E", Locale.CHINA)
         date?.text = format.format(calendar.time)

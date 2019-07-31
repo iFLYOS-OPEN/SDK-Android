@@ -22,13 +22,11 @@ import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.content.*
+import android.database.ContentObserver
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.media.AudioManager
-import android.net.ConnectivityManager
-import android.net.Network
-import android.net.NetworkCapabilities
-import android.net.NetworkRequest
+import android.net.*
 import android.os.*
 import android.provider.Settings
 import android.text.TextUtils
@@ -36,6 +34,7 @@ import android.util.Log
 import android.util.TypedValue
 import android.view.KeyEvent
 import android.view.View
+import android.view.WindowManager
 import android.view.animation.*
 import android.widget.ImageView
 import android.widget.TextView
@@ -43,8 +42,8 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
-import androidx.fragment.app.Fragment
 import androidx.core.content.PermissionChecker
+import androidx.fragment.app.Fragment
 import androidx.interpolator.view.animation.FastOutSlowInInterpolator
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
@@ -68,6 +67,7 @@ import cn.iflyos.sdk.android.impl.template.TemplateRuntimeHandler.Companion.OPTI
 import cn.iflyos.sdk.android.impl.template.TemplateRuntimeHandler.Companion.OPTION_TEMPLATE3
 import cn.iflyos.sdk.android.impl.template.TemplateRuntimeHandler.Companion.WEATHER_TEMPLATE
 import cn.iflyos.sdk.android.v3.constant.ExternalVideoAppConstant
+import cn.iflyos.sdk.android.v3.constant.ExternalVideoAppConstant.PKG_SHOW_CORE_OVERLAY
 import cn.iflyos.sdk.android.v3.constant.iFLYOSEvent
 import cn.iflyos.sdk.android.v3.iFLYOSManager
 import cn.iflyos.sdk.android.v3.iface.Alerts
@@ -79,6 +79,7 @@ import cn.iflyos.sdk.android.v3.ipc.iFLYOSInterface
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.iflytek.cyber.iot.show.core.fragment.*
+import com.iflytek.cyber.iot.show.core.impl.Custom.CustomHandler
 import com.iflytek.cyber.iot.show.core.impl.ExternalVideoApp.AppStateObserver
 import com.iflytek.cyber.iot.show.core.impl.ExternalVideoApp.ExternalVideoAppDirectiveHandler
 import com.iflytek.cyber.iot.show.core.impl.SpeechRecognizer.SpeechRecognizerHandler
@@ -227,6 +228,19 @@ class LauncherActivity : AppCompatActivity(), TemplateFragment.TemplateCallback 
 
     private var isResume = false // 主界面是否可见标识
 
+    // 用于支持 HDP Live 应用
+    private val updateCustomContextObserver = object : AppStateObserver.OnStateChangeListener {
+        override fun onStateChange(currentState: AppStateObserver.AppState, previousState: AppStateObserver.AppState?) {
+            val customHandler = customAgent as? CustomHandler ?: return
+            if (currentState.packageName == PKG_SHOW_CORE_OVERLAY) return
+            if (currentState.packageName == CustomHandler.PKG_HDP_LIVE) {
+                customHandler.updateHdpLiveContext(true)
+            } else {
+                customHandler.updateHdpLiveContext(false)
+            }
+        }
+    }
+
     init {
         // 保证检查网络的 handler 在子线程中运行
         val handlerThread = HandlerThread("checkNetwork")
@@ -242,6 +256,9 @@ class LauncherActivity : AppCompatActivity(), TemplateFragment.TemplateCallback 
         private const val CHECK_IVS_OFFSET = 60 * 1000L // 检查 iFLYOS 可用性的时间间隔
 
         private const val REQUEST_PERMISSION_CODE = 1001
+
+        private val BRIGHTNESS_MODE_URI = Settings.System.getUriFor(Settings.System.SCREEN_BRIGHTNESS_MODE)
+        private val BRIGHTNESS_URI = Settings.System.getUriFor(Settings.System.SCREEN_BRIGHTNESS)
 
         // 各个提示语数组 id
         const val TIPS_DEFAULT = R.array.default_tips
@@ -472,7 +489,7 @@ class LauncherActivity : AppCompatActivity(), TemplateFragment.TemplateCallback 
         }
     }
 
-    fun updateTipsWithResId(resId: Int) {
+    private fun updateTipsWithResId(resId: Int) {
         currentTips = resId
 
         val tips = getString(resId)
@@ -983,6 +1000,7 @@ class LauncherActivity : AppCompatActivity(), TemplateFragment.TemplateCallback 
 
         // 注册 App 前台状态改变监听
         appStateObserver.addOnStateChangeListener(extVideoAppDirectiveHandler)
+        appStateObserver.addOnStateChangeListener(updateCustomContextObserver)
 
         isNetworkAvailable = ConnectivityUtils.isNetworkAvailable(this)
 
@@ -1036,9 +1054,7 @@ class LauncherActivity : AppCompatActivity(), TemplateFragment.TemplateCallback 
                                     manager?.initializeIvs()
 
                                     // 重新定位以触发获取一次天气
-                                    (getCurrentFragment() as? MainFragment)?.let {
-                                        it.startLocation()
-                                    }
+                                    (getCurrentFragment() as? MainFragment)?.startLocation()
                                 }
                             }
                         }
@@ -1100,6 +1116,24 @@ class LauncherActivity : AppCompatActivity(), TemplateFragment.TemplateCallback 
                 }
             }
         })
+
+        try {
+            val cr = contentResolver
+            cr.registerContentObserver(BRIGHTNESS_MODE_URI, false, brightnessObserver)
+            cr.registerContentObserver(BRIGHTNESS_URI, false, brightnessObserver)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
+        asleep_container.setOnClickListener {
+            it.animate()
+                    .alpha(0f)
+                    .setDuration(300)
+                    .withEndAction {
+                        it.visibility = View.GONE
+                    }
+                    .start()
+        }
     }
 
     private fun generateAdditionalParams(): JsonObject {
@@ -1177,6 +1211,9 @@ class LauncherActivity : AppCompatActivity(), TemplateFragment.TemplateCallback 
 
     override fun onResume() {
         super.onResume()
+
+        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+
         if (PermissionChecker.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
                 != PermissionChecker.PERMISSION_GRANTED || PermissionChecker.checkSelfPermission(
                         this, Manifest.permission.READ_PHONE_STATE)
@@ -1241,6 +1278,17 @@ class LauncherActivity : AppCompatActivity(), TemplateFragment.TemplateCallback 
                 && current !is WelcomeFragment && current !is SplashFragment
                 && current !is PairFragment) {
             showSimpleTips()
+        }
+
+        try {
+            val currentBrightness = Settings.System.getInt(contentResolver,
+                    Settings.System.SCREEN_BRIGHTNESS)
+            (customAgent as? CustomHandler)?.updateScreenContext(
+                    asleep_container.visibility != View.VISIBLE,
+                    currentBrightness
+            )
+        } catch (e: Settings.SettingNotFoundException) {
+            e.printStackTrace()
         }
     }
 
@@ -1388,6 +1436,8 @@ class LauncherActivity : AppCompatActivity(), TemplateFragment.TemplateCallback 
     override fun onPause() {
         super.onPause()
 
+        window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+
         isResume = false
 
         getCurrentFragment()?.let {
@@ -1500,6 +1550,11 @@ class LauncherActivity : AppCompatActivity(), TemplateFragment.TemplateCallback 
                     }
 
                     if (isResume) {
+                        runOnUiThread {
+                            asleep_container.visibility = View.GONE
+                            asleep_container.alpha = 0f
+                        }
+
                         handleVoiceStart()
                     } else {
                         try {
@@ -1540,14 +1595,109 @@ class LauncherActivity : AppCompatActivity(), TemplateFragment.TemplateCallback 
                         mStatusType = StatusType.NORMAL
                         updateBottomBar()
 
+                        // 创建自定义的 Custom 指令处理器，如无需要注释掉即可
+                        val customAgent = CustomHandler(this@LauncherActivity, manager!!)
+                        customAgent.screenControlCallback = object : CustomHandler.ScreenControlCallback {
+                            override fun setState(visible: Boolean) {
+                                asleep_container.let { view ->
+                                    if (!visible) {
+                                        view.visibility = View.VISIBLE
+                                        view.animate()
+                                                .alpha(1f)
+                                                .setDuration(500)
+                                                .start()
+                                    } else {
+                                        view.animate()
+                                                .alpha(0f)
+                                                .setDuration(300)
+                                                .withEndAction {
+                                                    view.visibility = View.GONE
+                                                }
+                                                .start()
+                                    }
+                                }
+                            }
 
-                        val customAgent = object : CustomAgent(manager!!) {
-                            override fun onCustomDirective(directive: String) {
-                                // handle your custom
-                                System.out.println("custom: $directive")
+                            override fun setBrightness(brightness: Int) {
+                                val realBrightness = brightness * 255 / 100
+
+                                try {
+                                    if (Settings.System.getInt(contentResolver,
+                                                    Settings.System.SCREEN_BRIGHTNESS_MODE)
+                                            == Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC) {
+                                        Settings.System.putInt(contentResolver,
+                                                Settings.System.SCREEN_BRIGHTNESS_MODE,
+                                                Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL)
+                                    }
+                                } catch (e: Settings.SettingNotFoundException) {
+                                    e.printStackTrace()
+                                }
+
+                                Settings.System.putInt(contentResolver,
+                                        Settings.System.SCREEN_BRIGHTNESS, realBrightness)
+                            }
+                        }
+                        customAgent.launcherControlCallback = object : CustomHandler.LauncherControlCallback {
+                            override fun startActivity(page: String) {
+                                if (page == "home") {
+                                    if (isResume) {
+                                        val navController = findNavController(R.id.fragment)
+
+                                        clearTemplate(navController)
+
+                                        navController.popBackStack(R.id.player_fragment, true)
+                                    } else {
+                                        try {
+                                            val intent = Intent(this@LauncherActivity, LauncherActivity::class.java)
+                                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                            intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
+                                            applicationContext.startActivity(intent)
+                                        } catch (e: Exception) {
+                                            e.printStackTrace()
+                                        }
+                                    }
+                                }
                             }
 
                         }
+                        customAgent.powerOffCallback = object : CustomHandler.PowerOffCallback {
+                            override fun powerOff() {
+                                // 真实的关机实现
+//                                try {
+//                                    val i = Intent("android.intent.action.ACTION_REQUEST_SHUTDOWN")
+//                                    i.putExtra("android.intent.extra.KEY_CONFIRM", true)
+//                                    i.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+//                                    context.startActivity(i)
+//                                } catch (e: Exception) {
+//                                    e.printStackTrace()
+//                                    // 需要 android.permission.SHUTDOWN 权限
+//                                    val i = Intent("com.android.internal.intent.action.REQUEST_SHUTDOWN")
+//                                    i.putExtra("android.intent.extra.KEY_CONFIRM", false)
+//                                    i.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+//                                    context.startActivity(i)
+//                                }
+                                manager?.stopAllPlayers()
+
+                                runOnUiThread {
+                                    asleep_container.visibility = View.VISIBLE
+                                    asleep_container.animate()
+                                            .alpha(1f)
+                                            .setDuration(500)
+                                            .start()
+                                }
+                            }
+                        }
+                        try {
+                            val currentBrightness = Settings.System.getInt(contentResolver,
+                                    Settings.System.SCREEN_BRIGHTNESS)
+                            customAgent.updateScreenContext(
+                                    asleep_container.visibility != View.VISIBLE,
+                                    currentBrightness
+                            )
+                        } catch (e: Settings.SettingNotFoundException) {
+                            e.printStackTrace()
+                        }
+
                         manager?.setCustomAgent(customAgent)
                         this@LauncherActivity.customAgent = customAgent
 //                         设置成功后，可执行以下操作
@@ -1606,7 +1756,12 @@ class LauncherActivity : AppCompatActivity(), TemplateFragment.TemplateCallback 
                 }
                 iFLYOSEvent.EVENT_AUTH_REFRESHED -> {
                     // Token 已更新
-                    val speechRecognizerHandler = SpeechRecognizerHandler(this@LauncherActivity, this)
+                    val speechRecognizerHandler = if (manager?.speechRecognizer != null
+                            && manager?.speechRecognizer is SpeechRecognizerHandler) {
+                        manager?.speechRecognizer as SpeechRecognizerHandler
+                    } else {
+                        SpeechRecognizerHandler(this@LauncherActivity, this)
+                    }
                     speechRecognizerHandler.wakeUpHandler = {
                         // 定义是否可被开始识别
                         val normalStatus = arrayOf(
@@ -1988,6 +2143,9 @@ class LauncherActivity : AppCompatActivity(), TemplateFragment.TemplateCallback 
         alertsPlayerHandler?.removeOnAlertStateChangedListener(onAlertStateChangedListener)
 
         appStateObserver.removeOnStateChangeListener(extVideoAppDirectiveHandler)
+        appStateObserver.removeOnStateChangeListener(updateCustomContextObserver)
+
+        contentResolver.unregisterContentObserver(brightnessObserver)
     }
 
     // 更新唤醒界面的模糊背景
@@ -2039,6 +2197,47 @@ class LauncherActivity : AppCompatActivity(), TemplateFragment.TemplateCallback 
                         updateBottomBar()
                     }
                 }
+            }
+        }
+    }
+
+    private val brightnessObserver = object : ContentObserver(Handler()) {
+        override fun onChange(selfChange: Boolean, uri: Uri) {
+            val context = baseContext ?: return
+            val contentResolver = context.contentResolver
+            if (BRIGHTNESS_MODE_URI == uri) {
+                var mode = 0
+                try {
+                    mode = Settings.System.getInt(contentResolver, Settings.System.SCREEN_BRIGHTNESS_MODE)
+                } catch (e: Settings.SettingNotFoundException) {
+                    e.printStackTrace()
+                }
+
+                if (mode == Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC) {
+                } else {
+                    try {
+                        val currentBrightness = Settings.System.getInt(contentResolver,
+                                Settings.System.SCREEN_BRIGHTNESS)
+                        (customAgent as? CustomHandler)?.updateScreenContext(
+                                asleep_container.visibility != View.VISIBLE,
+                                currentBrightness
+                        )
+                    } catch (e: Settings.SettingNotFoundException) {
+                        e.printStackTrace()
+                    }
+                }
+            } else if (BRIGHTNESS_URI == uri) {
+                try {
+                    val currentBrightness = Settings.System.getInt(contentResolver,
+                            Settings.System.SCREEN_BRIGHTNESS)
+                    (customAgent as? CustomHandler)?.updateScreenContext(
+                            asleep_container.visibility != View.VISIBLE,
+                            currentBrightness
+                    )
+                } catch (e: Settings.SettingNotFoundException) {
+                    e.printStackTrace()
+                }
+
             }
         }
     }

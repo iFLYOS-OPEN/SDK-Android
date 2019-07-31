@@ -237,5 +237,42 @@
         tools:scaleX="1"
         tools:scaleY="1" />
 
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/asleep_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:alpha="0"
+        android:background="@android:color/black"
+        android:clickable="true"
+        android:focusable="true"
+        android:visibility="gone">
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/asleep_top_margin"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_percent="0.08" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/asleep_start_margin"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.047" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/asleep_clock"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:maxLines="1"
+            android:textColor="@android:color/white"
+            app:fontFamily="sans-serif-medium"
+            app:layout_constraintStart_toStartOf="@id/asleep_start_margin"
+            app:layout_constraintTop_toTopOf="@id/asleep_top_margin"
+            tools:text="10:45"
+            tools:textSize="80sp" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
