@@ -1,1 +1,1 @@
-include ':app', ':overlay', ':template'
+include ':app', ':overlay', ':template', ':ota'

@@ -264,8 +264,9 @@ class SettingsFragment : DialogFragment(), View.OnClickListener {
         }
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
         val context = context ?: return
         WifiInfoManager.manager.registerWifiRssiCallback(context,
                 object : WifiInfoManager.WifiRssiListener {
@@ -281,8 +282,7 @@ class SettingsFragment : DialogFragment(), View.OnClickListener {
 
         val info = manager.activeNetworkInfo ?: return
 
-        val netType = info.type
-        when (netType) {
+        when (info.type) {
             ConnectivityManager.TYPE_WIFI -> {  //WIFI
                 val level = WifiInfoManager.manager.getWifiSignalLevel(context)
 

@@ -62,5 +62,15 @@
 
         <service android:name="com.amap.api.location.APSService" />
         <service android:name=".TimeService" />
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="com.iflytek.cyber.iot.show.core.fileProvider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_provider_paths" />
+        </provider>
     </application>
 </manifest>

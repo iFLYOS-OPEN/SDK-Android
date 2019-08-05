@@ -22,6 +22,8 @@ android {
         versionName "2.0"
 
         buildConfigField "String", "CLIENT_ID", '"ceb62135-38a7-42c3-b721-842f3ed596a8"'
+        // 在"设备控制台 - 自动更新"中可以看到「加密秘钥」
+        buildConfigField "String", "OTA_SECRET", '"4c81153af284d536817ff86771d454b7f6dab284"'
         buildConfigField "String", "AUTH_URL", '"https://auth.iflyos.cn/oauth/device"'
 
         ndk {
@@ -63,6 +65,7 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation(name: 'MiguAreaSDK2.1.1', ext: 'aar')
     implementation(name: 'ivs-android-sdk3', ext: 'aar')
+    implementation project(':ota') // 一个简易的 OTA 模块
     implementation project(':template') // 显示模板封装
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
@@ -93,6 +96,9 @@ dependencies {
     implementation 'com.amap.api:location:4.2.0'
 
     implementation 'commons-net:commons-net:3.6'
+
+    // 检查已下载的 apk 是否比当前版本更新
+    implementation 'com.jaredrummler:apk-parser:1.0.2'
 
     // Don't update exoplayer version,
     // or it will cause some crash because of calling method in different thread

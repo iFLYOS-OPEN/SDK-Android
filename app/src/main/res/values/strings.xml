@@ -65,6 +65,7 @@
     <string name="retry_connecting">正在尝试重连</string>
     <string name="recording_is_occupied">录音被占用</string>
     <string name="recording_is_occupied_message">请确定后台程序中无占用录音的应用。</string>
+    <string name="check_update">检查更新</string>
 
     <string-array name="default_tips">
         <item>蓝小飞，明天天气怎么样？</item>

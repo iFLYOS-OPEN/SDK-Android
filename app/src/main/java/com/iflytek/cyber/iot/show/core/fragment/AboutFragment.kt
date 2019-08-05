@@ -14,8 +14,12 @@
  * limitations under the License.
  */
 
+@file:Suppress("DEPRECATION")
+
 package com.iflytek.cyber.iot.show.core.fragment
 
+import android.app.ProgressDialog
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -28,11 +32,21 @@ import cn.iflyos.sdk.android.v3.iFLYOSManager
 import com.iflytek.cyber.iot.show.core.BuildConfig
 import com.iflytek.cyber.iot.show.core.LauncherActivity
 import com.iflytek.cyber.iot.show.core.R
+import com.iflytek.cyber.iot.show.core.SelfBroadcastReceiver
 import com.iflytek.cyber.iot.show.core.impl.SpeechRecognizer.SpeechRecognizerHandler
 import com.iflytek.cyber.iot.show.core.model.ContentStorage
+import com.iflytek.cyber.product.ota.OtaService
 
 class AboutFragment : BaseFragment() {
     private var changeBinding = false
+    private var progressDialog: ProgressDialog? = null
+    private var tipsDialog: AlertDialog? = null
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        receiver.register(context)
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_about, container, false)
@@ -88,9 +102,53 @@ class AboutFragment : BaseFragment() {
                     }
                     .show()
         }
+        view.findViewById<View>(R.id.check_update).setOnClickListener {
+            val startCheck = Intent(it.context, OtaService::class.java)
+            startCheck.action = OtaService.ACTION_REQUEST_CHECKING
+            it.context.startService(startCheck)
+
+            progressDialog = ProgressDialog.show(it.context, "检查更新", "正在检查更新", false, false)
+        }
         val textView = view.findViewById<TextView>(R.id.system_version)
         textView.text = BuildConfig.VERSION_NAME
         return view
+    }
+
+    private val receiver = object : SelfBroadcastReceiver(
+            OtaService.ACTION_NEW_UPDATE_DOWNLOAD_STARTED,
+            OtaService.ACTION_NEW_UPDATE_DOWNLOADED,
+            OtaService.ACTION_CHECK_UPDATE_FAILED,
+            OtaService.ACTION_NO_UPDATE_FOUND) {
+        override fun onReceiveAction(action: String, intent: Intent) {
+            when (action) {
+                OtaService.ACTION_NEW_UPDATE_DOWNLOADED -> {
+                    progressDialog?.dismiss()
+                }
+                OtaService.ACTION_NEW_UPDATE_DOWNLOAD_STARTED -> {
+                    progressDialog?.dismiss()
+                    progressDialog = ProgressDialog.show(context, "检查更新", "正在下载更新")
+                }
+                OtaService.ACTION_NO_UPDATE_FOUND -> {
+                    progressDialog?.dismiss()
+                    context?.let { context ->
+                        tipsDialog?.dismiss()
+                        tipsDialog = AlertDialog.Builder(context)
+                                .setTitle("当前已是最新版本")
+                                .setPositiveButton(android.R.string.yes, null)
+                                .setOnDismissListener {
+                                    if (it == tipsDialog) {
+                                        tipsDialog = null
+                                    }
+                                }
+                                .show()
+                    }
+                }
+                OtaService.ACTION_CHECK_UPDATE_FAILED -> {
+                    progressDialog?.dismiss()
+                }
+            }
+        }
+
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -126,5 +184,6 @@ class AboutFragment : BaseFragment() {
         super.onDestroy()
         if (!changeBinding)
             launcher?.showSimpleTips()
+        receiver.unregister(context)
     }
 }

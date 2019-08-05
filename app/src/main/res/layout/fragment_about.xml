@@ -207,4 +207,29 @@
         app:layout_constraintTop_toBottomOf="@id/tv_version"
         tools:text="1.0.0" />
 
+    <View
+        android:id="@+id/third_divider"
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:layout_marginTop="20dp"
+        android:background="#1effffff"
+        app:layout_constraintEnd_toEndOf="@id/right_margin"
+        app:layout_constraintStart_toStartOf="@id/left_margin"
+        app:layout_constraintTop_toBottomOf="@id/system_version" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/check_update"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:gravity="end|center_vertical"
+        android:text="@string/check_update"
+        android:textColor="#1784E9"
+        app:autoSizeMinTextSize="6sp"
+        app:autoSizeTextType="uniform"
+        app:layout_constraintBottom_toBottomOf="@id/third_divider"
+        app:layout_constraintEnd_toStartOf="@id/right_margin"
+        app:layout_constraintHeight_percent=".04"
+        app:layout_constraintTop_toTopOf="@id/second_divider" />
+
+
 </androidx.constraintlayout.widget.ConstraintLayout>

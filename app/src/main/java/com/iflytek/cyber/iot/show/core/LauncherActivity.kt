@@ -89,8 +89,10 @@ import com.iflytek.cyber.iot.show.core.model.TemplateContent
 import com.iflytek.cyber.iot.show.core.retrofit.SSLSocketFactoryCompat
 import com.iflytek.cyber.iot.show.core.template.*
 import com.iflytek.cyber.iot.show.core.utils.ConnectivityUtils
+import com.iflytek.cyber.iot.show.core.utils.PackageUtils
 import com.iflytek.cyber.iot.show.core.utils.ToneManager
 import com.iflytek.cyber.iot.show.core.widget.RecognizeWaveView
+import com.iflytek.cyber.product.ota.OtaService
 import jp.wasabeef.blurry.Blurry
 import kotlinx.android.synthetic.main.activity_launcher.*
 import java.lang.ref.SoftReference
@@ -183,6 +185,8 @@ class LauncherActivity : AppCompatActivity(), TemplateFragment.TemplateCallback 
 
         handleVoiceStart()
     }
+    private var pendingInstallApkPath: String? = null
+    private var updateDialog: AlertDialog? = null
 
     // 闹钟状态改变监听
     private val onAlertStateChangedListener = object : AlertsPlayerHandler.OnAlertStateChangedListener {
@@ -256,6 +260,7 @@ class LauncherActivity : AppCompatActivity(), TemplateFragment.TemplateCallback 
         private const val CHECK_IVS_OFFSET = 60 * 1000L // 检查 iFLYOS 可用性的时间间隔
 
         private const val REQUEST_PERMISSION_CODE = 1001
+        private const val INSTALL_PACKAGES_REQUESTCODE = 1002
 
         private val BRIGHTNESS_MODE_URI = Settings.System.getUriFor(Settings.System.SCREEN_BRIGHTNESS_MODE)
         private val BRIGHTNESS_URI = Settings.System.getUriFor(Settings.System.SCREEN_BRIGHTNESS)
@@ -899,6 +904,54 @@ class LauncherActivity : AppCompatActivity(), TemplateFragment.TemplateCallback 
         }
     }
 
+    private val updateArrivedReceiver = object : SelfBroadcastReceiver(
+            OtaService.ACTION_NEW_UPDATE_DOWNLOADED, OtaService.ACTION_CHECK_UPDATE_FAILED) {
+        override fun onReceiveAction(action: String, intent: Intent) {
+            when (action) {
+                OtaService.ACTION_NEW_UPDATE_DOWNLOADED -> {
+                    val path = intent.getStringExtra(OtaService.EXTRA_PATH)
+                    if (PackageUtils.checkIfLatest(baseContext, path)) {
+                        updateDialog?.dismiss()
+                        updateDialog = AlertDialog.Builder(this@LauncherActivity)
+                                .setMessage("新版本固件已下载，是否立即更新")
+                                .setPositiveButton("更新") { _, _ ->
+                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                        if (packageManager.canRequestPackageInstalls()) {
+                                            PackageUtils.notifyInstallApk(baseContext, path)
+                                        } else {
+                                            pendingInstallApkPath = path
+                                            val uri = Uri.parse("package:$packageName")
+                                            val toSettings = Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES, uri)
+                                            startActivity(toSettings)
+                                        }
+                                    } else {
+                                        PackageUtils.notifyInstallApk(baseContext, path)
+                                    }
+                                }
+                                .setNegativeButton("下次吧") { _, _ -> }
+                                .setOnDismissListener {
+                                    if (it == updateDialog)
+                                        updateDialog = null
+                                }
+                                .show()
+                    }
+                }
+                OtaService.ACTION_CHECK_UPDATE_FAILED -> {
+                    updateDialog?.dismiss()
+                    updateDialog = AlertDialog.Builder(this@LauncherActivity)
+                            .setMessage("检查更新失败")
+                            .setNegativeButton("下次吧") { _, _ -> }
+                            .setOnDismissListener {
+                                if (it == updateDialog)
+                                    updateDialog = null
+                            }
+                            .show()
+                }
+            }
+        }
+
+    }
+
     // 监听外部发送广播对程序进行控制
     private val iflyosReceiver = object : SelfBroadcastReceiver(ActionConstant.ACTION_STOP_SPEAKING,
             ActionConstant.ACTION_TEMPLATE_RUNTIME_SELECT_ELEMENT,
@@ -1008,6 +1061,8 @@ class LauncherActivity : AppCompatActivity(), TemplateFragment.TemplateCallback 
 
         pkgChangedReceiver.getFilter().addDataScheme("package")
         pkgChangedReceiver.register(this)
+
+        updateArrivedReceiver.register(this)
 
         // api 21 以上该广播过时
         @Suppress("DEPRECATION")
@@ -1151,9 +1206,9 @@ class LauncherActivity : AppCompatActivity(), TemplateFragment.TemplateCallback 
 //        additionalParams.add("cblAuthDelegate", cblAuthDelegate)
 
 //        自定义设备标识
-//        val deviceInfo = JsonObject()
-//        deviceInfo.addProperty("deviceSerialNumber", "deviceId...")
-//        additionalParams.add("deviceInfo", deviceInfo)
+        val deviceInfo = JsonObject()
+        deviceInfo.addProperty("deviceSerialNumber", getDeviceId())
+        additionalParams.add("deviceInfo", deviceInfo)
 
         // 自定义唤醒词可参考以下代码，将唤醒词资源路径传入即可，详细内容请参阅文档相关章节描述
 //        val customWakeUp = JsonObject()
@@ -1161,6 +1216,12 @@ class LauncherActivity : AppCompatActivity(), TemplateFragment.TemplateCallback 
 //        additionalParams.add("ivw", customWakeUp)
 
         return additionalParams
+    }
+
+    @Suppress("DEPRECATION")
+    @SuppressLint("MissingPermission,HardwareIds")
+    private fun getDeviceId(): String {
+        return if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O_MR1) Build.SERIAL else Build.getSerial()
     }
 
     private fun initializedPage() {
@@ -1289,6 +1350,17 @@ class LauncherActivity : AppCompatActivity(), TemplateFragment.TemplateCallback 
             )
         } catch (e: Settings.SettingNotFoundException) {
             e.printStackTrace()
+        }
+
+        pendingInstallApkPath?.let { path ->
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                if (packageManager.canRequestPackageInstalls()) {
+                    PackageUtils.notifyInstallApk(baseContext, path)
+                }
+            } else {
+                PackageUtils.notifyInstallApk(baseContext, path)
+            }
+            pendingInstallApkPath = null
         }
     }
 
@@ -1722,6 +1794,17 @@ class LauncherActivity : AppCompatActivity(), TemplateFragment.TemplateCallback 
                         }
 
                         extVideoAppDirectiveHandler.resetAppStates(installedPkgName.toTypedArray())
+
+                        // 启动 OTA 服务
+                        val otaService = Intent(baseContext, OtaService::class.java)
+                        otaService.action = OtaService.ACTION_START_SERVICE
+                        otaService.putExtra(OtaService.EXTRA_CLIENT_ID, BuildConfig.CLIENT_ID)
+                        otaService.putExtra(OtaService.EXTRA_DEVICE_ID, getDeviceId())
+                        otaService.putExtra(OtaService.EXTRA_OTA_SECRET, BuildConfig.OTA_SECRET)
+                        otaService.putExtra(OtaService.EXTRA_VERSION, BuildConfig.VERSION_CODE)
+                        otaService.putExtra(OtaService.EXTRA_DOWNLOAD_PATH, externalCacheDir?.path.toString())
+                        otaService.putExtra(OtaService.EXTRA_PACKAGE_NAME, packageName)
+                        startService(otaService)
                     } else if (params[0] == iFLYOSClient.ConnectionStatus.DISCONNECTED.name) {
                         isNetworkLost = true
                         val navController = findNavController(R.id.fragment)
@@ -2121,6 +2204,8 @@ class LauncherActivity : AppCompatActivity(), TemplateFragment.TemplateCallback 
         iflyosReceiver.unregister(this)
 
         pkgChangedReceiver.unregister(this)
+
+        updateArrivedReceiver.unregister(this)
 
         if (Build.VERSION.SDK_INT < 21)
             unregisterReceiver(connectStateReceiver)
